@@ -1,0 +1,155 @@
+/* ================================================== */
+/* CHARTE GRAPHIQUE BELAFRICA - STYLES GLOBAUX */
+/* ================================================== */
+
+// Import des polices Google
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap');
+// @import url('https://fonts.googleapis.com/css2?family=Cursive&display=swap');
+
+// =============================================================================
+// VARIABLES COULEURS OFFICIELLES BELAFRICA
+// =============================================================================
+$bel-primary: #F2A900;
+$bel-primary-dark: #D69400;
+$bel-primary-light: #FFBE33;
+
+$bel-secondary: #008751;
+$bel-secondary-dark: #006B3F; 
+$bel-secondary-light: #00A862;
+
+$bel-accent: #E53E3E;
+$bel-accent-dark: #C53030;
+$bel-accent-light: #F56565;
+
+$bel-dark: #2D3748;
+$bel-gray: #718096;
+$bel-light: #F7FAFC;
+$bel-white: #FFFFFF;
+
+// =============================================================================
+// VARIABLES CSS POUR THÈMES
+// =============================================================================
+:root {
+  // Couleurs primaires
+  --bel-color-primary: #{$bel-primary};
+  --bel-color-primary-dark: #{$bel-primary-dark};
+  --bel-color-secondary: #{$bel-secondary};
+  --bel-color-accent: #{$bel-accent};
+  
+  // Couleurs interface
+  --bel-bg-app: #{$bel-light};
+  --bel-bg-card: #{$bel-white};
+  --bel-text-primary: #{$bel-dark};
+  --bel-text-secondary: #{$bel-gray};
+  --bel-border: #E2E8F0;
+  
+  // Typographie
+  --bel-font-heading: cursive;
+  --bel-font-body: 'Open Sans', cursive;
+  // --bel-font-heading: 'Poppins', sans-serif;
+  // --bel-font-body: 'Open Sans', sans-serif;
+  
+  // Espacements
+  --bel-spacing-xs: 0.25rem;
+  --bel-spacing-sm: 0.5rem;
+  --bel-spacing-md: 1rem;
+  --bel-spacing-lg: 1.5rem;
+  --bel-spacing-xl: 2rem;
+  
+  // Bordures
+  --bel-radius-sm: 4px;
+  --bel-radius-md: 8px;
+  --bel-radius-lg: 12px;
+  --bel-radius-xl: 16px;
+}
+
+// =============================================================================
+// STYLES GLOBAUX
+// =============================================================================
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--bel-font-body);
+  background-color: var(--bel-bg-app);
+  color: var(--bel-text-primary);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--bel-font-heading);
+  font-weight: 600;
+  margin-bottom: var(--bel-spacing-md);
+}
+
+// =============================================================================
+// CLASSES UTILITAIRES BELAFRICA
+// =============================================================================
+.bel-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--bel-spacing-md);
+}
+
+.bel-card {
+  background: var(--bel-bg-card);
+  border-radius: var(--bel-radius-xl);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: var(--bel-spacing-xl);
+  margin-top: 40px;
+}
+
+.bel-btn-primary {
+  background: var(--bel-color-primary);
+  color: var(--bel-bg-card);
+  border: none;
+  border-radius: var(--bel-radius-lg);
+  padding: var(--bel-spacing-md) var(--bel-spacing-xl);
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--bel-font-body);
+  
+  &:hover {
+    background: var(--bel-color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(242, 169, 0, 0.3);
+  }
+  
+  &:disabled {
+    background: var(--bel-text-secondary);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.bel-title {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--bel-spacing-sm);
+  color: var(--bel-text-primary);
+}
+
+.bel-subtitle {
+  font-size: 16px;
+  text-align: center;
+  color: var(--bel-text-secondary);
+  margin-bottom: var(--bel-spacing-xl);
+  line-height: 1.5;
+}
+
+// =============================================================================
+// OVERRIDES ANGULAR MATERIAL POUR BELAFRICA
+// =============================================================================
+.mat-mdc-card {
+  border-radius: var(--bel-radius-xl) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}

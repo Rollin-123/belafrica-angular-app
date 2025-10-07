@@ -1,0 +1,21 @@
+.form-field-bel {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--bel-border);
+  border-radius: var(--bel-radius-md);
+  font-size: 16px;
+  font-family: var(--font-body);
+  transition: all 0.3s ease;
+  background-color: var(--bel-white);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--bel-primary);
+    box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.1);
+  }
+  
+  &:disabled {
+    background-color: var(--bel-light);
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,104 @@
+<div class="bel-container">
+  <div class="bel-card">
+    
+    <!-- Header avec logo -->
+    <div class="bel-auth-header">
+      <app-logo size="medium"></app-logo>
+    </div>
+
+    <!-- Titre et instructions -->
+    <div style="margin-bottom: var(--bel-spacing-xl);">
+      <h2 class="bel-title" style="text-align: left; font-size: 28px; margin-bottom: var(--bel-spacing-sm);">
+        Quelle est votre nationalité ?
+      </h2>
+      <p class="bel-subtitle" style="text-align: left; margin-bottom: 0;">
+        Cette information nous aide à vous connecter à votre communauté africaine.
+      </p>
+    </div>
+
+    <!-- Formulaire de sélection -->
+    <form [formGroup]="nationalityForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Sélection de la nationalité - VERSION LISTE DÉROULANTE -->
+      <div style="margin-bottom: var(--bel-spacing-xl);">
+        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
+          Sélectionnez votre nationalité
+        </label>
+        
+        <!-- Container personnalisé pour le select -->
+        <div class="bel-select-container">
+          <select 
+            formControlName="nationality"
+            class="bel-select"
+            (change)="onNationalityChange()"
+            [class.selected]="nationalityForm.get('nationality')?.value">
+            
+            <option value="">-- Choisissez votre nationalité --</option>
+            <option 
+              *ngFor="let country of africanCountries" 
+              [value]="country.code"
+              [attr.data-flag]="country.flag">
+              {{ country.flag }} {{ country.name }}
+            </option>
+          </select>
+          
+          <!-- Icône flèche personnalisée -->
+          <div class="bel-select-arrow">▼</div>
+        </div>
+
+        <!-- Aperçu de la sélection -->
+        <div 
+          *ngIf="nationalityForm.get('nationality')?.value" 
+          class="bel-selection-preview">
+          <span class="bel-preview-flag">{{ selectedCountryFlag }}</span>
+          <span class="bel-preview-text">Nationalité sélectionnée : <strong>{{ selectedCountryName }}</strong></span>
+        </div>
+
+        <!-- Message d'erreur -->
+        <small 
+          *ngIf="nationalityForm.get('nationality')?.invalid && nationalityForm.get('nationality')?.touched" 
+          class="bel-error-message">
+          ⚠️ Veuillez sélectionner votre nationalité
+        </small>
+      </div>
+
+      <!-- Pays de résidence détecté -->
+      <div *ngIf="detectedCountry" class="bel-detected-country">
+        <div class="bel-country-badge">
+          <span class="bel-badge-icon">🌍</span>
+          <span class="bel-badge-text">
+            <strong>Pays de résidence :</strong> {{ detectedCountry }}
+          </span>
+        </div>
+        
+        <!-- Information importante -->
+        <div class="bel-info-box">
+          <p style="margin: 0; font-size: 13px; color: var(--bel-dark);">
+            💡 <strong>Votre communauté :</strong> Vous rejoindrez automatiquement la communauté 
+            <strong>{{ selectedCountryName || '...[nationalité]' }}</strong> 
+            résidant en <strong>{{ detectedCountry }}</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Boutons -->
+      <div class="bel-buttons-container">
+        <button 
+          type="submit" 
+          class="bel-btn-primary"
+          [disabled]="!nationalityForm.valid || isLoading">
+          <span *ngIf="!isLoading">Créer mon compte</span>
+          <span *ngIf="isLoading">Création en cours...</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="bel-btn-secondary"
+          (click)="goBack()">
+          ← Retour à la vérification
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

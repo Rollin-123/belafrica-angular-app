@@ -1,0 +1,80 @@
+<div class="bel-container">
+  <div class="bel-card">
+    
+    <!-- Header -->
+    <div class="bel-auth-header">
+   <app-logo size="medium"></app-logo>
+</div>
+
+    <!-- Titre -->
+    <div style="margin-bottom: var(--bel-spacing-xl);">
+      <h2 class="bel-title" style="text-align: left; font-size: 28px; margin-bottom: var(--bel-spacing-sm);">
+        Vérification du code
+      </h2>
+      <p class="bel-subtitle" style="text-align: left; margin-bottom: 0;">
+        Nous avons envoyé un code à 6 chiffres au 
+        <strong>{{ phoneNumber }}</strong>
+      </p>
+    </div>
+
+    <!-- Formulaire OTP -->
+    <form [formGroup]="otpForm" (ngSubmit)="onVerifyOtp()">
+      
+      <!-- Champ OTP -->
+      <div style="margin-bottom: var(--bel-spacing-lg);">
+        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
+          Code de vérification
+        </label>
+        <input 
+        #otpInput
+          type="text" 
+          formControlName="otpCode"
+          placeholder="Entrez le code à 6 chiffres"
+          class="form-field-bel"
+          (keypress)="validateOtpInput($event)" 
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="6"
+          style="text-align: center; letter-spacing: 8px; font-size: 18px; font-weight: 600;"
+        >
+        <small *ngIf="otpForm.get('otpCode')?.invalid && otpForm.get('otpCode')?.touched" 
+               style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
+          Le code doit contenir 6 chiffres
+        </small>
+      </div>
+
+      <!-- Compteur de réenvoi -->
+      <div style="text-align: center; margin-bottom: var(--bel-spacing-lg);">
+        <p style="color: var(--bel-gray); font-size: 14px;">
+          <span *ngIf="canResend">Vous n'avez pas reçu le code ? </span>
+          <a *ngIf="canResend" href="javascript:void(0)" (click)="resendOtp()" 
+             style="color: var(--bel-primary); font-weight: 600;">
+            Renvoyer le code
+          </a>
+          <span *ngIf="!canResend">
+            Renvoyer le code dans {{ countdown }} secondes
+          </span>
+        </p>
+      </div>
+
+      <!-- Boutons -->
+      <button 
+        type="submit" 
+        class="bel-btn-primary"
+        [disabled]="!otpForm.valid || isLoading"
+        style="margin-bottom: var(--bel-spacing-md);">
+        <span *ngIf="!isLoading">Vérifier le code</span>
+        <span *ngIf="isLoading">Vérification...</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="bel-btn-secondary"
+        (click)="goBack()"
+        [disabled]="isLoading">
+        ← Retour
+      </button>
+
+    </form>
+  </div>
+</div>

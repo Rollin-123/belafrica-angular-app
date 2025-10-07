@@ -1,0 +1,25 @@
+.bel-btn-secondary {
+  background: transparent;
+  color: var(--bel-secondary);
+  border: 2px solid var(--bel-secondary);
+  border-radius: var(--bel-radius-md);
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  display: contents;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--bel-secondary);
+    color: var(--bel-white);
+  }
+  
+  &:disabled {
+    background: var(--bel-light);
+    border-color: var(--bel-gray);
+    color: var(--bel-gray);
+    cursor: not-allowed;
+  }
+}

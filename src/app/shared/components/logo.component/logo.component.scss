@@ -1,0 +1,25 @@
+.bel-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  .bel-logo-image {
+      &.small {
+      border-radius: 50%;
+      width: 80px;
+      height: auto;
+    }
+    
+    &.medium {
+      border-radius: 50%;
+      width: 120px;
+      height: auto;
+    }
+    
+    &.large {
+      border-radius: 50%;
+      width: 160px;
+      height: auto;
+    }
+  }
+}
