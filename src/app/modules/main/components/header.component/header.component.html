@@ -1,0 +1,19 @@
+<header class="bel-app-header">
+  <div class="bel-header-content">
+    <app-logo size="small"></app-logo>
+    
+    <div class="bel-header-actions">
+      <div class="bel-user-info">
+        <span class="bel-user-greeting">Bonjour, {{ currentUser?.pseudo }}</span>
+        <span class="bel-user-community">{{ userCommunity }}</span>
+      </div>
+      
+      <button class="bel-notification-btn" (click)="toggleNotifications()">
+        🔔
+        <span *ngIf="notificationCount > 0" class="bel-notification-badge">
+          {{ notificationCount }}
+        </span>
+      </button>
+    </div>
+  </div>
+</header>

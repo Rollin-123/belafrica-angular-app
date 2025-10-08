@@ -132,34 +132,51 @@ export class NationalitySelectionComponent implements OnInit {
 
   // Soumission du formulaire
   onSubmit() {
-    if (this.nationalityForm.valid) {
-      this.isLoading = true;
+  if (this.nationalityForm.valid) {
+    this.isLoading = true;
 
-      // Récupérer les données existantes
-      const tempData = localStorage.getItem('tempPhone');
-      if (tempData) {
-        const phoneData = JSON.parse(tempData);
-        
-        // Ajouter la nationalité sélectionnée
-        const userData = {
-          ...phoneData,
-          nationality: this.nationalityForm.get('nationality')?.value,
-          nationalityName: this.africanCountries.find(c => c.code === this.nationalityForm.get('nationality')?.value)?.name
-        };
-
-        console.log('🌍 Données utilisateur:', userData);
-
-        // Stocker les données complètes
-        localStorage.setItem('userRegistrationData', JSON.stringify(userData));
-
-        // Simulation traitement
-        setTimeout(() => {
-          this.isLoading = false;
-          this.router.navigate(['/auth/profile']);
-        }, 1000);
+    // Récupérer les données existantes
+    const tempData = localStorage.getItem('tempPhone');
+    if (tempData) {
+      const phoneData = JSON.parse(tempData);
+      
+      // TROUVER LE PAYS SÉLECTIONNÉ
+      const selectedCountry = this.africanCountries.find(
+        c => c.code === this.nationalityForm.get('nationality')?.value
+      );
+      
+      if (!selectedCountry) {
+        alert('❌ Pays non trouvé');
+        this.isLoading = false;
+        return;
       }
+
+      // ⚠️ CORRECTION : Créer l'objet COMPLET avec toutes les propriétés
+      const userData = {
+        phoneNumber: `${phoneData.countryCode}${phoneData.phoneNumber.replace(/\s/g, '')}`,
+        countryCode: phoneData.countryCode,
+        countryName: this.detectedCountry, // ⬅️ IMPORTANT
+        nationality: this.nationalityForm.get('nationality')?.value,
+        nationalityName: selectedCountry.name // ⬅️ IMPORTANT
+      };
+
+      console.log('🌍 Données utilisateur COMPLÈTES:', userData);
+
+      // Stocker les données complètes
+      localStorage.setItem('userRegistrationData', JSON.stringify(userData));
+
+      // Simulation traitement
+      setTimeout(() => {
+        this.isLoading = false;
+        this.router.navigate(['/auth/profile']);
+      }, 1000);
+    } else {
+      this.isLoading = false;
+      alert('❌ Données téléphone non trouvées');
+      this.router.navigate(['/auth/phone']);
     }
   }
+}
 
   goBack() {
     this.router.navigate(['/auth/phone']);

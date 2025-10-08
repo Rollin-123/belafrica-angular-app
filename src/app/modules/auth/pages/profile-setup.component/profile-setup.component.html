@@ -1,1 +1,184 @@
-<p>profile-setup.component works!</p>
+<div class="bel-container">
+  <div class="bel-card">
+    
+    <!-- Header avec logo -->
+    <div class="bel-auth-header">
+      <app-logo size="medium"></app-logo>
+    </div>
+
+    <!-- Titre et progression -->
+    <div style="margin-bottom: var(--bel-spacing-xl);">
+      <!-- Barre de progression -->
+      <div class="bel-progress-bar">
+        <div class="bel-progress-step completed">
+          <span class="bel-step-number">1</span>
+          <span class="bel-step-label">Téléphone</span>
+        </div>
+        <div class="bel-progress-step completed">
+          <span class="bel-step-number">2</span>
+          <span class="bel-step-label">OTP</span>
+        </div>
+        <div class="bel-progress-step completed">
+          <span class="bel-step-number">3</span>
+          <span class="bel-step-label">Nationalité</span>
+        </div>
+        <div class="bel-progress-step active">
+          <span class="bel-step-number">4</span>
+          <span class="bel-step-label">Profil</span>
+        </div>
+      </div>
+
+      <h2 class="bel-title" style="text-align: left; font-size: 28px; margin-bottom: var(--bel-spacing-sm); margin-top: var(--bel-spacing-lg);">
+        Finalisez votre profil
+      </h2>
+      <p class="bel-subtitle" style="text-align: left; margin-bottom: 0;">
+        Personnalisez votre présence sur BELAFRICA. Ces informations pourront être modifiées plus tard.
+      </p>
+    </div>
+
+    <!-- Récapitulatif des infos immuables -->
+    <div class="bel-immutable-info">
+      <h3 style="font-size: 16px; margin-bottom: var(--bel-spacing-md); color: var(--bel-dark);">
+        📋 Informations de base (immuables)
+      </h3>
+      
+      <div class="bel-info-grid">
+        <div class="bel-info-item">
+          <span class="bel-info-label">📞 Téléphone</span>
+          <span class="bel-info-value">{{ userData?.phoneNumber }}</span>
+        </div>
+        <div class="bel-info-item">
+          <span class="bel-info-label">🌍 Pays de résidence</span>
+          <span class="bel-info-value">{{ userData?.countryName }}</span>
+        </div>
+        <div class="bel-info-item">
+          <span class="bel-info-label">🇨🇲 Nationalité</span>
+          <span class="bel-info-value">{{ userData?.nationalityName }}</span>
+        </div>
+        <div class="bel-info-item">
+          <span class="bel-info-label">👥 Votre communauté</span>
+          <span class="bel-info-value bel-community">{{ userData?.nationalityName }} en {{ userData?.countryName }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire de profil -->
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Photo de profil -->
+      <div style="margin-bottom: var(--bel-spacing-xl);">
+        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
+          Photo de profil
+        </label>
+        
+        <div class="bel-avatar-upload">
+          <div class="bel-avatar-preview" [class.has-image]="avatarPreview">
+            <img [src]="avatarPreview" *ngIf="avatarPreview" class="bel-avatar-image">
+            <div *ngIf="!avatarPreview" class="bel-avatar-placeholder">
+              👤
+            </div>
+          </div>
+          
+          <div class="bel-upload-controls">
+            <input 
+              type="file" 
+              #fileInput
+              (change)="onFileSelected($event)"
+              accept="image/*"
+              style="display: none;"
+            >
+            <button 
+              type="button" 
+              class="bel-btn-secondary bel-btn-small"
+              (click)="fileInput.click()">
+              📷 Choisir une photo
+            </button>
+            <small style="display: block; margin-top: 4px; color: var(--bel-gray);">
+              PNG, JPG max. 2MB
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pseudo -->
+      <div style="margin-bottom: var(--bel-spacing-lg);">
+        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
+          Pseudo *
+        </label>
+        <input 
+          type="text" 
+          formControlName="pseudo"
+          placeholder="Votre nom d'utilisateur"
+          class="form-field-bel"
+          maxlength="30"
+        >
+        <small *ngIf="profileForm.get('pseudo')?.invalid && profileForm.get('pseudo')?.touched" 
+               style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
+          Le pseudo est requis (3-30 caractères)
+        </small>
+        <small style="color: var(--bel-gray); margin-top: 4px; display: block;">
+          Ce sera votre nom public dans la communauté
+        </small>
+      </div>
+
+      <!-- Email (optionnel) -->
+      <div style="margin-bottom: var(--bel-spacing-xl);">
+        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
+          Adresse email (optionnel)
+        </label>
+        <input 
+          type="email" 
+          formControlName="email"
+          placeholder="vous@exemple.com"
+          class="form-field-bel"
+        >
+        <small style="color: var(--bel-gray); margin-top: 4px; display: block;">
+          Pour la récupération de compte et les notifications
+        </small>
+      </div>
+
+      <!-- Conditions -->
+      <div style="margin-bottom: var(--bel-spacing-xl);">
+        <label class="bel-checkbox-label">
+          <input 
+            type="checkbox" 
+            formControlName="acceptTerms"
+            class="bel-checkbox"
+          >
+          <span class="bel-checkbox-custom"></span>
+          <span class="bel-checkbox-text">
+            J'accepte les 
+            <a href="#" class="bel-link">conditions d'utilisation</a> 
+            et la 
+            <a href="#" class="bel-link">politique de confidentialité</a>
+            de BELAFRICA
+          </span>
+        </label>
+        
+        <small *ngIf="profileForm.get('acceptTerms')?.invalid && profileForm.get('acceptTerms')?.touched" 
+               style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
+          Vous devez accepter les conditions pour continuer
+        </small>
+      </div>
+
+      <!-- Boutons -->
+      <div class="bel-buttons-container">
+        <button 
+          type="submit" 
+          class="bel-btn-primary"
+          [disabled]="!profileForm.valid || isLoading">
+          <span *ngIf="!isLoading">🎉 Créer mon compte BELAFRICA</span>
+          <span *ngIf="isLoading">Création en cours...</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="bel-btn-secondary"
+          (click)="goBack()">
+          ← Modifier la nationalité
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

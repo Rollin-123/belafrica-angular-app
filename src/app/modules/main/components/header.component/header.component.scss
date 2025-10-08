@@ -1,0 +1,92 @@
+.bel-app-header {
+  background: var(--bel-bg-card);
+  border-bottom: 1px solid var(--bel-border);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.bel-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--bel-spacing-md) var(--bel-spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--bel-spacing-lg);
+}
+
+.bel-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  
+  .bel-user-greeting {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    margin-bottom: 2px;
+  }
+  
+  .bel-user-community {
+    font-size: 12px;
+    color: var(--bel-primary);
+    font-weight: 500;
+  }
+}
+
+.bel-notification-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--bel-light);
+  }
+}
+
+.bel-notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--bel-accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .bel-header-content {
+    padding: var(--bel-spacing-sm) var(--bel-spacing-md);
+  }
+  
+  .bel-user-info {
+    .bel-user-greeting {
+      font-size: 13px;
+    }
+    
+    .bel-user-community {
+      font-size: 11px;
+    }
+  }
+  
+  .bel-notification-btn {
+    font-size: 18px;
+  }
+}
