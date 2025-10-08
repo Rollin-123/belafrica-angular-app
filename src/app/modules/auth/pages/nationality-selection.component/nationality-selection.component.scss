@@ -49,7 +49,27 @@
     }
   }
 }
+.bel-reconnection-info {
+  margin-bottom: var(--bel-spacing-lg);
+}
 
+.bel-info-box {
+  background: rgba(242, 169, 0, 0.1);
+  border: 1px solid var(--bel-primary);
+  border-radius: var(--bel-radius-lg);
+  padding: var(--bel-spacing-md);
+}
+
+.bel-info-box h3 {
+  color: var(--bel-primary);
+  margin-bottom: var(--bel-spacing-sm);
+}
+
+.bel-warning {
+  color: var(--bel-accent);
+  font-weight: 600;
+  margin-top: var(--bel-spacing-sm);
+}
 .bel-select-arrow {
   position: absolute;
   right: 16px;
