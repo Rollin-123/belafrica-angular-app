@@ -16,19 +16,6 @@
       </p>
     </div>
 
-    <div *ngIf="isReconnection && previousNationalityName" class="bel-reconnection-info">
-  <div class="bel-info-box">
-    <h3>🔄 Reconnexion détectée</h3>
-    <p>
-      <strong>Votre nationalité :</strong> {{ previousNationalityName }}<br>
-      <strong>Votre communauté précédente :</strong> {{ previousNationalityName }} en {{ detectedCountry }}
-    </p>
-    <p class="bel-warning">
-      ⚠️ Votre nationalité ne peut pas être modifiée. Elle a été présélectionnée.
-    </p>
-  </div>
-</div>
-
     <!-- Formulaire de sélection -->
     <form [formGroup]="nationalityForm" (ngSubmit)="onSubmit()">
       

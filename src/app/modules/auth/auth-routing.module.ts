@@ -6,7 +6,7 @@ import { NationalitySelectionComponent } from './pages/nationality-selection.com
 import { ProfileSetupComponent } from './pages/profile-setup.component/profile-setup.component';
 
 const routes: Routes = [
-  {path:' ', redirectTo:'phone', pathMatch:'full'},
+  {path:'', redirectTo:'phone', pathMatch:'full'},
   {path:'phone', component:PhoneVerificationComponent},
   {path:'otp', component:OtpVerificationComponent},
   {path:'nationality', component:NationalitySelectionComponent},

@@ -1,59 +1,83 @@
-# Belafrica
+# 🌍 BELAFRICA
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.1.
+**Votre communauté, votre lien, votre chez-vous en Europe**
 
-## Development server
+---
 
-To start a local development server, run:
+## 📱 Description
+
+BELAFRICA est une plateforme de communication communautaire sécurisée pour la diaspora africaine résidant en Europe et au Canada.
+
+## 🎯 Fonctionnalités
+
+### ✅ Implémentées
+- [x] Authentification par téléphone + OTP
+- [x] Sélection de nationalité africaine  
+- [x] Charte graphique BELAFRICA complète
+- [x] Structure modulaire Angular
+
+### 🚧 En développement
+- [ ] Création de profil utilisateur
+- [ ] Module de messagerie chiffrée
+- [ ] Publications administrateurs
+- [ ] Convertisseur de devises
+
+## 🛠️ Stack Technique
+
+- **Frontend:** Angular 20, TypeScript, SCSS
+- **UI:** Angular Material + Design System personnalisé
+- **Validation:** Reactive Forms
+- **Routing:** Angular Router avec Lazy Loading
+
+## 🚀 Installation
 
 ```bash
+# Cloner le projet
+git clone https://github.com/VOTRE_USERNAME/belafrica.git
+
+# Installer les dépendances
+npm install
+
+# Lancer en développement
 ng serve
-```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+# Structure du projet
+belafrica/
+├── src/app/
+│   ├── modules/auth/          # Authentification
+│   ├── shared/               # Composants réutilisables
+│   └── core/                 # Services fondamentaux
+├── src/assets/styles/        # Charte graphique
+└── README.md
 
-## Code scaffolding
+# Equipe BelAfrica
+Développé avec passion pour la communauté africaine.---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+#*© 2024 BELAFRICA - Tous droits réservés*
 
+
+---
+
+## **🎯 COMMANDES GIT QUOTIDIENNES**
+
+### **Pour sauvegarder notre travail :**
 ```bash
-ng generate component component-name
-```
+# Vérifier les modifications
+git status
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+# Ajouter les fichiers modifiés
+git add .
 
-```bash
-ng generate --help
-```
+# Commit avec message descriptif
+git commit -m "feat: description claire de vos changements"
 
-## Building
+# Pousser vers GitHub
+git push
 
-To build the project run:
+# Créer une nouvelle branche
+git checkout -b feature/nom-fonctionnalite
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+# Travailler sur la feature...
+# Puis merger dans develop
+git checkout develop
+git merge feature/nom-fonctionnalite

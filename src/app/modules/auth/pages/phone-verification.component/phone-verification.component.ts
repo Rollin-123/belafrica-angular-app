@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService, PhoneValidationResult } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-phone-verification',
@@ -9,12 +9,11 @@ import { AuthService } from '../../../../core/services/auth.service';
   templateUrl: './phone-verification.component.html',
   styleUrls: ['./phone-verification.component.scss']
 })
-export class PhoneVerificationComponent {
+export class PhoneVerificationComponent implements OnInit {
   phoneForm: FormGroup;
   isLoading: boolean = false;
   isPendingPhoneChange: boolean = false;
   
-  // Liste des pays européens cibles (simplifiée pour le front-end)
   europeanCountries = [
     { name: 'Allemagne', code: '+49' },
     { name: 'Belgique', code: '+32' },
@@ -26,8 +25,8 @@ export class PhoneVerificationComponent {
     { name: 'Suisse', code: '+41' },
     { name: 'Royaume-Uni', code: '+44' },
     { name: 'Russie', code: '+7' },
-    // Ajout d'autres pays cibles ici si nécessaire
   ];
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -39,13 +38,11 @@ export class PhoneVerificationComponent {
     });
   }
 
-    ngOnInit() {
-    // Vérifier si c'est un changement de numéro en attente
+  ngOnInit() {
     this.isPendingPhoneChange = this.authService.isPendingPhoneChange();
     
     if (this.isPendingPhoneChange) {
       console.log('🔄 Mode changement de numéro détecté');
-      this.authService.clearPendingPhoneChange();
     }
   }
 
@@ -54,61 +51,42 @@ export class PhoneVerificationComponent {
       this.isLoading = true;
       
       const formValue = this.phoneForm.value;
-      const fullPhoneNumber = `${formValue.countryCode}${formValue.phoneNumber.replace(/\s/g, '')}`;
+      
+      // 🎯 VALIDATION INTELLIGENTE
+      const validationResult = this.authService.validatePhoneNumber(formValue);
+      
+      if (!validationResult.isValid) {
+        this.isLoading = false;
+        alert(`❌ ${validationResult.message}`);
+        return;
+      }
 
-      // 🎯 LOGIQUE AMÉLIORÉE
-      if (this.authService.isPhoneNumberKnown(fullPhoneNumber)) {
-        this.handleReconnection(fullPhoneNumber, formValue);
-      } else if (this.isPendingPhoneChange) {
-        this.handlePhoneChange(fullPhoneNumber, formValue);
-      } else {
-        this.handleNewRegistration(formValue);
+      console.log(`🔍 Type d'opération: ${validationResult.type}`);
+      
+      // TRAITEMENT SELON LE TYPE
+      switch (validationResult.type) {
+        case 'new_registration':
+          this.handleNewRegistration(formValue);
+          break;
+          
+        case 'reconnection':
+          this.handleReconnection(validationResult, formValue);
+          break;
+          
+        case 'phone_change':
+          this.handlePhoneChange(validationResult, formValue);
+          break;
+          
+        default:
+          this.handleError('Type d\'opération non supporté');
       }
     }
   }
 
-  // 🔄 RECONNEXION (même numéro, même communauté)
-  private handleReconnection(fullPhoneNumber: string, phoneData: any) {
-    console.log('🔄 Reconnexion détectée');
-    
-    localStorage.setItem('tempPhone', JSON.stringify({
-      ...phoneData,
-      fullPhoneNumber
-    }));
-    localStorage.setItem('isReconnection', 'true');
-
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/auth/nationality']);
-    }, 1500);
-  }
-
-  // 📞 CHANGEMENT DE NUMÉRO (même profil, nouvelle communauté)
-  private handlePhoneChange(fullPhoneNumber: string, phoneData: any) {
-    console.log('📞 Changement de numéro');
-    
-    localStorage.setItem('tempPhone', JSON.stringify({
-      ...phoneData,
-      fullPhoneNumber
-    }));
-    localStorage.setItem('isPhoneChange', 'true');
-
-    setTimeout(() => {
-      this.isLoading = false;
-      // ⚠️ PAS besoin de resélectionner la nationalité - elle est immuable !
-      this.authService.changePhoneNumber({
-        ...phoneData,
-        fullPhoneNumber
-      });
-    }, 1500);
-  }
-
-  // ✅ NOUVELLE INSCRIPTION
-  private handleNewRegistration(phoneData: any) {
+  private handleNewRegistration(phoneData: any): void {
     console.log('✅ Nouvelle inscription');
     
-    localStorage.setItem('tempPhone', JSON.stringify(phoneData));
-    localStorage.setItem('isReconnection', 'false');
+    this.authService.handleNewRegistration(phoneData);
 
     setTimeout(() => {
       this.isLoading = false;
@@ -116,4 +94,47 @@ export class PhoneVerificationComponent {
     }, 1500);
   }
 
+  private handleReconnection(validationResult: PhoneValidationResult, phoneData: any): void {
+    console.log('🔄 Reconnexion');
+    
+    this.authService.handleReconnection(validationResult, phoneData);
+
+    setTimeout(() => {
+      this.isLoading = false;
+      this.router.navigate(['/auth/nationality']);
+    }, 1500);
+  }
+
+  private handlePhoneChange(validationResult: PhoneValidationResult, phoneData: any): void {
+    console.log('📞 Changement de numéro');
+    
+    this.authService.handlePhoneChange(validationResult, phoneData);
+    this.isLoading = false;
+    // Redirection gérée dans le service
+  }
+
+  private handleError(message: string): void {
+    this.isLoading = false;
+    alert(`❌ ${message}`);
+    console.error(message);
+  }
+
+  // Validation des caractères numériques
+  validateNumber(event: KeyboardEvent): boolean {
+    const charCode = event.which ? event.which : event.keyCode;
+    
+    if (
+      (charCode >= 48 && charCode <= 57) || // Chiffres 0-9
+      charCode === 8 || // Backspace
+      charCode === 9 || // Tab
+      charCode === 37 || // Flèche gauche
+      charCode === 39 || // Flèche droite
+      charCode === 46 // Delete
+    ) {
+      return true;
+    }
+    
+    event.preventDefault();
+    return false;
+  }
 }

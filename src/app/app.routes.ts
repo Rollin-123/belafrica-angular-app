@@ -8,19 +8,23 @@ export const routes: Routes = [
     loadChildren: () => import('./modules/auth/auth.module').then(m => m.AuthModule)
   },
   {
-    path:'app',
+    path: 'app',
     canActivate: [AuthGuard],
     loadChildren: () => import('./modules/main/main.module').then(m => m.MainModule)
   },
-   // Route par défaut (redirige l'utilisateur non connecté vers la page d'inscription/connexion)
-  { path: '', redirectTo: 'auth/phone', pathMatch: 'full' },
-  { path: '**', redirectTo: 'auth/phone' }
-  // Autres routes...
+  { 
+    path: '', 
+    redirectTo: 'auth/phone', 
+    pathMatch: 'full' 
+  },
+  { 
+    path: '**', 
+    redirectTo: 'auth/phone', 
+  }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-
 export class AppRoutingModule { }
