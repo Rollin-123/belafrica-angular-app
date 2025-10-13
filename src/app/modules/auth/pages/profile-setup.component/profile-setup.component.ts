@@ -1,3 +1,4 @@
+import { StorageService } from './../../../../core/services/storage.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -25,14 +26,15 @@ export class ProfileSetupComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private storageService: StorageService
   ) {
     this.profileForm = this.fb.group({
       pseudo: ['', [
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(30),
-        Validators.pattern(/^[a-zA-Z0-9_-]+$/)
+        Validators.pattern(/^[a-zA-Z0-9_\- ]+$/)
       ]],
       email: ['', [
         Validators.email
@@ -41,18 +43,16 @@ export class ProfileSetupComponent implements OnInit {
     });
   }
 
- ngOnInit() {
-  // Récupérer les données utilisateur depuis le localStorage
-  const userDataStr = localStorage.getItem('userRegistrationData');
-  
-  if (userDataStr) {
-    try {
-      this.userData = JSON.parse(userDataStr);
-      console.log('📋 Données récupérées:', this.userData); // Debug
+  ngOnInit() {
+    // ✅ UTILISER LE SERVICE SÉCURISÉ
+    this.userData = this.storageService.getItem('userRegistrationData');
+    
+    if (this.userData) {
+      console.log('📋 Données récupérées:', this.userData);
       
-      // VÉRIFICATION : Afficher les données dans la console
-      if (this.userData && (!this.userData.countryName || !this.userData.nationalityName)) {
-        console.error('❌ Données manquantes:', { // Object is possibly 'null'.
+      // Vérifier les données
+      if (!this.userData.countryName || !this.userData.nationalityName) {
+        console.error('❌ Données manquantes:', {
           countryName: this.userData.countryName,
           nationalityName: this.userData.nationalityName
         });
@@ -64,15 +64,11 @@ export class ProfileSetupComponent implements OnInit {
         pseudo: suggestedPseudo
       });
       
-    } catch (error) {
-      console.error('❌ Erreur parsing JSON:', error);
+    } else {
+      console.error('❌ Aucune donnée trouvée dans le stockage');
       this.router.navigate(['/auth/phone']);
     }
-  } else {
-    console.error('❌ Aucune donnée trouvée dans localStorage');
-    this.router.navigate(['/auth/phone']);
   }
-}
 
   // Générer un pseudo suggéré basé sur la nationalité
   private generateSuggestedPseudo(): string {
@@ -90,7 +86,7 @@ export class ProfileSetupComponent implements OnInit {
     
     if (file) {
       // Validation du fichier
-      if (file.size > 2 * 1024 * 1024) { // 2MB max
+      if (file.size > 2 * 1024 * 1024) {
         alert('⚠️ La photo ne doit pas dépasser 2MB');
         return;
       }
@@ -111,8 +107,7 @@ export class ProfileSetupComponent implements OnInit {
     }
   }
 
-  // Soumission du formulaire
-  onSubmit(): void {
+ onSubmit(): void {
     if (this.profileForm.valid && this.userData) {
       this.isLoading = true;
 
@@ -131,10 +126,10 @@ export class ProfileSetupComponent implements OnInit {
       setTimeout(() => {
         this.isLoading = false;
         
-        // Stocker le profil utilisateur complet
-        localStorage.setItem('belafrica_user_profile', JSON.stringify(userProfile));
-        localStorage.removeItem('tempPhone'); // Nettoyer les données temporaires
-        localStorage.removeItem('userRegistrationData');
+        // ✅ UTILISER LE SERVICE SÉCURISÉ
+        this.storageService.setItem('belafrica_user_profile', userProfile);
+        this.storageService.removeItem('tempPhone');
+        this.storageService.removeItem('userRegistrationData');
         
         // Redirection vers l'application principale
         this.router.navigate(['/app']);

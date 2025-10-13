@@ -1,0 +1,60 @@
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class StorageService {
+  private isBrowser: boolean;
+
+  constructor(@Inject(PLATFORM_ID) private platformId: any) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+
+  // Méthode sécurisée pour setItem
+  setItem(key: string, value: any): void {
+    if (this.isBrowser) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (error) {
+        console.error('❌ Erreur localStorage setItem:', error);
+      }
+    }
+  }
+
+  // Méthode sécurisée pour getItem
+  getItem(key: string): any {
+    if (this.isBrowser) {
+      try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+      } catch (error) {
+        console.error('❌ Erreur localStorage getItem:', error);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // Méthode sécurisée pour removeItem
+  removeItem(key: string): void {
+    if (this.isBrowser) {
+      try {
+        localStorage.removeItem(key);
+      } catch (error) {
+        console.error('❌ Erreur localStorage removeItem:', error);
+      }
+    }
+  }
+
+  // Méthode sécurisée pour clear
+  clear(): void {
+    if (this.isBrowser) {
+      try {
+        localStorage.clear();
+      } catch (error) {
+        console.error('❌ Erreur localStorage clear:', error);
+      }
+    }
+  }
+}

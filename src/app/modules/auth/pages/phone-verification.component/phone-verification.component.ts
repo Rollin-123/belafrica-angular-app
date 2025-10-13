@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, PhoneValidationResult } from '../../../../core/services/auth.service';
+import { StorageService } from '../../../../core/services/storage.service';
 
 @Component({
   selector: 'app-phone-verification',
@@ -9,11 +9,11 @@ import { AuthService, PhoneValidationResult } from '../../../../core/services/au
   templateUrl: './phone-verification.component.html',
   styleUrls: ['./phone-verification.component.scss']
 })
-export class PhoneVerificationComponent implements OnInit {
+export class PhoneVerificationComponent {
   phoneForm: FormGroup;
   isLoading: boolean = false;
-  isPendingPhoneChange: boolean = false;
   
+  // Liste des pays européens cibles
   europeanCountries = [
     { name: 'Allemagne', code: '+49' },
     { name: 'Belgique', code: '+32' },
@@ -24,13 +24,13 @@ export class PhoneVerificationComponent implements OnInit {
     { name: 'Italie', code: '+39' },
     { name: 'Suisse', code: '+41' },
     { name: 'Royaume-Uni', code: '+44' },
-    { name: 'Russie', code: '+7' },
+    { name: 'Russie', code: '+7' }
   ];
 
   constructor(
-    private fb: FormBuilder,
+    private fb: FormBuilder, 
     private router: Router,
-    private authService: AuthService
+    private storageService: StorageService
   ) {
     this.phoneForm = this.fb.group({
       countryCode: [this.europeanCountries[0].code, Validators.required],
@@ -38,88 +38,6 @@ export class PhoneVerificationComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.isPendingPhoneChange = this.authService.isPendingPhoneChange();
-    
-    if (this.isPendingPhoneChange) {
-      console.log('🔄 Mode changement de numéro détecté');
-    }
-  }
-
-  onSubmit() {
-    if (this.phoneForm.valid) {
-      this.isLoading = true;
-      
-      const formValue = this.phoneForm.value;
-      
-      // 🎯 VALIDATION INTELLIGENTE
-      const validationResult = this.authService.validatePhoneNumber(formValue);
-      
-      if (!validationResult.isValid) {
-        this.isLoading = false;
-        alert(`❌ ${validationResult.message}`);
-        return;
-      }
-
-      console.log(`🔍 Type d'opération: ${validationResult.type}`);
-      
-      // TRAITEMENT SELON LE TYPE
-      switch (validationResult.type) {
-        case 'new_registration':
-          this.handleNewRegistration(formValue);
-          break;
-          
-        case 'reconnection':
-          this.handleReconnection(validationResult, formValue);
-          break;
-          
-        case 'phone_change':
-          this.handlePhoneChange(validationResult, formValue);
-          break;
-          
-        default:
-          this.handleError('Type d\'opération non supporté');
-      }
-    }
-  }
-
-  private handleNewRegistration(phoneData: any): void {
-    console.log('✅ Nouvelle inscription');
-    
-    this.authService.handleNewRegistration(phoneData);
-
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/auth/otp']);
-    }, 1500);
-  }
-
-  private handleReconnection(validationResult: PhoneValidationResult, phoneData: any): void {
-    console.log('🔄 Reconnexion');
-    
-    this.authService.handleReconnection(validationResult, phoneData);
-
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/auth/nationality']);
-    }, 1500);
-  }
-
-  private handlePhoneChange(validationResult: PhoneValidationResult, phoneData: any): void {
-    console.log('📞 Changement de numéro');
-    
-    this.authService.handlePhoneChange(validationResult, phoneData);
-    this.isLoading = false;
-    // Redirection gérée dans le service
-  }
-
-  private handleError(message: string): void {
-    this.isLoading = false;
-    alert(`❌ ${message}`);
-    console.error(message);
-  }
-
-  // Validation des caractères numériques
   validateNumber(event: KeyboardEvent): boolean {
     const charCode = event.which ? event.which : event.keyCode;
     
@@ -136,5 +54,50 @@ export class PhoneVerificationComponent implements OnInit {
     
     event.preventDefault();
     return false;
+  }
+
+  onSubmit() {
+    if (this.phoneForm.valid) {
+      this.isLoading = true;
+      const formValue = this.phoneForm.value;
+      
+      const fullPhoneNumber = `${formValue.countryCode}${formValue.phoneNumber.replace(/\s/g, '')}`;
+
+      console.log('Tentative de vérification pour:', fullPhoneNumber);
+
+      // Stocker les données
+      const phoneData = {
+        phoneNumber: formValue.phoneNumber.replace(/\s/g, ''),
+        countryCode: formValue.countryCode,
+        countryName: this.getCountryName(formValue.countryCode)
+      };
+      
+      this.storageService.setItem('tempPhone', phoneData);
+
+      // Simulation envoi OTP
+      setTimeout(() => {
+        this.isLoading = false;
+        alert(`Code OTP envoyé (MOCK). Utilisez le code 123456.`);
+        
+        // Naviguer vers OTP
+        this.router.navigate(['/auth/otp']); 
+      }, 1500); 
+    }
+  }
+
+  private getCountryName(code: string): string {
+    const countries: {[key: string]: string} = {
+      '+33': 'France',
+      '+32': 'Belgique', 
+      '+49': 'Allemagne',
+      '+39': 'Italie',
+      '+34': 'Espagne',
+      '+41': 'Suisse',
+      '+44': 'Royaume-Uni',
+      '+1': 'Canada',
+      '+7': 'Russie',
+      '+375': 'Biélorussie'
+    };
+    return countries[code] || 'Inconnu';
   }
 }

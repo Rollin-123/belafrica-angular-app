@@ -42,24 +42,27 @@
         📋 Informations de base (immuables)
       </h3>
       
-      <div class="bel-info-grid">
-        <div class="bel-info-item">
-          <span class="bel-info-label">📞 Téléphone</span>
-          <span class="bel-info-value">{{ userData?.phoneNumber }}</span>
-        </div>
-        <div class="bel-info-item">
-          <span class="bel-info-label">🌍 Pays de résidence</span>
-          <span class="bel-info-value">{{ userData?.countryName }}</span>
-        </div>
-        <div class="bel-info-item">
-          <span class="bel-info-label">🇨🇲 Nationalité</span>
-          <span class="bel-info-value">{{ userData?.nationalityName }}</span>
-        </div>
-        <div class="bel-info-item">
-          <span class="bel-info-label">👥 Votre communauté</span>
-          <span class="bel-info-value bel-community">{{ userData?.nationalityName }} en {{ userData?.countryName }}</span>
-        </div>
-      </div>
+      <!-- CORRIGEZ toutes les références à userData avec ?. -->
+<div class="bel-info-grid">
+  <div class="bel-info-item">
+    <span class="bel-info-label">📞 Téléphone</span>
+    <span class="bel-info-value">{{ userData?.phoneNumber }}</span>
+  </div>
+  <div class="bel-info-item">
+    <span class="bel-info-label">🌍 Pays de résidence</span>
+    <span class="bel-info-value">{{ userData?.countryName }}</span>
+  </div>
+  <div class="bel-info-item">
+    <span class="bel-info-label">🇨🇲 Nationalité</span>
+    <span class="bel-info-value">{{ userData?.nationalityName }}</span>
+  </div>
+  <div class="bel-info-item">
+    <span class="bel-info-label">👥 Votre communauté</span>
+    <span class="bel-info-value bel-community">
+      {{ userData?.nationalityName }} en {{ userData?.countryName }}
+    </span>
+  </div>
+</div>
     </div>
 
     <!-- Formulaire de profil -->
@@ -114,7 +117,7 @@
         >
         <small *ngIf="profileForm.get('pseudo')?.invalid && profileForm.get('pseudo')?.touched" 
                style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
-          Le pseudo est requis (3-30 caractères)
+          Le nom est requis (3-30 caractères)
         </small>
         <small style="color: var(--bel-gray); margin-top: 4px; display: block;">
           Ce sera votre nom public dans la communauté

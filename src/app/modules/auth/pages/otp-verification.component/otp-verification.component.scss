@@ -23,3 +23,45 @@
     cursor: not-allowed;
   }
 }
+// Styles pour le compteur
+.countdown-display {
+  font-weight: 700;
+  color: var(--bel-primary);
+  font-size: 16px;
+}
+
+// Animation pour le compteur
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.countdown-animated {
+  animation: pulse 1s infinite;
+}
+
+// Style pour le lien de renvoi
+.resend-link {
+  color: var(--bel-primary);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: var(--bel-primary-dark);
+    text-decoration: underline;
+  }
+  
+  &.disabled {
+    color: var(--bel-gray);
+    cursor: not-allowed;
+    text-decoration: none;
+    
+    &:hover {
+      color: var(--bel-gray);
+      text-decoration: none;
+    }
+  }
+}

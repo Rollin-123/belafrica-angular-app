@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, PhoneValidationResult } from '../../../../core/services/auth.service';
+import { StorageService } from '../../../../core/services/storage.service';
 
 interface AfricanCountry {
   code: string;
@@ -21,15 +21,8 @@ export class NationalitySelectionComponent implements OnInit {
   detectedCountry: string = '';
   selectedCountryName: string = '';
   selectedCountryFlag: string = '';
-  
-  // Flags pour la gestion des différents scénarios
-  isReconnection: boolean = false;
-  isPhoneChange: boolean = false;
-  previousNationality: string = '';
-  previousNationalityName: string = '';
-  validationResult: PhoneValidationResult | null = null;
 
-  // Liste des pays africains
+  // Liste complète des pays africains
   africanCountries: AfricanCountry[] = [
     { code: 'DZ', name: 'Algérie', flag: '🇩🇿' },
     { code: 'AO', name: 'Angola', flag: '🇦🇴' },
@@ -87,22 +80,23 @@ export class NationalitySelectionComponent implements OnInit {
     { code: 'ZW', name: 'Zimbabwe', flag: '🇿🇼' }
   ];
 
-   constructor(
+  constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private storageService: StorageService
   ) {
     this.nationalityForm = this.fb.group({
       nationality: ['', Validators.required]
     });
   }
 
- ngOnInit() {
-    // Récupérer le pays de résidence
-    const tempData = localStorage.getItem('tempPhone');
+  ngOnInit() {
+    // Récupérer le pays de résidence depuis les données temporaires
+    const tempData = this.storageService.getItem('tempPhone');
     if (tempData) {
-      const phoneData = JSON.parse(tempData);
-      this.detectedCountry = this.getCountryNameFromCode(phoneData.countryCode);
+      this.detectedCountry = this.getCountryNameFromCode(tempData.countryCode);
     } else {
+      // Si pas de données, retour à l'écran téléphone
       this.router.navigate(['/auth/phone']);
     }
 
@@ -125,29 +119,21 @@ export class NationalitySelectionComponent implements OnInit {
   }
 
   onNationalityChange() {
+    // Cette méthode est appelée quand la sélection change
     console.log('Nationalité sélectionnée:', this.nationalityForm.get('nationality')?.value);
   }
 
-  // Sélectionner un pays
-  selectCountry(country: AfricanCountry) {
-    this.nationalityForm.patchValue({
-      nationality: country.code
-    });
-  }
-
-  // 🆕 SOUMISSION INTELLIGENTE AVEC NOUVELLES MÉTHODES
+  // Soumission du formulaire - VERSION CORRIGÉE
   onSubmit() {
     if (this.nationalityForm.valid) {
       this.isLoading = true;
 
-      const tempData = localStorage.getItem('tempPhone');
+      // Récupérer les données existantes
+      const tempData = this.storageService.getItem('tempPhone');
       if (tempData) {
-        const phoneData = JSON.parse(tempData);
-        const selectedNationality = this.nationalityForm.get('nationality')?.value;
-        
         // TROUVER LE PAYS SÉLECTIONNÉ
         const selectedCountry = this.africanCountries.find(
-          c => c.code === selectedNationality
+          c => c.code === this.nationalityForm.get('nationality')?.value
         );
         
         if (!selectedCountry) {
@@ -156,15 +142,25 @@ export class NationalitySelectionComponent implements OnInit {
           return;
         }
 
-        // 🎯 LOGIQUE INTELLIGENTE SELON LE TYPE DE CONNEXION
-        if (this.isReconnection) {
-          this.handleReconnection(phoneData, selectedNationality, selectedCountry);
-        } else if (this.isPhoneChange) {
-          // ⚠️ NE DEVRAIT PAS ARRIVER ICI - Le changement de numéro est traité directement
-          this.handlePhoneChangeError();
-        } else {
-          this.handleNewRegistration(phoneData, selectedNationality, selectedCountry);
-        }
+        // Créer l'objet COMPLET avec toutes les propriétés
+        const userData = {
+          phoneNumber: `${tempData.countryCode}${tempData.phoneNumber.replace(/\s/g, '')}`,
+          countryCode: tempData.countryCode,
+          countryName: this.detectedCountry,
+          nationality: this.nationalityForm.get('nationality')?.value,
+          nationalityName: selectedCountry.name
+        };
+
+        console.log('🌍 Données utilisateur COMPLÈTES:', userData);
+
+        // Stocker les données complètes
+        this.storageService.setItem('userRegistrationData', userData);
+
+        // Simulation traitement
+        setTimeout(() => {
+          this.isLoading = false;
+          this.router.navigate(['/auth/profile']);
+        }, 1000);
       } else {
         this.isLoading = false;
         alert('❌ Données téléphone non trouvées');
@@ -173,73 +169,8 @@ export class NationalitySelectionComponent implements OnInit {
     }
   }
 
-  // 🔄 RECONNEXION - UTILISE LA NOUVELLE MÉTHODE
-  private handleReconnection(phoneData: any, selectedNationality: string, selectedCountry: any): void {
-    console.log('🔄 Traitement reconnexion');
-    
-    // ⚠️ SÉCURITÉ : Vérifier la cohérence de la nationalité
-    if (this.previousNationality && this.previousNationality !== selectedNationality) {
-      const message = `⚠️ Votre nationalité ne peut pas être modifiée. \n\n` +
-                     `Votre nationalité d'origine est : ${this.previousNationalityName}\n` +
-                     `Voulez-vous continuer avec votre nationalité d'origine ?`;
-      
-      if (confirm(message)) {
-        // Forcer la nationalité originale
-        this.nationalityForm.patchValue({ nationality: this.previousNationality });
-        selectedNationality = this.previousNationality;
-      } else {
-        this.isLoading = false;
-        return;
-      }
-    }
-
-    // 🆕 UTILISATION DE LA NOUVELLE MÉTHODE
-    this.cleanupTempData();
-    this.isLoading = false;
-  }
-
-  // 📞 CHANGEMENT DE NUMÉRO - NE DEVRAIT PAS ARRIVER ICI
-  private handlePhoneChangeError(): void {
-    console.error('❌ ERREUR: Changement de numéro ne devrait pas passer par la sélection de nationalité');
-    alert('Erreur système. Redirection...');
-    this.cleanupTempData();
-    this.router.navigate(['/auth/phone']);
-  }
-
-  // ✅ NOUVELLE INSCRIPTION
-  private handleNewRegistration(phoneData: any, selectedNationality: string, selectedCountry: any): void {
-    console.log('✅ Traitement nouvelle inscription');
-    
-    const userData = {
-      phoneNumber: `${phoneData.countryCode}${phoneData.phoneNumber.replace(/\s/g, '')}`,
-      fullPhoneNumber: phoneData.fullPhoneNumber || `${phoneData.countryCode}${phoneData.phoneNumber.replace(/\s/g, '')}`,
-      countryCode: phoneData.countryCode,
-      countryName: this.detectedCountry,
-      nationality: selectedNationality,
-      nationalityName: selectedCountry.name
-    };
-
-    console.log('🌍 Données utilisateur COMPLÈTES:', userData);
-    
-    // Stocker pour l'étape profil
-    localStorage.setItem('userRegistrationData', JSON.stringify(userData));
-
-    setTimeout(() => {
-      this.isLoading = false;
-      this.cleanupTempData();
-      this.router.navigate(['/auth/profile']);
-    }, 1000);
-  }
-
-  // 🧹 NETTOYAGE DES DONNÉES TEMPORAIRES
-  private cleanupTempData(): void {
-    localStorage.removeItem('tempPhone');
-    localStorage.removeItem('isReconnection');
-    localStorage.removeItem('isPhoneChange');
-  }
-
   goBack() {
-    this.router.navigate(['/auth/phone']);
+    this.router.navigate(['/auth/otp']);
   }
 
   // Helper pour obtenir le nom du pays depuis le code
