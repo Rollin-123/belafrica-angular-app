@@ -1,0 +1,50 @@
+.bel-page-container {
+  padding: 16px;
+  min-height: 100vh;
+  background: var(--bel-light);
+}
+
+.bel-welcome-card {
+  background: var(--bel-white);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  margin-top: 20px;
+  
+  h2 {
+    color: var(--bel-primary);
+    margin-bottom: 12px;
+    font-size: 24px;
+  }
+  
+  p {
+    color: var(--bel-gray);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+}
+
+.bel-user-info {
+  background: rgba(242, 169, 0, 0.1);
+  border: 1px solid rgba(242, 169, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+  
+  strong {
+    color: var(--bel-primary);
+  }
+}
+
+.bel-coming-soon {
+  background: var(--bel-light);
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 4px solid var(--bel-secondary);
+  
+  p {
+    margin: 8px 0;
+    color: var(--bel-dark);
+  }
+}

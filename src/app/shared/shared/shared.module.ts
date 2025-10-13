@@ -7,14 +7,14 @@ import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
-    LogoComponent
+    LogoComponent,
   ],
   imports: [
     CommonModule,
     RouterModule
   ],
   exports: [
-    LogoComponent
+    LogoComponent,
   ]
 })
 export class SharedModule { }

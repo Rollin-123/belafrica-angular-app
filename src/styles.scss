@@ -4,7 +4,6 @@
 
 // Import des polices Google
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap');
-// @import url('https://fonts.googleapis.com/css2?family=Cursive&display=swap');
 
 // =============================================================================
 // VARIABLES COULEURS OFFICIELLES BELAFRICA
@@ -31,23 +30,26 @@ $bel-white: #FFFFFF;
 // =============================================================================
 :root {
   // Couleurs primaires
-  --bel-color-primary: #{$bel-primary};
-  --bel-color-primary-dark: #{$bel-primary-dark};
-  --bel-color-secondary: #{$bel-secondary};
-  --bel-color-accent: #{$bel-accent};
+  --bel-primary: #{$bel-primary};
+  --bel-primary-dark: #{$bel-primary-dark};
+  --bel-primary-light: #{$bel-primary-light};
+  --bel-secondary: #{$bel-secondary};
+  --bel-secondary-dark: #{$bel-secondary-dark};
+  --bel-secondary-light: #{$bel-secondary-light};
+  --bel-accent: #{$bel-accent};
+  --bel-accent-dark: #{$bel-accent-dark};
+  --bel-accent-light: #{$bel-accent-light};
   
   // Couleurs interface
-  --bel-bg-app: #{$bel-light};
-  --bel-bg-card: #{$bel-white};
-  --bel-text-primary: #{$bel-dark};
-  --bel-text-secondary: #{$bel-gray};
+  --bel-dark: #{$bel-dark};
+  --bel-gray: #{$bel-gray};
+  --bel-light: #{$bel-light};
+  --bel-white: #{$bel-white};
   --bel-border: #E2E8F0;
   
-  // Typographie
-  --bel-font-heading: cursive;
-  --bel-font-body: 'Open Sans', cursive;
-  // --bel-font-heading: 'Poppins', sans-serif;
-  // --bel-font-body: 'Open Sans', sans-serif;
+  // Typographie - AVEC CURSIVE COMME VOUS SOUHAITEZ
+  --bel-font-heading: cursive, 'Poppins', sans-serif;
+  --bel-font-body: cursive, 'Open Sans', sans-serif;
   
   // Espacements
   --bel-spacing-xs: 0.25rem;
@@ -75,8 +77,8 @@ $bel-white: #FFFFFF;
 html, body {
   height: 100%;
   font-family: var(--bel-font-body);
-  background-color: var(--bel-bg-app);
-  color: var(--bel-text-primary);
+  background-color: var(--bel-light);
+  color: var(--bel-dark);
   line-height: 1.6;
 }
 
@@ -96,7 +98,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bel-card {
-  background: var(--bel-bg-card);
+  background: var(--bel-white);
   border-radius: var(--bel-radius-xl);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: var(--bel-spacing-xl);
@@ -104,8 +106,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bel-btn-primary {
-  background: var(--bel-color-primary);
-  color: var(--bel-bg-card);
+  background: var(--bel-primary);
+  color: var(--bel-white);
   border: none;
   border-radius: var(--bel-radius-lg);
   padding: var(--bel-spacing-md) var(--bel-spacing-xl);
@@ -117,16 +119,41 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--bel-font-body);
   
   &:hover {
-    background: var(--bel-color-primary-dark);
+    background: var(--bel-primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(242, 169, 0, 0.3);
   }
   
   &:disabled {
-    background: var(--bel-text-secondary);
+    background: var(--bel-gray);
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+  }
+}
+
+.bel-btn-secondary {
+  background: transparent;
+  color: var(--bel-secondary);
+  border: 2px solid var(--bel-secondary);
+  border-radius: var(--bel-radius-md);
+  padding: var(--bel-spacing-md) var(--bel-spacing-xl);
+  font-size: 16px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--bel-secondary);
+    color: var(--bel-white);
+  }
+  
+  &:disabled {
+    background: var(--bel-light);
+    border-color: var(--bel-gray);
+    color: var(--bel-gray);
+    cursor: not-allowed;
   }
 }
 
@@ -135,15 +162,23 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   text-align: center;
   margin-bottom: var(--bel-spacing-sm);
-  color: var(--bel-text-primary);
+  color: var(--bel-dark);
 }
 
 .bel-subtitle {
   font-size: 16px;
   text-align: center;
-  color: var(--bel-text-secondary);
+  color: var(--bel-gray);
   margin-bottom: var(--bel-spacing-xl);
   line-height: 1.5;
+}
+
+// =============================================================================
+// STYLES POUR LE HEADER PRINCIPAL (CORRECTION COULEUR ORANGE)
+// =============================================================================
+.bel-header {
+  background: var(--bel-primary) !important; // ⬅️ FORCER LA COULEUR ORANGE
+  color: var(--bel-white) !important;
 }
 
 // =============================================================================
@@ -152,4 +187,56 @@ h1, h2, h3, h4, h5, h6 {
 .mat-mdc-card {
   border-radius: var(--bel-radius-xl) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+// =============================================================================
+// CORRECTION POUR LA NAVIGATION (COULEURS ACTIVES)
+// =============================================================================
+.bel-nav-item.active {
+  .bel-nav-icon {
+    color: var(--bel-primary) !important;
+  }
+  
+  .bel-nav-label {
+    color: var(--bel-primary) !important;
+  }
+}
+
+// =============================================================================
+// UTILITAIRES SUPPLEMENTAIRES
+// =============================================================================
+.form-field-bel {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--bel-border);
+  border-radius: var(--bel-radius-md);
+  font-size: 16px;
+  font-family: var(--bel-font-body);
+  transition: all 0.3s ease;
+  background-color: var(--bel-white);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--bel-primary);
+    box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.1);
+  }
+  
+  &:disabled {
+    background-color: var(--bel-light);
+    cursor: not-allowed;
+  }
+}
+
+// =============================================================================
+// RESPONSIVE
+// =============================================================================
+@media (max-width: 768px) {
+  .bel-container {
+    padding: var(--bel-spacing-sm);
+  }
+  
+  .bel-card {
+    padding: var(--bel-spacing-lg);
+    margin-top: 20px;
+  }
 }

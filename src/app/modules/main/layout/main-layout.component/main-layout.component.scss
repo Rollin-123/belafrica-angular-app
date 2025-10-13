@@ -1,0 +1,206 @@
+.bel-main-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bel-light);
+  position: relative;
+}
+
+// HEADER ==============================================
+.bel-header {
+  background: var(--bel-primary) !important; // ⬅️ IMPORTANT
+  color: var(--bel-white);
+  padding: 12px 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.bel-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bel-header-logo {
+  flex-shrink: 0;
+}
+
+.bel-header-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+  font-family: var(--font-heading);
+}
+
+.bel-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bel-header-btn {
+  background: none;
+  border: none;
+  color: var(--bel-white);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .bel-icon {
+    font-size: 18px;
+  }
+}
+
+// CONTENU PRINCIPAL ===================================
+.bel-main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px; // Espace pour la navigation bottom
+  background: var(--bel-white);
+}
+
+// NAVIGATION BOTTOM ===================================
+.bel-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bel-white);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  border-top: 1px solid var(--bel-border);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+
+.bel-nav-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 60px;
+
+  .bel-nav-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .bel-nav-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--bel-gray);
+    transition: all 0.3s ease;
+  }
+
+  // État actif
+  &.active {
+    .bel-nav-icon {
+      color: var(--bel-primary);
+      transform: scale(1.1);
+    }
+
+    .bel-nav-label {
+      color: var(--bel-primary);
+      font-weight: 600;
+    }
+  }
+
+  // Hover
+  &:hover:not(.active) {
+    background: var(--bel-light);
+    
+    .bel-nav-icon {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Badge de notifications
+.bel-nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--bel-accent);
+  color: var(--bel-white);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s infinite;
+}
+
+// Animation du badge
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// RESPONSIVE ==========================================
+@media (max-width: 480px) {
+  .bel-header {
+    padding: 10px 12px;
+  }
+  
+  .bel-header-title {
+    font-size: 16px;
+  }
+  
+  .bel-nav-item {
+    padding: 6px 8px;
+    min-width: 50px;
+    
+    .bel-nav-icon {
+      font-size: 18px;
+    }
+    
+    .bel-nav-label {
+      font-size: 10px;
+    }
+  }
+}
+
+// Animation de transition entre onglets
+.bel-main-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

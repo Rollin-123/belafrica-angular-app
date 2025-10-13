@@ -5,14 +5,9 @@ import { AuthGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
   path: '',
-  redirectTo: 'app',
+  redirectTo: 'auth/phone',
   pathMatch: 'full'
 },
-//   {
-//   path: '',
-//   redirectTo: 'auth/phone',
-//   pathMatch: 'full'
-// },
 {
   path: 'auth',
   loadChildren: ()=> import('./modules/auth/auth.module').then(m => m.AuthModule),
@@ -27,12 +22,8 @@ export const routes: Routes = [
 //Routes de page not found 
 {
   path: '**',
-  redirectTo: 'app'
+  redirectTo: 'auth/phone'
 }
-// {
-//   path: '**',
-//   redirectTo: 'auth/phone'
-// }
 ];
 
 @NgModule({

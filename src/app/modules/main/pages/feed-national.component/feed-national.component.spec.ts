@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CommunityFeedComponent } from './community-feed.component';
+import { FeedNationalComponent } from './feed-national.component';
 
-describe('CommunityFeedComponent', () => {
-  let component: CommunityFeedComponent;
-  let fixture: ComponentFixture<CommunityFeedComponent>;
+describe('FeedNationalComponent', () => {
+  let component: FeedNationalComponent;
+  let fixture: ComponentFixture<FeedNationalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CommunityFeedComponent]
+      imports: [FeedNationalComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CommunityFeedComponent);
+    fixture = TestBed.createComponent(FeedNationalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

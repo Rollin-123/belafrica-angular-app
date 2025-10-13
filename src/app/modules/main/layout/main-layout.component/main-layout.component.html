@@ -1,1 +1,73 @@
-<p>main-layout.component works!</p>
+<!-- Layout Principal Style WhatsApp -->
+<div class="bel-main-layout">
+  
+  <!-- Header Fixe -->
+  <header class="bel-header">
+    <div class="bel-header-content">
+      <!-- Logo -->
+      <div class="bel-header-logo">
+        <app-logo size="small"></app-logo>
+      </div>
+      
+      <!-- Titre dynamique -->
+      <h1 class="bel-header-title">{{ getCurrentTitle() }}</h1>
+      
+      <!-- Actions header (recherche, etc.) -->
+      <div class="bel-header-actions">
+        <button class="bel-header-btn" (click)="onSearch()">
+          <span class="bel-icon">🔍</span>
+        </button>
+        <button class="bel-header-btn" (click)="onMenu()">
+          <span class="bel-icon">⋮</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu Principal -->
+  <main class="bel-main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Navigation Bottom Style WhatsApp -->
+  <nav class="bel-bottom-nav">
+    <!-- Fil National -->
+    <button 
+      class="bel-nav-item"
+      [class.active]="activeTab === 'national'"
+      (click)="navigateTo('national')">
+      <span class="bel-nav-icon">🏠</span>
+      <span class="bel-nav-label">National</span>
+    </button>
+
+    <!-- Fil International -->
+    <button 
+      class="bel-nav-item"
+      [class.active]="activeTab === 'international'"  
+      (click)="navigateTo('international')">
+      <span class="bel-nav-icon">🌍</span>
+      <span class="bel-nav-label">International</span>
+    </button>
+
+    <!-- Messagerie -->
+    <button 
+      class="bel-nav-item"
+      [class.active]="activeTab === 'messaging'"
+      (click)="navigateTo('messaging')">
+      <span class="bel-nav-icon">💬</span>
+      <span class="bel-nav-label">Messages</span>
+      <!-- Badge notifications -->
+      <span *ngIf="unreadCount > 0" class="bel-nav-badge">{{ unreadCount }}</span>
+    </button>
+
+    <!-- Paramètres -->
+    <button 
+      class="bel-nav-item"
+      [class.active]="activeTab === 'settings'"  
+      (click)="navigateTo('settings')">
+      <span class="bel-nav-icon">⚙️</span>
+      <span class="bel-nav-label">Paramètres</span>
+    </button>
+  </nav>
+
+</div>
