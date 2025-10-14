@@ -8,6 +8,7 @@ import { MessagingComponent } from './pages/messaging.component/messaging.compon
 import { SettingsComponent } from './pages/settings.component/settings.component';
 import { SharedModule } from '../../shared/shared/shared.module';
 import { FeedNationalComponent } from './pages/feed-national.component/feed-national.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -20,7 +21,9 @@ import { FeedNationalComponent } from './pages/feed-national.component/feed-nati
   ],
   imports: [
     CommonModule,
+    FormsModule,
     MainRoutingModule,
+    ReactiveFormsModule,
     SharedModule
   ]
 })

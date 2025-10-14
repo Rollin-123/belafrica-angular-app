@@ -1,1 +1,191 @@
-<p>messaging.component works!</p>
+<div class="bel-messaging-container">
+  
+  <!-- Header Principal -->
+  <header class="bel-messaging-header">
+    <p>Communiquez avec votre communauté et vos contacts</p>
+  </header>
+
+  <!-- Navigation par Onglets -->
+  <nav class="bel-messaging-tabs">
+    <button 
+      class="bel-tab-button" 
+      [class.active]="activeTab === 'group'"
+      (click)="setActiveTab('group')">
+      💬 Chat de Groupe
+    </button>
+    <button 
+      class="bel-tab-button" 
+      [class.active]="activeTab === 'private'"
+      (click)="setActiveTab('private')">
+      👤 Messages Privés
+    </button>
+  </nav>
+
+  <!-- Contenu des Onglets -->
+  <main class="bel-messaging-content">
+    
+    <!-- ONGLET CHAT DE GROUPE -->
+    @if (activeTab === 'group') {
+      <div class="bel-group-chat-container">
+        
+        <!-- Header du Groupe -->
+        <div class="bel-group-header">
+          <div class="bel-group-info">
+            <h2>Chat de Groupe - {{ userCommunity }}</h2>
+          </div>
+          <div class="bel-group-members">
+            <span class="bel-members-count">👥 {{ (groupConversation$ | async)?.participants?.length || 0 }} membres</span>
+          </div>
+        </div>
+
+        <!-- Zone des Messages -->
+        <div class="bel-chat-messages" #messagesContainer>
+          @if ((messages$ | async)?.length === 0) {
+            <div class="bel-no-messages">
+              <div class="bel-no-messages-icon">💬</div>
+              <h3>Aucun message</h3>
+              <p>Soyez le premier à envoyer un message dans le groupe !</p>
+            </div>
+          } @else {
+            <div class="bel-messages-list">
+              @for (message of messages$ | async; track message.id) {
+                <div 
+                  class="bel-message-wrapper"
+                  [class.my-message]="isMyMessage(message)"
+                  [class.other-message]="!isMyMessage(message)"
+                  (contextmenu)="showMessageMenu(message, $event)">
+                  
+                  <div class="bel-message-bubble">
+                    
+                    <!-- MODE ÉDITION -->
+                    @if (editingMessageId === message.id) {
+                      <div class="bel-message-edit">
+                        <textarea 
+                          class="bel-edit-input"
+                          [(ngModel)]="editMessageContent"
+                          (keydown)="onEditKeyPress($event, message)"
+                          rows="3"
+                          placeholder="Modifier votre message...">
+                        </textarea>
+                        <div class="bel-edit-actions">
+                          <button class="bel-btn-cancel" (click)="cancelEditing()">Annuler</button>
+                          <button class="bel-btn-save" (click)="saveEditedMessage()">Enregistrer</button>
+                        </div>
+                      </div>
+                    }
+                    
+                    <!-- AFFICHAGE NORMAL -->
+                    @else {
+                      <!-- En-tête du message -->
+                      @if (!isMyMessage(message) && !message.isDeleted) {
+                        <div class="bel-message-header">
+                          <div class="bel-message-sender-info">
+                            @if (message.fromUserAvatar) {
+                              <img [src]="message.fromUserAvatar" class="bel-user-avatar" alt="Avatar">
+                            } @else {
+                              <div class="bel-user-avatar-placeholder">
+                                {{ message.fromUserName.charAt(0).toUpperCase() }}
+                              </div>
+                            }
+                            <strong class="bel-message-sender">{{ message.fromUserName }}</strong>
+                          </div>
+                        </div>
+                      }
+
+                      <!-- Contenu du message -->
+                      <div class="bel-message-content">
+                        @if (message.isDeleted) {
+                          <span class="bel-deleted-message">🗑️ Message supprimé</span>
+                        } @else {
+                          {{ message.content }}
+                          
+                          <!-- Indicateur message édité -->
+                          @if (message.isEdited) {
+                            <span class="bel-edited-badge">(modifié)</span>
+                          }
+                        }
+                      </div>
+
+                      <!-- Pied du message -->
+                      <div class="bel-message-footer">
+                        <span class="bel-message-time">
+                          {{ formatMessageTime(message.timestamp) }}
+                        </span>
+                        
+                        <!-- Indicateurs de statut -->
+                        @if (isMyMessage(message) && !message.isDeleted) {
+                          <span class="bel-message-status" [title]="message.status">
+                            {{ getMessageStatus(message) }}
+                          </span>
+                          
+                          <!-- Boutons d'action -->
+                          <div class="bel-message-actions">
+                            @if (canEditMessage(message)) {
+                              <button class="bel-action-btn" (click)="startEditing(message)" title="Modifier">
+                                ✏️
+                              </button>
+                            }
+                            @if (canDeleteMessage(message)) {
+                              <button class="bel-action-btn" (click)="deleteMessage(message.id)" title="Supprimer">
+                                🗑️
+                              </button>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Input d'envoi -->
+        <footer class="bel-chat-input">
+          <div class="bel-input-container">            
+            <textarea
+              #messageInput
+              [(ngModel)]="newMessage"
+              (keydown)="onKeyPress($event)"
+              placeholder="Tapez votre message..."
+              class="bel-message-input"
+              rows="1"
+              [disabled]="isSending">
+            </textarea>
+
+            <button 
+              class="bel-send-btn"
+              (click)="sendMessage()"
+              [disabled]="!newMessage.trim() || isSending"
+              [class.sending]="isSending">
+              {{ isSending ? '⏳' : '➤' }}
+            </button>
+          </div>
+        </footer>
+
+      </div>
+    }
+
+    <!-- ONGLET MESSAGES PRIVÉS -->
+    @if (activeTab === 'private') {
+      <div class="bel-private-chat-container">
+        
+        <!-- État de développement -->
+        <div class="bel-feature-development">
+          <div class="bel-development-icon">🚧</div>
+          <h3>Messagerie Privée</h3>
+          <p class="bel-development-text">
+            Fonctionnalité en cours de développement
+          </p>
+          <p class="bel-feature-description">
+            Les messages privés seront chiffrés de bout en bout pour garantir votre confidentialité.
+          </p>
+        </div>
+
+      </div>
+    }
+
+  </main>
+
+</div>

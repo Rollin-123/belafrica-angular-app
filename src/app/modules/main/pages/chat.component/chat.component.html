@@ -1,0 +1,101 @@
+<div class="bel-chat-container">
+  
+  <!-- Header du Chat -->
+  <header class="bel-chat-header">
+    <button class="bel-back-btn" (click)="goBack()">
+      ←
+    </button>
+    
+    <div class="bel-chat-info" *ngIf="conversation$ | async as conversation">
+      <div class="bel-chat-avatar">
+        <span class="bel-avatar-icon">
+          {{ conversation.type === 'group' ? '👥' : '👤' }}
+        </span>
+      </div>
+      <div class="bel-chat-details">
+        <h3>{{ conversation.name }}</h3>
+        <p *ngIf="conversation.type === 'group'">
+          Groupe communautaire • {{ conversation.participants.length }} membre(s)
+        </p>
+        <p *ngIf="conversation.type === 'private'">
+          En ligne
+        </p>
+      </div>
+    </div>
+
+    
+  </header>
+
+  <!-- Zone des Messages -->
+  <main class="bel-chat-messages" #messagesContainer>
+    <div *ngIf="(messages$ | async)?.length === 0" class="bel-no-messages">
+      <div class="bel-no-messages-icon">💬</div>
+      <h3>Aucun message</h3>
+      <p>Soyez le premier à envoyer un message dans cette conversation !</p>
+    </div>
+
+    <div class="bel-messages-list">
+      <div 
+        *ngFor="let message of messages$ | async"
+        class="bel-message-wrapper"
+        [class.my-message]="isMyMessage(message)"
+        [class.other-message]="!isMyMessage(message)">
+        
+        <div class="bel-message-bubble">
+          <!-- En-tête du message -->
+          <div class="bel-message-header" *ngIf="!isMyMessage(message)">
+            <strong class="bel-message-sender">{{ message.fromUserName }}</strong>
+          </div>
+
+          <!-- Contenu du message -->
+          <div class="bel-message-content">
+            {{ message.content }}
+          </div>
+
+          <!-- Pied du message -->
+          <div class="bel-message-footer">
+            <span class="bel-message-time">
+              {{ formatMessageTime(message.timestamp) }}
+            </span>
+            
+            <span *ngIf="isMyMessage(message)" class="bel-message-status">
+              {{ message.isRead ? '👁️' : '✓' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Input d'envoi -->
+  <footer class="bel-chat-input">
+    <div class="bel-input-container">
+      <button class="bel-attachment-btn" title="Joindre un fichier">
+        📎
+      </button>
+      
+      <textarea
+        #messageInput
+        [(ngModel)]="newMessage"
+        (keydown)="onKeyPress($event)"
+        placeholder="Tapez votre message..."
+        class="bel-message-input"
+        rows="1"
+        [disabled]="isSending">
+      </textarea>
+
+      <button 
+        class="bel-send-btn"
+        (click)="sendMessage()"
+        [disabled]="!newMessage.trim() || isSending"
+        [class.sending]="isSending">
+        {{ isSending ? '⏳' : '📤' }}
+      </button>
+    </div>
+
+    <div class="bel-chat-features">
+      <small>💡 Appuyez sur Entrée pour envoyer, Shift+Entrée pour un saut de ligne</small>
+    </div>
+  </footer>
+
+</div>

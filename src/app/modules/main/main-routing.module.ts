@@ -5,6 +5,7 @@ import { FeedNationalComponent } from './pages/feed-national.component/feed-nati
 import { FeedInternationalComponent } from './pages/feed-international.component/feed-international.component';
 import { MessagingComponent } from './pages/messaging.component/messaging.component';
 import { SettingsComponent } from './pages/settings.component/settings.component';
+import { ChatComponent } from './pages/chat.component/chat.component';
 
 const routes: Routes = [
   {
@@ -15,6 +16,7 @@ const routes: Routes = [
       {path: 'national', component: FeedNationalComponent},
       {path: 'international', component: FeedInternationalComponent},
       {path: 'messaging', component: MessagingComponent},
+      {path: 'chat/:conversationId', component: ChatComponent},
       {path: 'settings', component: SettingsComponent},
     ]
   }
