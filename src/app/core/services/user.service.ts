@@ -12,7 +12,7 @@ export interface User {
   pseudo: string;
   email?: string;
   avatar?: string;
-  community: string; // Ex: "CamerounaisEnFrance"
+  community: string; 
   createdAt: string;
 }
 

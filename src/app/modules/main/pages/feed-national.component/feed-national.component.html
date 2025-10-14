@@ -1,15 +1,77 @@
 <div class="bel-page-container">
-  <div class="bel-welcome-card">
-    <h2>🎉 Bienvenue sur BELAFRICA !</h2>
-    <p>Vous êtes connecté à votre communauté.</p>
-    
-    <div class="bel-user-info">
-      <strong>Votre communauté :</strong> {{ userCommunity }}
-    </div>
-    
-    <div class="bel-coming-soon">
-      <p>📢 <strong>Fil National</strong> - En cours de développement</p>
-      <p>Ici apparaîtront les publications de votre communauté.</p>
-    </div>
+  
+  <!-- Header du feed national -->
+  <div class="bel-feed-header">
+    <h2>🏠 {{ userCommunity }}</h2>
+    <p>Publications de votre communauté • Expirent après 48h</p>
   </div>
+
+  <!-- Liste des posts nationaux -->
+  <div class="bel-posts-container">
+    
+    <div class="bel-post-card" *ngFor="let post of posts$ | async">
+      
+      <div class="bel-post-header">
+        <div class="bel-post-author">
+          <img 
+            [src]="post.authorAvatar || '/assets/images/default-avatar.png'" 
+            alt="Avatar" 
+            class="bel-post-avatar">
+          <div class="bel-post-info">
+            <strong class="bel-author-name">{{ post.authorName }}</strong>
+            <div class="bel-post-meta">
+              <span class="bel-post-time">{{ post.createdAt | date:'dd/MM HH:mm' }}</span>
+              <span class="bel-post-badge admin">👑 Admin</span>
+              <span class="bel-post-badge national">🏠 National</span>
+            </div>
+          </div>
+        </div>
+        
+        <div 
+          class="bel-expiry-indicator"
+          [class.expiring]="isExpiringSoon(post)"
+          [title]="'Expire le ' + (post.expiresAt | date:'dd/MM HH:mm')">
+          ⏳ {{ getTimeRemaining(post) }}
+        </div>
+      </div>
+
+      <div class="bel-post-content">
+        <p>{{ post.content }}</p>
+        
+        <div *ngIf="post.imageUrls?.length" class="bel-post-images">
+          <img 
+            *ngFor="let imageUrl of post.imageUrls" 
+            [src]="imageUrl" 
+            alt="Image du post"
+            class="bel-post-image">
+        </div>
+      </div>
+
+      <div class="bel-post-actions">
+        <button 
+          class="bel-action-btn like"
+          [class.liked]="hasLiked(post)"
+          (click)="toggleLike(post.id)">
+          ❤️ {{ post.likes.length }}
+        </button>
+        
+        <!-- <button class="bel-action-btn">
+          🔄 Partager
+        </button> -->
+      </div>
+
+    </div>
+
+    <!-- Message si pas de posts -->
+    <div *ngIf="(posts$ | async)?.length === 0" class="bel-empty-state">
+      <div class="bel-empty-icon">🏠</div>
+      <h3>Aucune publication nationale</h3>
+      <p>Les administrateurs de votre communauté publieront bientôt du contenu.</p>
+      <p class="bel-expiry-note">
+        <small>💡 Les posts nationaux expirent après 48h</small>
+      </p>
+    </div>
+
+  </div>
+
 </div>

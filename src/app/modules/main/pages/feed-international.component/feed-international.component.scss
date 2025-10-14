@@ -1,0 +1,311 @@
+.bel-page-container {
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bel-light);
+}
+
+//  COMMUNITY DU POST ==================================
+.bel-post-community {
+  background: rgba(0, 135, 81, 0.1);
+  color: var(--bel-secondary);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(0, 135, 81, 0.2);
+  margin-right: 8px;
+}
+
+.bel-feed-header {
+  background: linear-gradient(135deg, var(--bel-secondary), var(--bel-secondary-dark));
+  
+  h2 {
+    color: var(--bel-white);
+  }
+  
+  p {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+// HEADER DU FEED ======================================
+.bel-feed-header {
+  background: var(--bel-white);
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--bel-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  
+  h2 {
+    color: var(--bel-primary);
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-heading);
+  }
+  
+  p {
+    color: var(--bel-gray);
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+// CONTAINER DES POSTS =================================
+.bel-posts-container {
+  padding: 16px;
+  padding-bottom: 100px; // Espace pour la navigation bottom
+}
+
+// CARTE DE POST =======================================
+.bel-post-card {
+  background: var(--bel-white);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--bel-border);
+  transition: all 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+}
+
+// EN-TÊTE DU POST =====================================
+.bel-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.bel-post-author {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.bel-post-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--bel-light);
+  flex-shrink: 0;
+}
+
+.bel-post-info {
+  flex: 1;
+  
+  .bel-author-name {
+    color: var(--bel-dark);
+    font-size: 16px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+}
+
+.bel-post-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bel-post-time {
+  color: var(--bel-gray);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.bel-post-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  
+  &.admin {
+    background: rgba(242, 169, 0, 0.1);
+    color: var(--bel-primary);
+    border: 1px solid rgba(242, 169, 0, 0.2);
+  }
+  
+  &.international {
+    background: rgba(0, 135, 81, 0.1);
+    color: var(--bel-secondary);
+    border: 1px solid rgba(0, 135, 81, 0.2);
+  }
+}
+
+// INDICATEUR D'EXPIRATION =============================
+.bel-expiry-indicator {
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(229, 62, 62, 0.05);
+  color: var(--bel-gray);
+  border: 1px solid rgba(229, 62, 62, 0.1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  
+  &.expiring {
+    background: rgba(229, 62, 62, 0.1);
+    color: var(--bel-accent);
+    border-color: rgba(229, 62, 62, 0.2);
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(229, 62, 62, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 62, 62, 0);
+  }
+}
+
+// CONTENU DU POST =====================================
+.bel-post-content {
+  margin-bottom: 16px;
+  
+  p {
+    color: var(--bel-dark);
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-line;
+  }
+}
+
+.bel-post-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.bel-post-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--bel-border);
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+// ACTIONS DU POST =====================================
+.bel-post-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--bel-light);
+}
+
+.bel-action-btn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bel-gray);
+  
+  &:hover {
+    background: var(--bel-light);
+    transform: translateY(-1px);
+  }
+  
+  &.like {
+    &.liked {
+      color: var(--bel-accent);
+      background: rgba(229, 62, 62, 0.1);
+    }
+  }
+}
+
+// ÉTAT VIDE ===========================================
+.bel-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--bel-white);
+  border-radius: 16px;
+  border: 2px dashed var(--bel-border);
+  
+  .bel-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  h3 {
+    color: var(--bel-dark);
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  p {
+    color: var(--bel-gray);
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+  }
+}
+
+.bel-expiry-note {
+  small {
+    color: var(--bel-gray);
+    font-style: italic;
+  }
+}
+
+// RESPONSIVE ==========================================
+@media (max-width: 480px) {
+  .bel-posts-container {
+    padding: 12px;
+    padding-bottom: 100px;
+  }
+  
+  .bel-post-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .bel-post-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .bel-expiry-indicator {
+    align-self: flex-end;
+  }
+  
+  .bel-post-actions {
+    gap: 8px;
+  }
+  
+  .bel-action-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
