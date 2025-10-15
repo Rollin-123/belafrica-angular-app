@@ -6,6 +6,9 @@ import { FeedInternationalComponent } from './pages/feed-international.component
 import { MessagingComponent } from './pages/messaging.component/messaging.component';
 import { SettingsComponent } from './pages/settings.component/settings.component';
 import { ChatComponent } from './pages/chat.component/chat.component';
+import { ProfileComponent } from './pages/profile.component/profile.component';
+import { PrivacySettingsComponent } from './pages/privacy-settings.component/privacy-settings.component';
+import { NotificationSettingsComponent } from './pages/notification-settings.component/notification-settings.component';
 
 const routes: Routes = [
   {
@@ -17,7 +20,10 @@ const routes: Routes = [
       {path: 'international', component: FeedInternationalComponent},
       {path: 'messaging', component: MessagingComponent},
       {path: 'chat/:conversationId', component: ChatComponent},
+      {path: 'profile', component: ProfileComponent},
       {path: 'settings', component: SettingsComponent},
+      { path: 'settings/privacy', component: PrivacySettingsComponent }, 
+      { path: 'settings/notifications', component: NotificationSettingsComponent }
     ]
   }
 ];

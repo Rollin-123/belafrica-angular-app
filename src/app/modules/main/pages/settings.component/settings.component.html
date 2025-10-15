@@ -1,1 +1,103 @@
-<p>settings.component works!</p>
+<div class="bel-settings-container">
+  
+  <!-- Header -->
+  <header class="bel-settings-header">
+    <p>Gérez vos préférences et paramètres de compte</p>
+  </header>
+
+  <!-- Carte Utilisateur -->
+  <div class="bel-user-card" *ngIf="user">
+    <div class="bel-user-avatar">
+      <img 
+        [src]="user.avatar || userService.generateDefaultAvatar(user.pseudo)" 
+        [alt]="user.pseudo"
+        class="bel-avatar-img">
+        <!-- <div 
+        *ngIf="!user.avatar" 
+        class="bel-avatar-default">
+        👤
+      </div> -->
+    </div>
+    
+    <div class="bel-user-info">
+      <h2 class="bel-user-name">{{ user.pseudo }}</h2>
+      <p class="bel-user-email" *ngIf="user.email">{{ user.email }}</p>
+      <p class="bel-user-phone" *ngIf="!user.email">{{ user.phoneNumber }}</p>
+      <div class="bel-user-badges">
+        <span class="bel-badge bel-badge-community">{{ user.community }}</span>
+        <span class="bel-badge bel-badge-member">{{ getMemberSince() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sections des Paramètres -->
+  <main class="bel-settings-sections">
+    
+    <!-- Paramètres Principaux -->
+    <section class="bel-settings-group">
+      <h3 class="bel-settings-group-title">Préférences du compte</h3>
+      
+      <div class="bel-settings-list">
+        <div 
+          *ngFor="let section of settingsSections"
+          class="bel-settings-item"
+          [class.disabled]="section.disabled"
+          (click)="navigateToSection(section)">
+          
+          <div class="bel-settings-item-icon">
+            {{ section.icon }}
+          </div>
+          
+          <div class="bel-settings-item-content">
+            <h4 class="bel-settings-item-title">{{ section.title }}</h4>
+            <p class="bel-settings-item-desc">{{ section.description }}</p>
+          </div>
+          
+          <div class="bel-settings-item-actions">
+            <span *ngIf="section.badge" class="bel-settings-badge">
+              {{ section.badge }}
+            </span>
+            <span class="bel-settings-arrow" *ngIf="!section.disabled">›</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Actions Critiques -->
+    <section class="bel-settings-group">
+      <h3 class="bel-settings-group-title">Actions</h3>
+      
+      <div class="bel-settings-list">
+        <div 
+          *ngFor="let action of criticalActions"
+          class="bel-settings-item bel-settings-item-critical"
+          [class.bel-danger]="action.color === 'danger'"
+          (click)="navigateToSection(action)">
+          
+          <div class="bel-settings-item-icon">
+            {{ action.icon }}
+          </div>
+          
+          <div class="bel-settings-item-content">
+            <h4 class="bel-settings-item-title">{{ action.title }}</h4>
+            <p class="bel-settings-item-desc">{{ action.description }}</p>
+          </div>
+          
+          <div class="bel-settings-item-actions">
+            <span class="bel-settings-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Informations Version -->
+    <section class="bel-app-info">
+      <div class="bel-version-info">
+        <p class="bel-version">BELAFRICA v1.0.0</p>
+        <p class="bel-copyright">© 2024 BELAFRICA. Tous droits réservés.</p>
+      </div>
+    </section>
+
+  </main>
+
+</div>

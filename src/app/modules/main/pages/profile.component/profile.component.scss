@@ -1,0 +1,577 @@
+.bel-profile-container {
+  min-height: 100vh;
+  background: var(--bel-light);
+  padding-bottom: 80px; // Espace pour la navigation
+}
+
+// HEADER ==============================================
+.bel-profile-header {
+  background: var(--bel-white);
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--bel-border);
+  
+  .bel-profile-header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .bel-back-btn {
+    background: none;
+    border: none;
+    color: var(--bel-primary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 0;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+  
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+  
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+  }
+}
+
+// SECTION AVATAR =====================================
+.bel-profile-avatar-section {
+  background: var(--bel-white);
+  padding: 24px 16px;
+  border-bottom: 1px solid var(--bel-border);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.bel-avatar-container {
+  position: relative;
+  
+  .bel-avatar-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bel-primary);
+  }
+}
+
+.bel-avatar-actions {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  
+  .bel-file-input {
+    display: none;
+  }
+  
+  .bel-avatar-upload-btn {
+    background: var(--bel-primary);
+    color: var(--bel-white);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--bel-primary-dark);
+      transform: scale(1.1);
+    }
+  }
+}
+
+.bel-user-basic-info {
+  flex: 1;
+  
+  .bel-user-name {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+  
+  .bel-user-community {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+  }
+  
+  .bel-user-member-since {
+    margin: 0;
+    font-size: 13px;
+    color: var(--bel-gray-light);
+    font-family: var(--bel-font-body);
+  }
+}
+
+// CONTENU PRINCIPAL ==================================
+.bel-profile-content {
+  padding: 20px 16px;
+}
+
+// CARTE D'INFORMATIONS ===============================
+.bel-info-card {
+  background: var(--bel-white);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--bel-border);
+}
+
+.bel-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+  
+  .bel-edit-btn {
+    background: var(--bel-primary);
+    color: var(--bel-white);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--bel-font-body);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--bel-primary-dark);
+    }
+  }
+}
+
+.bel-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bel-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  
+  .bel-info-label {
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    min-width: 120px;
+  }
+  
+  .bel-info-value {
+    font-size: 14px;
+    color: var(--bel-dark);
+    font-weight: 400;
+    font-family: var(--bel-font-body);
+    text-align: right;
+    flex: 1;
+    margin-left: 16px;
+  }
+}
+
+// SECTION BIO ========================================
+.bel-bio-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bel-border-light);
+  
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+  
+  .bel-bio-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bel-dark);
+    line-height: 1.5;
+    font-family: var(--bel-font-body);
+    white-space: pre-wrap;
+  }
+}
+
+// CENTRES D'INTÉRÊT ==================================
+.bel-interests-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bel-border-light);
+  
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+}
+
+.bel-interests-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bel-interest-badge {
+  background: var(--bel-primary-light);
+  color: var(--bel-primary-dark);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--bel-font-body);
+}
+
+// SECTION ÉDITION ====================================
+.bel-edit-section {
+  .bel-edit-card {
+    background: var(--bel-white);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--bel-border);
+    
+    h3 {
+      margin: 0 0 24px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--bel-dark);
+      font-family: var(--bel-font-heading);
+    }
+  }
+}
+
+.bel-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bel-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+  label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-body);
+  }
+  
+  small {
+    font-size: 12px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+  }
+}
+
+.bel-form-input,
+.bel-form-textarea,
+.bel-form-select {
+  border: 2px solid var(--bel-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: var(--bel-font-body);
+  background: var(--bel-white);
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--bel-primary);
+    box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.1);
+  }
+}
+
+.bel-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.bel-form-select {
+  cursor: pointer;
+}
+
+// CENTRES D'INTÉRÊT (ÉDITION) ========================
+.bel-interests-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid var(--bel-border);
+  border-radius: 8px;
+  background: var(--bel-white);
+  min-height: 52px;
+  
+  &:focus-within {
+    border-color: var(--bel-primary);
+  }
+}
+
+.bel-interest-tag {
+  background: var(--bel-primary-light);
+  color: var(--bel-primary-dark);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--bel-font-body);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  .bel-interest-remove {
+    background: none;
+    border: none;
+    color: var(--bel-primary-dark);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}
+
+.bel-interest-input {
+  border: none;
+  outline: none;
+  padding: 6px 0;
+  font-size: 13px;
+  font-family: var(--bel-font-body);
+  background: transparent;
+  flex: 1;
+  min-width: 150px;
+  
+  &::placeholder {
+    color: var(--bel-gray-light);
+  }
+}
+
+// ACTIONS DU FORMULAIRE ==============================
+.bel-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bel-border-light);
+}
+
+.bel-btn-cancel,
+.bel-btn-primary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--bel-font-body);
+  transition: all 0.2s ease;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.bel-btn-cancel {
+  background: var(--bel-light);
+  color: var(--bel-gray);
+  
+  &:hover:not(:disabled) {
+    background: var(--bel-border);
+  }
+}
+
+.bel-btn-primary {
+  background: var(--bel-primary);
+  color: var(--bel-white);
+  
+  &:hover:not(:disabled) {
+    background: var(--bel-primary-dark);
+  }
+}
+
+// SECTION STATISTIQUES (COMMENTÉE) ===================
+.bel-stats-card {
+  background: var(--bel-white);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--bel-border);
+  
+  h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+}
+
+.bel-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.bel-stat-item {
+  text-align: center;
+  
+  .bel-stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bel-primary);
+    font-family: var(--bel-font-heading);
+    margin-bottom: 4px;
+  }
+  
+  .bel-stat-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--bel-primary);
+    font-family: var(--bel-font-heading);
+    margin-bottom: 4px;
+  }
+  
+  .bel-stat-label {
+    font-size: 12px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+  }
+}
+
+// RESPONSIVE =========================================
+@media (max-width: 480px) {
+  .bel-profile-header {
+    padding: 16px 12px;
+    
+    h1 {
+      font-size: 22px;
+    }
+  }
+  
+  .bel-profile-avatar-section {
+    padding: 20px 12px;
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .bel-profile-content {
+    padding: 16px 12px;
+  }
+  
+  .bel-info-card,
+  .bel-edit-card {
+    padding: 16px;
+  }
+  
+  .bel-info-item {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+    
+    .bel-info-value {
+      text-align: left;
+      margin-left: 0;
+    }
+  }
+  
+  .bel-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .bel-form-actions {
+    flex-direction: column;
+  }
+  
+  .bel-btn-cancel,
+  .bel-btn-primary {
+    width: 100%;
+  }
+}
+
+// ANIMATIONS =========================================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bel-edit-section,
+.bel-view-section {
+  animation: fadeIn 0.3s ease;
+}
+// AVATAR PAR DÉFAUT =================================
+.bel-avatar-default {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--bel-gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  border: 4px solid var(--bel-border);
+  color: var(--bel-gray);
+}
+
+.bel-avatar-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--bel-primary);
+}
