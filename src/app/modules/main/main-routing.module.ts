@@ -9,6 +9,7 @@ import { ChatComponent } from './pages/chat.component/chat.component';
 import { ProfileComponent } from './pages/profile.component/profile.component';
 import { PrivacySettingsComponent } from './pages/privacy-settings.component/privacy-settings.component';
 import { NotificationSettingsComponent } from './pages/notification-settings.component/notification-settings.component';
+import { AdminRequestComponent } from './pages/admin-request.component/admin-request.component';
 
 const routes: Routes = [
   {
@@ -22,8 +23,9 @@ const routes: Routes = [
       {path: 'chat/:conversationId', component: ChatComponent},
       {path: 'profile', component: ProfileComponent},
       {path: 'settings', component: SettingsComponent},
-      { path: 'settings/privacy', component: PrivacySettingsComponent }, 
-      { path: 'settings/notifications', component: NotificationSettingsComponent }
+      {path: 'settings/privacy', component: PrivacySettingsComponent }, 
+      {path: 'settings/notifications', component: NotificationSettingsComponent },
+      {path: 'admin-request', component: AdminRequestComponent}
     ]
   }
 ];

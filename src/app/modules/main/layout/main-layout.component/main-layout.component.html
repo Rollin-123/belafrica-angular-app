@@ -21,12 +21,27 @@
           <span class="bel-icon">⋮</span>
         </button>
       </div> -->
+      <button 
+  *ngIf="isUserAdmin"
+  class="bel-fab"
+  (click)="openCreatePostModal()"
+  title="Créer une publication">
+  ✏️
+</button>
+
+<!-- Modal de création de post -->
+<app-create-post-modal 
+  *ngIf="showCreatePostModal"
+  (closed)="closeCreatePostModal()"
+  (postCreated)="onPostCreated()">
+</app-create-post-modal>
     </div>
   </header>
 
   <!-- Contenu Principal -->
   <main class="bel-main-content">
     <router-outlet></router-outlet>
+    <!-- Bouton Floating Action (Admin seulement) -->
   </main>
 
   <!-- Navigation Bottom Style WhatsApp -->

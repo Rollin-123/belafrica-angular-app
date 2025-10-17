@@ -13,7 +13,14 @@ export class ProfileComponent implements OnInit {
   isEditing = false;
   isLoading = false;
   
-  editData: UserUpdateData = {};
+  // CORRECTION : Initialisation avec des valeurs par défaut
+  editData: UserUpdateData = {
+    pseudo: '',
+    bio: '',
+    gender: '',
+    profession: '',
+    interests: []
+  };
   
   genders = [
     { value: 'male', label: 'Homme' },
@@ -41,29 +48,52 @@ export class ProfileComponent implements OnInit {
 
   startEditing(): void {
     this.isEditing = true;
+    
+    // CORRECTION : Copie sécurisée des données
     this.editData = {
       pseudo: this.user?.pseudo || '',
       bio: this.user?.bio || '',
       gender: this.user?.gender || '',
       profession: this.user?.profession || '',
-      interests: this.user?.interests || []
+      interests: this.user?.interests ? [...this.user.interests] : []
     };
+    
   }
 
   cancelEditing(): void {
     this.isEditing = false;
-    this.editData = {};
+    this.editData = {
+      pseudo: '',
+      bio: '',
+      gender: '',
+      profession: '',
+      interests: []
+    };
   }
 
   async saveProfile(): Promise<void> {
-    if (!this.user) return;
+    if (!this.user) {
+      return;
+    }
 
     this.isLoading = true;
+    
     try {
       await this.userService.updateProfile(this.editData);
+      
+      // Recharger les données
       this.loadUserProfile();
       this.isEditing = false;
-      this.editData = {};
+      
+      // Réinitialiser les données d'édition
+      this.editData = {
+        pseudo: '',
+        bio: '',
+        gender: '',
+        profession: '',
+        interests: []
+      };
+      
     } catch (error) {
       console.error('❌ Erreur sauvegarde profil:', error);
       alert('Erreur lors de la sauvegarde du profil');
@@ -77,6 +107,7 @@ export class ProfileComponent implements OnInit {
     if (!file) return;
 
     this.isLoading = true;
+    
     try {
       await this.userService.uploadAvatar(file);
       this.loadUserProfile();
@@ -89,23 +120,28 @@ export class ProfileComponent implements OnInit {
     }
   }
 
- addInterest(event: any): void {
-  const input = event.target as HTMLInputElement;
-  const value = input.value.trim();
-  
-  if (value && event.key === 'Enter') {
-    if (!this.editData.interests) {
-      this.editData.interests = [];
+  addInterest(event: any): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.trim();
+    
+    if (value && event.key === 'Enter') {
+      
+      // CORRECTION : Initialisation garantie du tableau
+      if (!this.editData.interests) {
+        this.editData.interests = [];
+      }
+      
+      if (!this.editData.interests.includes(value)) {
+        this.editData.interests.push(value);
+      }
+      
+      input.value = '';
+      event.preventDefault();
     }
-    if (!this.editData.interests.includes(value)) {
-      this.editData.interests.push(value);
-    }
-    input.value = '';
-    event.preventDefault();
   }
-}
 
   removeInterest(interest: string): void {
+    
     if (this.editData.interests) {
       this.editData.interests = this.editData.interests.filter(i => i !== interest);
     }
@@ -118,10 +154,13 @@ export class ProfileComponent implements OnInit {
     return created.toLocaleDateString('fr-FR');
   }
 
-  // ✅ NOUVELLE MÉTHODE : Obtenir le label du genre
   getGenderLabel(genderValue: string | undefined): string {
     if (!genderValue) return 'Non spécifié';
     const gender = this.genders.find(g => g.value === genderValue);
     return gender ? gender.label : genderValue;
+  }
+
+  getUserInitials(): string {
+    return this.user?.pseudo?.charAt(0).toUpperCase() || 'U';
   }
 }

@@ -16,19 +16,45 @@ export interface Message {
   isRead: boolean;
   readBy: string[];
   
-  // NOUVEAUX CHAMPS POUR ÉDITION/SUPPRESSION AVEC TIMEOUT
+  // Édition/Suppression
   isEdited: boolean;
   isDeleted: boolean;
   editedAt?: Date;
   deletedAt?: Date;
   
-  // Fonctionnalités avancées
-  replyTo?: string;
-  mentions?: string[];
-  
-  // NOUVEAU : Statut d'envoi
+  // Statut d'envoi
   status: 'sending' | 'sent' | 'delivered' | 'read';
+  
+  // NOUVEAU : RÉPONSE À UN MESSAGE
+  replyTo?: {
+    messageId: string;
+    fromUserId: string;
+    fromUserName: string;
+    content: string;
+    isDeleted?: boolean;
+  };
+  
+  // NOUVEAU : MENTIONS
+  mentions?: Mention[];
 }
+
+// NOUVEAU : INTERFACE POUR LES MENTIONS
+export interface Mention {
+  userId: string;
+  userName: string;
+  position: number;
+  length: number;
+}
+
+// INTERFACE POUR LE MENU CONTEXTUEL
+export interface MessageAction {
+  type: 'reply' | 'edit' | 'delete' | 'copy' | 'forward';
+  label: string;
+  icon: string;
+  condition: (message: Message, currentUserId: string) => boolean;
+}
+
+// INTERFACE POUR LES CONVERSATIONS
 
 export interface Conversation {
   id: string;
@@ -73,10 +99,3 @@ export function generateGroupId(community: string): string {
 export function generateMessageId(): string {
   return 'msg_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
 }
-// // NOUVELLE INTERFACE POUR LES ACTIONS
-// export interface MessageAction {
-//   type: 'edit' | 'delete' | 'reply';
-//   messageId: string;
-//   data?: any;
-//   timestamp: Date;
-// }

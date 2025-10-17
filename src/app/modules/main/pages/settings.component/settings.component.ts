@@ -95,6 +95,10 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  navigateToAdminRequest(): void {
+  this.router.navigate(['/app/admin-request']);
+}
+
   logout(): void {
     if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
       this.userService.logout();

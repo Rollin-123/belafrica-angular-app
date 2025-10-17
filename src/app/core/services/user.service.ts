@@ -12,19 +12,26 @@ export interface User {
   pseudo: string;
   email?: string;
   avatar?: string;
-  community: string; 
+  community: string;
   createdAt: string;
   
-  // Champs optionnels pour les nouvelles fonctionnalités
+  // Champs admin
+  isAdmin?: boolean;
+  adminPermissions?: string[];
+  adminLevel?: 'national' | 'international' | 'super';
+  adminSince?: string;
+  adminCode?: string;
+  
+  // Profil optionnel
   bio?: string;
   gender?: string;
   profession?: string;
   interests?: string[];
 }
 
-// Interface pour la mise à jour (seulement les champs modifiables)
 export interface UserUpdateData {
   pseudo?: string;
+  email?: string;
   avatar?: string;
   bio?: string;
   gender?: string;
@@ -36,36 +43,73 @@ export interface UserUpdateData {
   providedIn: 'root'
 })
 export class UserService {
-  updateStats() {
-    throw new Error('Method not implemented.');
-  }
   private currentUser = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUser.asObservable();
+private userUpdate = new BehaviorSubject<User | null>(null);
+public userUpdate$ = this.userUpdate.asObservable();
 
   constructor(private storageService: StorageService) {
     this.loadUserFromStorage();
   }
 
+  // ✅ CORRECTION : Chargement utilisateur
   private loadUserFromStorage(): void {
     const userData = this.storageService.getItem('belafrica_user_profile');
+    
     if (userData) {
-      const community = `${userData.nationalityName}En${userData.countryName.replace(/\s/g, '')}`;
+      console.log('📥 Utilisateur chargé:', userData.pseudo);
+      
+      // Calculer la communauté si manquante
+      let community = userData.community;
+      if (!community && userData.nationalityName && userData.countryName) {
+        community = `${userData.nationalityName}En${userData.countryName.replace(/\s/g, '')}`;
+      }
+      
       const userWithCommunity = {
         ...userData,
-        community
+        community: community || 'CommunautéInconnue'
       };
+      
       this.currentUser.next(userWithCommunity);
     }
   }
 
-  // ✅ MÉTHODES EXISTANTES (conserver)
+  
+  // ✅ AJOUTEZ CETTE MÉTHODE DANS UserServicegetCurrentUser
+// generateDefaultAvatar(pseudo: string): string {
+//   // Avatar par défaut avec les initiales sur fond coloré
+//   const initials = pseudo.charAt(0).toUpperCase();
+//   const colors = [
+//     '#F2A900', '#008751', '#E53E3E', '#3182CE', '#38A169', 
+//     '#D69E2E', '#805AD5', '#DD6B20'
+//   ];
+  
+//   const colorIndex = pseudo.charCodeAt(0) % colors.length;
+//   const backgroundColor = colors[colorIndex];
+  
+//   // SVG simple avec initiales
+//   return `data:image/svg+xml;base64,${btoa(`
+//     <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+//       <rect width="100" height="100" fill="${backgroundColor}" rx="50"/>
+//       <text x="50" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="40" font-weight="bold">${initials}</text>
+//     </svg>
+//   `)}`;
+// }
+
+// ✅ VERSION ALTERNATIVE AVEC EMOJI
+generateDefaultAvatar(pseudo: string): string {
+  const emojis = ['👤', '😊', '😎', '🤠', '🧑', '👨', '👩', '🧔', '👱', '👴'];
+  const emojiIndex = pseudo.charCodeAt(0) % emojis.length;
+  return emojis[emojiIndex];
+}
+
+  // ✅ MÉTHODES DE BASE
   getCurrentUser(): User | null {
     return this.currentUser.value;
   }
 
   getUserCommunity(): string {
-    const user = this.currentUser.value;
-    return user?.community || '';
+    return this.currentUser.value?.community || '';
   }
 
   logout(): void {
@@ -75,7 +119,37 @@ export class UserService {
     this.currentUser.next(null);
   }
 
-  // ✅ NOUVELLES MÉTHODES POUR LE PROFIL
+  // ✅ MÉTHODES ADMIN
+  makeUserAdmin(permissions: string[] = ['post_national']): void {
+    const currentUser = this.currentUser.value;
+    if (!currentUser) return;
+
+    const updatedUser: User = {
+      ...currentUser,
+      isAdmin: true,
+      adminPermissions: permissions,
+      adminLevel: permissions.includes('post_international') ? 'international' : 'national',
+      adminSince: new Date().toISOString()
+    };
+
+    this.saveUser(updatedUser);
+    console.log('✅ Utilisateur promu admin:', currentUser.pseudo);
+  }
+
+  canUserPost(): boolean {
+    const user = this.currentUser.value;
+    return user?.isAdmin || false;
+  }
+
+  isUserAdmin(): boolean {
+    return this.currentUser.value?.isAdmin || false;
+  }
+
+  getAdminLevel(): string {
+    return this.currentUser.value?.adminLevel || 'user';
+  }
+
+  // ✅ MÉTHODES PROFIL
   updateProfile(updateData: UserUpdateData): Promise<User> {
     return new Promise((resolve, reject) => {
       try {
@@ -90,28 +164,18 @@ export class UserService {
           ...updateData
         };
 
-        // Sauvegarder dans le storage
-        this.storageService.setItem('belafrica_user_profile', updatedUser);
-        this.currentUser.next(updatedUser);
-
-        console.log('✅ Profil mis à jour:', updatedUser.pseudo);
+        this.saveUser(updatedUser);
         resolve(updatedUser);
       } catch (error) {
-        console.error('❌ Erreur mise à jour profil:', error);
         reject(error);
       }
     });
   }
 
-  // ✅ UPLOAD D'AVATAR (simulé)
+  // ✅ UPLOAD AVATAR
   async uploadAvatar(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
-      if (!file) {
-        reject(new Error('Aucun fichier sélectionné'));
-        return;
-      }
-
-      if (!file.type.startsWith('image/')) {
+      if (!file?.type.startsWith('image/')) {
         reject(new Error('Veuillez sélectionner une image'));
         return;
       }
@@ -124,19 +188,21 @@ export class UserService {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         const imageUrl = e.target.result;
-        
         this.updateProfile({ avatar: imageUrl })
           .then(() => resolve(imageUrl))
           .catch(reject);
       };
-      
-      reader.onerror = () => reject(new Error('Erreur lors de la lecture du fichier'));
+      reader.onerror = () => reject(new Error('Erreur lecture fichier'));
       reader.readAsDataURL(file);
     });
   }
+  notifyUserUpdate(): void {
+  this.userUpdate.next(this.currentUser.value);
+}
 
-  // ✅ GÉNÉRER UN AVATAR PAR DÉFAUT
-  generateDefaultAvatar(pseudo: string): string {
-    return `data:image/jpeg;base64,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`;
+  // ✅ MÉTHODE PRIVÉE POUR SAUVEGARDE
+  private saveUser(user: User): void {
+    this.storageService.setItem('belafrica_user_profile', user);
+    this.currentUser.next(user);
   }
 }

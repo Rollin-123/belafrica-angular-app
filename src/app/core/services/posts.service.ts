@@ -74,45 +74,28 @@ export class PostsService {
     }
   }
 
-  private generateSamplePosts(): any[] {
-    return [
-      // Posts Nationaux - CamerounaisEnFrance
-      {
-        content: '🎉 Bienvenue à la communauté Camerounaise de France ! Restons unis et solidaires.',
-        visibility: 'national' as const,
-        community: 'CamerounaisEnFrance',
-        authorName: 'Admin Cameroun'
-      },
-      {
-        content: '📅 Réunion mensuelle ce samedi à Paris. Inscriptions ouvertes !',
-        visibility: 'national' as const,
-        community: 'CamerounaisEnFrance', 
-        authorName: 'Admin Cameroun'
-      },
-
-      // Posts Nationaux - SenegalaisEnBelgique
-      {
-        content: '🌍 Bienvenue à la communauté Sénégalaise de Belgique ! Ensemble pour avancer.',
-        visibility: 'national' as const,
-        community: 'SenegalaisEnBelgique',
-        authorName: 'Admin Sénégal'
-      },
-
-      // Posts Internationaux
-      {
-        content: '🌟 Bienvenue sur le Fil International ! Actualités de toutes les communautés africaines.',
-        visibility: 'international' as const,
-        community: 'International',
-        authorName: 'Admin International'
-      },
-      {
-        content: '🗓️ Événement panafricain le mois prochain à Bruxelles !',
-        visibility: 'international' as const, 
-        community: 'International',
-        authorName: 'Admin International'
-      }
-    ];
-  }
+ // Remplacer generateSamplePosts() par :
+private generateSamplePosts(): any[] {
+  const baseDate = new Date();
+  
+  return [
+    {
+      content: '🎉 Bienvenue à la communauté Camerounaise de France ! Restons unis et solidaires.',
+      visibility: 'national' as const,
+      community: 'CamerounaisEnFrance',
+      authorName: 'Admin Cameroun',
+      createdAt: new Date(baseDate.getTime() - 2 * 60 * 60 * 1000) // 2h ago
+    },
+    {
+      content: '📅 Réunion mensuelle ce samedi à Paris. Inscriptions ouvertes !',
+      visibility: 'international' as const,
+      community: 'CamerounaisEnFrance', 
+      authorName: 'Admin Cameroun',
+      createdAt: new Date(baseDate.getTime() - 5 * 60 * 60 * 1000) // 5h ago
+    },
+    // ... autres posts avec dates variées
+  ];
+}
 
   private createPostWithMockData(
     content: string, 

@@ -24,6 +24,10 @@ export function calculateExpiration(visibility: 'national' | 'international'): D
 export function isPostExpired(post: Post): boolean {
   return new Date() > new Date(post.expiresAt);
 }
+// Ajoutez cette fonction helper
+export function formatCommunityName(nationality: string, country: string): string {
+  return `${nationality}En${country.replace(/\s/g, '')}`;
+}
 
 // ✅ FORMATER LE TEMPS RESTANT
 export function getTimeRemaining(post: Post): string {

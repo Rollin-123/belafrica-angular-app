@@ -1,7 +1,7 @@
 .bel-profile-container {
   min-height: 100vh;
   background: var(--bel-light);
-  padding-bottom: 80px; // Espace pour la navigation
+  padding-bottom: 80px;
 }
 
 // HEADER ==============================================
@@ -67,6 +67,21 @@
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--bel-primary);
+  }
+
+  // CORRECTION : Style pour l'avatar par défaut
+  .bel-avatar-default {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--bel-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--bel-white);
+    border: 3px solid var(--bel-primary-light);
   }
 }
 
@@ -437,56 +452,6 @@
   }
 }
 
-// SECTION STATISTIQUES (COMMENTÉE) ===================
-.bel-stats-card {
-  background: var(--bel-white);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--bel-border);
-  
-  h3 {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--bel-dark);
-    font-family: var(--bel-font-heading);
-  }
-}
-
-.bel-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.bel-stat-item {
-  text-align: center;
-  
-  .bel-stat-number {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--bel-primary);
-    font-family: var(--bel-font-heading);
-    margin-bottom: 4px;
-  }
-  
-  .bel-stat-text {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--bel-primary);
-    font-family: var(--bel-font-heading);
-    margin-bottom: 4px;
-  }
-  
-  .bel-stat-label {
-    font-size: 12px;
-    color: var(--bel-gray);
-    font-family: var(--bel-font-body);
-  }
-}
-
 // RESPONSIVE =========================================
 @media (max-width: 480px) {
   .bel-profile-header {
@@ -524,10 +489,6 @@
     }
   }
   
-  .bel-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
   .bel-form-actions {
     flex-direction: column;
   }
@@ -554,24 +515,26 @@
 .bel-view-section {
   animation: fadeIn 0.3s ease;
 }
-// AVATAR PAR DÉFAUT =================================
-.bel-avatar-default {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: var(--bel-gray-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  border: 4px solid var(--bel-border);
+.bel-no-user {
+  text-align: center;
+  padding: 60px 20px;
   color: var(--bel-gray);
-}
-
-.bel-avatar-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid var(--bel-primary);
+  
+  .bel-no-user-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+  
+  h3 {
+    margin: 0 0 12px 0;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+  
+  p {
+    margin: 0;
+    line-height: 1.5;
+    font-family: var(--bel-font-body);
+  }
 }

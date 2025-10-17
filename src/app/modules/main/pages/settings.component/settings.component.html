@@ -5,28 +5,20 @@
     <p>Gérez vos préférences et paramètres de compte</p>
   </header>
 
-  <!-- Carte Utilisateur -->
-  <div class="bel-user-card" *ngIf="user">
-    <div class="bel-user-avatar">
-      <img 
-        [src]="user.avatar || userService.generateDefaultAvatar(user.pseudo)" 
-        [alt]="user.pseudo"
-        class="bel-avatar-img">
-        <!-- <div 
-        *ngIf="!user.avatar" 
-        class="bel-avatar-default">
-        👤
-      </div> -->
-    </div>
+<div class="bel-user-card" *ngIf="user">
+  <div class="bel-user-avatar">
+    <!-- Version avec vérification -->
+    <!-- <img 
+      *ngIf="user.avatar && user.avatar.startsWith('data:image')"
+      [src]="user.avatar" 
+      [alt]="user.pseudo"
+      class="bel-avatar-img"> -->
     
-    <div class="bel-user-info">
-      <h2 class="bel-user-name">{{ user.pseudo }}</h2>
-      <p class="bel-user-email" *ngIf="user.email">{{ user.email }}</p>
-      <p class="bel-user-phone" *ngIf="!user.email">{{ user.phoneNumber }}</p>
-      <div class="bel-user-badges">
-        <span class="bel-badge bel-badge-community">{{ user.community }}</span>
-        <span class="bel-badge bel-badge-member">{{ getMemberSince() }}</span>
-      </div>
+    <!-- Version avec avatar par défaut -->
+    <div 
+      *ngIf="!user.avatar || !user.avatar.startsWith('data:image')"
+      class="bel-avatar-default">
+      {{ userService.generateDefaultAvatar(user.pseudo) }}
     </div>
   </div>
 
@@ -62,6 +54,58 @@
         </div>
       </div>
     </section>
+    <!-- Section Administration -->
+@if (user && !user.isAdmin) {
+  <section class="bel-settings-group">
+    <h3 class="bel-settings-group-title">👑 Administration</h3>
+    
+    <div class="bel-settings-list">
+      <div 
+        class="bel-settings-item"
+        (click)="navigateToAdminRequest()">
+        
+        <div class="bel-settings-item-icon">
+          👑
+        </div>
+        
+        <div class="bel-settings-item-content">
+          <h4 class="bel-settings-item-title">Devenir Administrateur</h4>
+          <p class="bel-settings-item-desc">Publiez du contenu pour votre communauté</p>
+        </div>
+        
+        <div class="bel-settings-item-actions">
+          <span class="bel-settings-badge">Vérification requise</span>
+          <span class="bel-settings-arrow">›</span>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+@if (user && user.isAdmin) {
+  <section class="bel-settings-group">
+    <h3 class="bel-settings-group-title">👑 Administration</h3>
+    
+    <div class="bel-settings-list">
+      <div class="bel-settings-item bel-settings-item-success">
+        
+        <div class="bel-settings-item-icon">
+          ✅
+        </div>
+        
+        <div class="bel-settings-item-content">
+          <h4 class="bel-settings-item-title">Administrateur Actif</h4>
+          <p class="bel-settings-item-desc">Vous pouvez publier du contenu</p>
+        </div>
+        
+        <div class="bel-settings-item-actions">
+          <span class="bel-settings-badge success">Actif</span>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
 
     <!-- Actions Critiques -->
     <section class="bel-settings-group">
@@ -89,6 +133,7 @@
         </div>
       </div>
     </section>
+
 
     <!-- Informations Version -->
     <section class="bel-app-info">

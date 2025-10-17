@@ -83,6 +83,25 @@ export class MainLayoutComponent implements OnInit {
     }
   }
 
+showCreatePostModal = false;
+
+get isUserAdmin(): boolean {
+  return this.userService.canUserPost();
+}
+
+openCreatePostModal(): void {
+  this.showCreatePostModal = true;
+}
+
+closeCreatePostModal(): void {
+  this.showCreatePostModal = false;
+}
+
+onPostCreated(): void {
+  // Recharger les posts si nécessaire
+  this.closeCreatePostModal();
+}
+
   // Actions header
   onSearch(): void {
     console.log('Recherche activée');

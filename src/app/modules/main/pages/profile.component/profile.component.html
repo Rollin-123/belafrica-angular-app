@@ -11,182 +11,215 @@
     <p>Gérez vos informations personnelles</p>
   </header>
 
-  <!-- Avatar et Informations de base -->
-  <div class="bel-profile-avatar-section">
-    <div class="bel-avatar-container">
-      <img 
-        [src]="user?.avatar || userService.generateDefaultAvatar(user?.pseudo || '')" 
-        [alt]="user?.pseudo" 
-        class="bel-avatar-image">
+  <!-- Afficher seulement si user existe -->
+  @if (user) {
+    <!-- Avatar et Informations de base -->
+    <div class="bel-profile-avatar-section">
+      <div class="bel-avatar-container">
+        @if (user.avatar) {
+          <img 
+            [src]="user.avatar" 
+            [alt]="user.pseudo || 'Utilisateur'" 
+            class="bel-avatar-image">
+        } @else {
+          <div class="bel-avatar-default">
+            {{ getUserInitials() }}
+          </div>
+        }
+        
+        <!-- Bouton de changement d'avatar -->
+        <div class="bel-avatar-actions">
+          <input 
+            type="file" 
+            id="avatarInput"
+            (change)="onAvatarSelected($event)"
+            accept="image/*" 
+            class="bel-file-input">
+          <label for="avatarInput" class="bel-avatar-upload-btn" title="Changer la photo">
+            📷
+          </label>
+        </div>
+      </div>
       
-      <!-- Bouton de changement d'avatar -->
-      <div class="bel-avatar-actions">
-        <input 
-          type="file" 
-          id="avatarInput"
-          (change)="onAvatarSelected($event)"
-          accept="image/*" 
-          class="bel-file-input">
-        <label for="avatarInput" class="bel-avatar-upload-btn" title="Changer la photo">
-          📷
-        </label>
+      <div class="bel-user-basic-info">
+        <h2 class="bel-user-name">{{ user.pseudo }}</h2>
+        <p class="bel-user-community">Communauté {{ user.community }}</p>
+        <p class="bel-user-member-since">Membre depuis {{ getMemberSince() }}</p>
       </div>
     </div>
-    
-    <div class="bel-user-basic-info">
-      <h2 class="bel-user-name">{{ user?.pseudo }}</h2>
-      <p class="bel-user-community">Communauté {{ user?.community }}</p>
-      <p class="bel-user-member-since">Membre depuis {{ getMemberSince() }}</p>
-    </div>
-  </div>
 
-  <!-- Contenu Principal -->
-  <main class="bel-profile-content">
-    
-    <!-- Mode Édition -->
-    <div *ngIf="isEditing" class="bel-edit-section">
-      <div class="bel-edit-card">
-        <h3>✏️ Modifier mon profil</h3>
-        
-        <form (ngSubmit)="saveProfile()" class="bel-edit-form">
-          
-          <!-- Pseudo -->
-          <div class="bel-form-group">
-            <label for="pseudo">Pseudonyme *</label>
-            <input
-              type="text"
-              id="pseudo"
-              [value]="editData.pseudo"
-              (input)="editData.pseudo = ($any($event.target).value)"
-              name="pseudo"
-              required
-              maxlength="30"
-              class="bel-form-input">
-            <small>Votre nom d'affichage sur la plateforme</small>
-          </div>
+    <!-- Contenu Principal -->
+    <main class="bel-profile-content">
+      
+      <!-- Mode Édition -->
+      @if (isEditing) {
+        <div class="bel-edit-section">
+          <div class="bel-edit-card">
+            <h3>Modifier mon profil</h3>
+            
+            <form (ngSubmit)="saveProfile()" class="bel-edit-form">
+              
+              <!-- Pseudo -->
+              <div class="bel-form-group">
+                <label for="pseudo">Pseudonyme *</label>
+                <input
+                  type="text"
+                  id="pseudo"
+                  [(ngModel)]="editData.pseudo"
+                  name="pseudo"
+                  required
+                  maxlength="30"
+                  class="bel-form-input">
+                <small>Votre nom d'affichage sur la plateforme</small>
+              </div>
 
-          <!-- Bio -->
-          <div class="bel-form-group">
-            <label for="bio">Bio</label>
-            <textarea
-              id="bio"
-              [value]="editData.bio"
-              (input)="editData.bio = ($any($event.target).value)"
-              name="bio"
-              rows="3"
-              maxlength="200"
-              placeholder="Décrivez-vous en quelques mots..."
-              class="bel-form-textarea"></textarea>
-            <small>{{ editData.bio?.length || 0 }}/200 caractères</small>
-          </div>
+              <!-- Bio -->
+              <div class="bel-form-group">
+                <label for="bio">Bio</label>
+                <textarea
+                  id="bio"
+                  [(ngModel)]="editData.bio"
+                  name="bio"
+                  rows="3"
+                  maxlength="200"
+                  placeholder="Décrivez-vous en quelques mots..."
+                  class="bel-form-textarea"></textarea>
+                <small>{{ editData.bio?.length || 0 }}/200 caractères</small>
+              </div>
 
-          <!-- Genre -->
-          <div class="bel-form-group">
-            <label for="gender">Genre</label>
-            <select
-              id="gender"
-              [value]="editData.gender"
-              (change)="editData.gender = ($any($event.target).value)"
-              name="gender"
-              class="bel-form-select">
-              <option value="">Sélectionnez...</option>
-              <option *ngFor="let gender of genders" [value]="gender.value">
-                {{ gender.label }}
-              </option>
-            </select>
-          </div>
+              <!-- Genre -->
+              <div class="bel-form-group">
+                <label for="gender">Genre</label>
+                <select
+                  id="gender"
+                  [(ngModel)]="editData.gender"
+                  name="gender"
+                  class="bel-form-select">
+                  <option value="">Sélectionnez...</option>
+                  <option *ngFor="let gender of genders" [value]="gender.value">
+                    {{ gender.label }}
+                  </option>
+                </select>
+              </div>
 
-          <!-- Profession -->
-          <div class="bel-form-group">
-            <label for="profession">Profession</label>
-            <input
-              type="text"
-              id="profession"
-              [value]="editData.profession"
-              (input)="editData.profession = ($any($event.target).value)"
-              name="profession"
-              placeholder="Votre métier..."
-              class="bel-form-input">
-          </div>
+              <!-- Profession -->
+              <div class="bel-form-group">
+                <label for="profession">Profession</label>
+                <input
+                  type="text"
+                  id="profession"
+                  [(ngModel)]="editData.profession"
+                  name="profession"
+                  placeholder="Votre métier..."
+                  class="bel-form-input">
+              </div>
 
-          <!-- Centres d'intérêt -->
-          <div class="bel-form-group">
-            <label>Centres d'intérêt</label>
-            <div class="bel-interests-container">
-              <div *ngFor="let interest of editData.interests" class="bel-interest-tag">
-                {{ interest }}
-                <button type="button" (click)="removeInterest(interest)" class="bel-interest-remove">
-                  ×
+              <!-- Centres d'intérêt -->
+              <div class="bel-form-group">
+                <label>Centres d'intérêt</label>
+                <div class="bel-interests-container">
+                  <div *ngFor="let interest of editData.interests" class="bel-interest-tag">
+                    {{ interest }}
+                    <button type="button" (click)="removeInterest(interest)" class="bel-interest-remove">
+                      ×
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Ajouter un intérêt (Entrée pour valider)"
+                    (keydown)="addInterest($event)"
+                    class="bel-interest-input">
+                </div>
+                <small>Appuyez sur Entrée après chaque intérêt</small>
+              </div>
+
+              <!-- Actions -->
+              <div class="bel-form-actions">
+                <button type="button" (click)="cancelEditing()" class="bel-btn-cancel" [disabled]="isLoading">
+                  Annuler
+                </button>
+                <button type="submit" class="bel-btn-primary" [disabled]="isLoading">
+                  {{ isLoading ? '⏳ Enregistrement...' : '💾 Enregistrer' }}
                 </button>
               </div>
-              <input
-                type="text"
-                placeholder="Ajouter un intérêt (Entrée pour valider)"
-                (keydown)="addInterest($event)"
-                class="bel-interest-input">
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- Mode Consultation -->
+      @if (!isEditing) {
+        <div class="bel-view-section">
+          
+          <!-- Informations Personnelles -->
+          <div class="bel-info-card">
+            <div class="bel-card-header">
+              <h3>📋 Informations personnelles</h3>
+              <button (click)="startEditing()" class="bel-edit-btn" title="Modifier le profil">
+                Modifier
+              </button>
             </div>
-            <small>Appuyez sur Entrée après chaque intérêt</small>
+            
+            <div class="bel-info-grid">
+              <div class="bel-info-item">
+                <span class="bel-info-label">Pseudonyme:</span>
+                <span class="bel-info-value">{{ user.pseudo }}</span>
+              </div>
+              
+              <div class="bel-info-item">
+                <span class="bel-info-label">Email:</span>
+                <span class="bel-info-value">{{ user.email || 'Non spécifié' }}</span>
+              </div>
+              
+              <div class="bel-info-item">
+                <span class="bel-info-label">Genre:</span>
+                <span class="bel-info-value">
+                  {{ getGenderLabel(user.gender) }}
+                </span>
+              </div>
+              
+              @if (user.profession) {
+                <div class="bel-info-item">
+                  <span class="bel-info-label">Profession:</span>
+                  <span class="bel-info-value">{{ user.profession }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Bio -->
+            @if (user.bio) {
+              <div class="bel-bio-section">
+                <h4>À propos</h4>
+                <p class="bel-bio-text">{{ user.bio }}</p>
+              </div>
+            }
+
+            <!-- Centres d'intérêt -->
+            @if (user.interests && user.interests.length > 0) {
+              <div class="bel-interests-section">
+                <h4>Centres d'intérêt</h4>
+                <div class="bel-interests-list">
+                  @for (interest of user.interests; track interest) {
+                    <span class="bel-interest-badge">
+                      {{ interest }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
           </div>
 
-          <!-- Actions -->
-          <div class="bel-form-actions">
-            <button type="button" (click)="cancelEditing()" class="bel-btn-cancel" [disabled]="isLoading">
-              Annuler
-            </button>
-            <button type="submit" class="bel-btn-primary" [disabled]="isLoading">
-              {{ isLoading ? '⏳ Enregistrement...' : '💾 Enregistrer' }}
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+      }
+
+    </main>
+  } @else {
+    <!-- Message si pas d'utilisateur -->
+    <div class="bel-no-user">
+      <div class="bel-no-user-icon">👤</div>
+      <h3>Aucun utilisateur connecté</h3>
+      <p>Veuillez vous connecter pour voir votre profil</p>
     </div>
-
-    <!-- Mode Consultation -->
-    <div *ngIf="!isEditing" class="bel-view-section">
-      
-      <!-- Informations Personnelles -->
-      <div class="bel-info-card">
-        <div class="bel-card-header">
-          <h3>📋 Informations personnelles</h3>
-          <button (click)="startEditing()" class="bel-edit-btn" title="Modifier le profil">
-            ✏️ Modifier
-          </button>
-        </div>
-        
-        <div class="bel-info-grid">
-          <div class="bel-info-item">
-            <span class="bel-info-label">Pseudonyme:</span>
-            <span class="bel-info-value">{{ user?.pseudo }}</span>
-          </div>
-          
-          <div class="bel-info-item">
-            <span class="bel-info-label">Email:</span>
-            <span class="bel-info-value">{{ user?.email || 'Non spécifié' }}</span>
-          </div>
-          
-          <div class="bel-info-item">
-            <span class="bel-info-label">Genre:</span>
-            <span class="bel-info-value">
-              {{ getGenderLabel(user?.gender) }}
-            </span>
-          </div>
-          
-          <div class="bel-info-item" *ngIf="user?.profession">
-            <span class="bel-info-label">Profession:</span>
-            <span class="bel-info-value">{{ user?.profession }}</span>
-          </div>
-        </div>
-
-        <!-- Bio -->
-        <div class="bel-bio-section" *ngIf="user?.bio">
-          <h4>À propos</h4>
-          <p class="bel-bio-text">{{ user?.bio }}</p>
-        </div>
-
-      </div>
-
-    </div>
-
-  </main>
+  }
 
 </div>

@@ -1,5 +1,9 @@
 <div class="bel-messaging-container">
   
+   <div class="bel-emoji-overlay" 
+       [class.active]="showEmojiPicker"
+       (click)="showEmojiPicker = false">
+  </div>
   <!-- Header Principal -->
   <header class="bel-messaging-header">
     <p>Communiquez avec votre communauté et vos contacts</p>
@@ -50,19 +54,35 @@
             <div class="bel-messages-list">
               @for (message of messages$ | async; track message.id) {
                 <div 
+                  [id]="'message-' + message.id"
                   class="bel-message-wrapper"
                   [class.my-message]="isMyMessage(message)"
                   [class.other-message]="!isMyMessage(message)"
-                  (contextmenu)="showMessageMenu(message, $event)">
+                  (contextmenu)="showContextMenu($event, message)"
+                  (touchstart)="onTouchStart($event, message)"
+                  (touchend)="onTouchEnd($event, message)">
                   
                   <div class="bel-message-bubble">
                     
+                    <!-- INDICATEUR DE RÉPONSE -->
+                    @if (message.replyTo) {
+                      <div class="bel-reply-indicator" 
+                           (click)="scrollToMessage(message.replyTo!.messageId)">
+                        <div class="bel-reply-line"></div>
+                        <div class="bel-reply-content">
+                          <strong>{{ message.replyTo.fromUserName }}</strong>
+                          <p>{{ getReplyPreview(message) }}</p>
+                        </div>
+                      </div>
+                    }
+
                     <!-- MODE ÉDITION -->
                     @if (editingMessageId === message.id) {
                       <div class="bel-message-edit">
                         <textarea 
                           class="bel-edit-input"
-                          [(ngModel)]="editMessageContent"
+                          [value]="editMessageContent"
+                          (input)="editMessageContent = ($any($event.target).value)"
                           (keydown)="onEditKeyPress($event, message)"
                           rows="3"
                           placeholder="Modifier votre message...">
@@ -95,7 +115,7 @@
                       <!-- Contenu du message -->
                       <div class="bel-message-content">
                         @if (message.isDeleted) {
-                          <span class="bel-deleted-message">🗑️ Message supprimé</span>
+                          <span class="bel-deleted-message">Message supprimé</span>
                         } @else {
                           {{ message.content }}
                           
@@ -117,20 +137,6 @@
                           <span class="bel-message-status" [title]="message.status">
                             {{ getMessageStatus(message) }}
                           </span>
-                          
-                          <!-- Boutons d'action -->
-                          <div class="bel-message-actions">
-                            @if (canEditMessage(message)) {
-                              <button class="bel-action-btn" (click)="startEditing(message)" title="Modifier">
-                                ✏️
-                              </button>
-                            }
-                            @if (canDeleteMessage(message)) {
-                              <button class="bel-action-btn" (click)="deleteMessage(message.id)" title="Supprimer">
-                                🗑️
-                              </button>
-                            }
-                          </div>
                         }
                       </div>
                     }
@@ -141,9 +147,32 @@
           }
         </div>
 
+        <!-- INDICATEUR DE RÉPONSE EN COURS -->
+        @if (replyingTo) {
+          <div class="bel-reply-preview">
+            <div class="bel-reply-preview-content">
+              <strong>{{ replyingTo.fromUserName }}</strong>
+              <p>{{ replyingTo.content?.substring(0, 50) }}{{ replyingTo.content && replyingTo.content.length > 50 ? '...' : '' }}</p>
+            </div>
+            <button (click)="cancelReply()" class="bel-cancel-reply" title="Annuler la réponse">
+              ×
+            </button>
+          </div>
+        }
+
         <!-- Input d'envoi -->
         <footer class="bel-chat-input">
-          <div class="bel-input-container">            
+          <div class="bel-input-container">
+            
+            <!-- BOUTON ÉMOJI -->
+            <button 
+              class="bel-emoji-btn"
+              (click)="toggleEmojiPicker($event)"
+              type="button"
+              title="Émojis">
+              😊
+            </button>
+            
             <textarea
               #messageInput
               [(ngModel)]="newMessage"
@@ -156,12 +185,25 @@
 
             <button 
               class="bel-send-btn"
-              (click)="sendMessage()"
+              (click)="replyingTo ? sendMessageWithReply() : sendMessage()"
               [disabled]="!newMessage.trim() || isSending"
               [class.sending]="isSending">
               {{ isSending ? '⏳' : '➤' }}
             </button>
           </div>
+
+          <!-- SÉLECTEUR D'ÉMOJIS -->
+          @if (showEmojiPicker) {
+            <div class="bel-emoji-picker">
+              <div class="bel-emoji-grid">
+                <span *ngFor="let emoji of ['😀', '😂', '🥰', '😎', '🤔', '👏', '🎉', '❤️', '🔥', '👍', '😢', '😡', '🤯', '👀', '🙏', '💯', '✨', '🌟', '💪', '🎯']"
+                      class="bel-emoji"
+                      (click)="addEmoji(emoji)">
+                  {{ emoji }}
+                </span>
+              </div>
+            </div>
+          }
         </footer>
 
       </div>
@@ -187,5 +229,19 @@
     }
 
   </main>
+
+  <!-- MENU CONTEXTUEL -->
+  @if (contextMenu.visible) {
+    <div class="bel-context-menu"
+         [style.left.px]="contextMenu.x"
+         [style.top.px]="contextMenu.y">
+      @for (action of contextMenu.actions; track action.type) {
+        <button class="bel-context-menu-item" (click)="executeContextAction(action)">
+          <span class="bel-context-icon">{{ action.icon }}</span>
+          <span class="bel-context-label">{{ action.label }}</span>
+        </button>
+      }
+    </div>
+  }
 
 </div>

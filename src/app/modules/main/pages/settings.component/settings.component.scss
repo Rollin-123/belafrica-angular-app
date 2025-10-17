@@ -3,7 +3,19 @@
   background: var(--bel-light);
   padding-bottom: 80px; // Espace pour la navigation
 }
-
+.bel-avatar-default {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bel-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  border: 3px solid var(--bel-white);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 // HEADER ==============================================
 .bel-settings-header {
   background: var(--bel-white);

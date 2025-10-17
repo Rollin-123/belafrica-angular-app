@@ -9,6 +9,9 @@ import { SettingsComponent } from './pages/settings.component/settings.component
 import { SharedModule } from '../../shared/shared/shared.module';
 import { FeedNationalComponent } from './pages/feed-national.component/feed-national.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ProfileComponent } from './pages/profile.component/profile.component';
+import { AdminRequestComponent } from './pages/admin-request.component/admin-request.component';
+import { CreatePostModalComponent } from './pages/create-post-modal.component/create-post-modal.component';
 
 
 @NgModule({
@@ -17,7 +20,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     FeedInternationalComponent,
     FeedNationalComponent,
     MessagingComponent,
-    SettingsComponent
+    SettingsComponent,
+    ProfileComponent,
+    AdminRequestComponent,
+    CreatePostModalComponent,
   ],
   imports: [
     CommonModule,
