@@ -20,7 +20,7 @@ const routes: Routes = [
       {path: 'national', component: FeedNationalComponent},
       {path: 'international', component: FeedInternationalComponent},
       {path: 'messaging', component: MessagingComponent},
-      {path: 'chat/:conversationId', component: ChatComponent},
+      {path: 'chat/:conversationId', component: ChatComponent, data: { preload: false }},
       {path: 'profile', component: ProfileComponent},
       {path: 'settings', component: SettingsComponent},
       {path: 'settings/privacy', component: PrivacySettingsComponent }, 

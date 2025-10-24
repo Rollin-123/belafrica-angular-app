@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+console.log('🔧 Optimisation des fichiers CSS...');
 
-// Liste des fichiers CSS problématiques
 const problemFiles = [
   'src/app/modules/main/pages/messaging.component/messaging.component.scss',
   'src/app/modules/main/pages/profile.component/profile.component.scss',
@@ -16,7 +16,6 @@ problemFiles.forEach(file => {
   if (fs.existsSync(file)) {
     try {
       const content = fs.readFileSync(file, 'utf8');
-      
       let optimized = content
         .replace(/\/\*[\s\S]*?\*\//g, '')
         .replace(/\s+/g, ' ')
@@ -26,9 +25,11 @@ problemFiles.forEach(file => {
         .trim();
       
       fs.writeFileSync(file, optimized);
+      console.log(`✅ Optimisé: ${file}`);
     } catch (error) {
       console.log(`❌ Erreur avec: ${file}`, error.message);
     }
-  } else {
   }
 });
+
+console.log('🎉 Optimisation CSS terminée!');
