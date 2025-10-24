@@ -1,11 +1,25 @@
 [build]
-  command = "npm run build"
-  publish = "dist/belafrica/browser"
+
+Commande de build standard pour Angular
+
+command = "ng build --configuration=production"
+
+Dossier de publication (doit correspondre à outputPath dans angular.json)
+
+publish = "dist/belafrica/browser"
 
 [build.environment]
-  NODE_VERSION = "18"
+
+🛑 DÉSACTIVE LE PLUGIN NETLIFY POUR ANGULAR 🛑
+
+Ceci force Netlify à ignorer le SSR/Prerendering et évite le conflit.
+
+NETLIFY_ANGULAR_PLUGIN_ENABLED = "false"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+
+Redirection nécessaire pour le routage Angular (évite les 404 sur les routes internes)
+
+from = "/*"
+to = "/index.html"
+status = 200
