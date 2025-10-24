@@ -35,7 +35,6 @@
               "src/styles.scss"
             ],
             "outputMode": "browser",
-            "ssr": false,
             "prerender": false
           },
           "configurations": {
