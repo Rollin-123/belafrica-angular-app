@@ -5,9 +5,12 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:vercel": "ng build --configuration=production --output-hashing=all",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:belafrica": "node dist/belafrica/server/server.mjs"
+    "serve:ssr:belafrica": "node dist/belafrica/server/server.mjs",
+    "optimize": "node optimize-css.js",
+    "build:prod": "npm run optimize && ng build --configuration=production --output-hashing=all"
   },
   "prettier": {
     "printWidth": 100,
