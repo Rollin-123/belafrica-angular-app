@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService, User } from '../../../../core/services/user.service';
 
@@ -78,7 +78,8 @@ export class SettingsComponent implements OnInit {
 
   constructor(
     public userService: UserService,
-    private router: Router
+    private router: Router,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {

@@ -1,218 +1,218 @@
 <div class="bel-admin-request-container">
-  
-  <header class="bel-admin-header">
-    <button (click)="goBack()" class="bel-back-btn">← Retour</button>
-    <h1>Devenir Administrateur</h1>
-    <p>Publiez du contenu pour votre communauté après vérification manuelle</p>
-  </header>
+  
+<header class="bel-admin-header">
+<button (click)="goBack()" class="bel-back-btn">← Retour</button>
+<h1>Devenir Administrateur</h1>
+<p>Publiez du contenu pour votre communauté après vérification manuelle</p>
+</header>
 
-  <div class="bel-admin-process">
-    
-    <!-- Statut Admin -->
-    <div *ngIf="isAdmin" class="bel-admin-status success">
-      <div class="bel-status-icon">✅</div>
-      <div class="bel-status-content">
-        <h3>Administrateur Actif</h3>
-        <p>Vous pouvez maintenant publier du contenu pour la communauté <strong>{{ user?.community }}</strong></p>
-      </div>
-    </div>
+<div class="bel-admin-process">
+  
+<!-- Statut Admin -->
+<div *ngIf="isAdmin" class="bel-admin-status success">
+<div class="bel-status-icon">✅</div>
+<div class="bel-status-content">
+<h3>Administrateur Actif</h3>
+<p>Vous pouvez maintenant publier du contenu pour la communauté <strong>{{ user?.community }}</strong></p>
+</div>
+</div>
 
-    <!-- Demande en attente -->
-    <div *ngIf="hasPendingRequest && !isAdmin" class="bel-admin-status pending">
-      <div class="bel-status-icon">⏳</div>
-      <div class="bel-status-content">
-        <h3>Demande en Cours de Traitement</h3>
-        <p>Votre demande est en cours de vérification par notre équipe.</p>
-        <p class="bel-status-note">Vous recevrez un code de validation par email sous 48h.</p>
-      </div>
-    </div>
+<!-- Demande en attente -->
+<div *ngIf="hasPendingRequest && !isAdmin" class="bel-admin-status pending">
+<div class="bel-status-icon">⏳</div>
+<div class="bel-status-content">
+<h3>Demande en Cours de Traitement</h3>
+<p>Votre demande est en cours de vérification manuelle par l'administrateur principal (Rollin Loic Tianga).</p>
+<p class="bel-status-note">Vous recevrez le code de validation par email si votre profil est approuvé (délai : 24-48h).</p>
+</div>
+</div>
 
-    <!-- Processus de demande -->
-    <div *ngIf="!hasPendingRequest && !isAdmin" class="bel-admin-steps">
-      
-      <!-- Étape 1 : Information -->
-      <div class="bel-admin-step">
-        <div class="bel-step-header">
-          <span class="bel-step-number">@</span>
-          <h3>Processus de Vérification</h3>
-        </div>
-        <p>Pour garantir la sécurité de notre communauté, chaque administrateur est vérifié manuellement.</p>
-        
-        <div class="bel-requirements">
-          <h4>📋 Documents Requis :</h4>
-          <ul class="bel-requirements-list">
-            <li>📸 <strong>Photo de pièce d'identité</strong> (passeport, carte d'identité ou permis)</li>
-            <li>💬 <strong>Explication de votre motivation</strong> (minimum 50 caractères)</li>
-            <li>⏳ <strong>Délai de traitement :</strong> 24-48 heures</li>
-          </ul>
-        </div>
-      </div>
+<!-- Processus de demande -->
+<div *ngIf="!hasPendingRequest && !isAdmin" class="bel-admin-steps">
+  
+<!-- Étape 1 : Information -->
+<div class="bel-admin-step">
+<div class="bel-step-header">
+<span class="bel-step-number">@</span>
+<h3>Processus de Vérification</h3>
+</div>
+<p>Pour garantir la sécurité de notre communauté, chaque administrateur est vérifié manuellement.</p>
+  
+<div class="bel-requirements">
+<h4>📋 Documents Requis :</h4>
+<ul class="bel-requirements-list">
+<li>📸 <strong>Photo de pièce d'identité</strong> (passeport, carte d'identité ou permis)</li>
+<li>💬 <strong>Explication de votre motivation</strong> (minimum 50 caractères)</li>
+<li>⏳ <strong>Délai de traitement :</strong> 24-48 heures</li>
+</ul>
+</div>
+</div>
 
-      <!-- Étape 2 : Formulaire -->
-      <form [formGroup]="adminForm" (ngSubmit)="submitRequest()" class="bel-admin-form">
-        
-        <!-- Photo du passeport -->
-        <div class="bel-form-group">
-          <label class="bel-form-label">
-            📸 Photo de Pièce d'Identité *
-            <span class="bel-required">*</span>
-          </label>
-          
-          <div class="bel-passport-upload" [class.has-image]="passportPreview">
-            <div class="bel-passport-preview">
-              <img 
-                [src]="passportPreview" 
-                *ngIf="passportPreview" 
-                class="bel-passport-image"
-                alt="Aperçu pièce d'identité">
-              
-              <div *ngIf="!passportPreview" class="bel-passport-placeholder">
-                <div class="bel-placeholder-icon">📄</div>
-                <p class="bel-placeholder-text">Cliquez pour prendre une photo</p>
-                <small>Format accepté : JPG, PNG (max. 5MB)</small>
-              </div>
-            </div>
-            
-            <div class="bel-upload-controls">
-              <input 
-                type="file" 
-                #passportInput
-                (change)="onPassportSelected($event)"
-                accept="image/jpeg,image/png"
-                capture="environment"
-                class="bel-file-input">
-              
-              <button 
-                type="button" 
-                class="bel-btn-secondary bel-upload-btn"
-                (click)="passportInput.click()">
-                <span class="bel-btn-icon">📷</span>
-                Prendre une Photo
-              </button>
-              
-              <div class="bel-upload-hints">
-                <p class="bel-hint">💡 <strong>Conseils :</strong></p>
-                <ul class="bel-hints-list">
-                  <li>Photo bien éclairée et lisible</li>
-                  <li>Masquez les informations sensibles si nécessaire</li>
-                  <li>Seule la photo sera visible par le créateur</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+<!-- Étape 2 : Formulaire -->
+<form [formGroup]="adminForm" (ngSubmit)="submitRequest()" class="bel-admin-form">
+  
+<!-- Photo du passeport -->
+<div class="bel-form-group">
+<label class="bel-form-label">
+📸 Photo de Pièce d'Identité *
+<span class="bel-required">*</span>
+</label>
+  
+<div class="bel-passport-upload" [class.has-image]="passportPreview">
+<div class="bel-passport-preview">
+<img 
+ [src]="passportPreview" 
+ *ngIf="passportPreview" 
+ class="bel-passport-image"
+ alt="Aperçu pièce d'identité">
+  
+<div *ngIf="!passportPreview" class="bel-passport-placeholder">
+<div class="bel-placeholder-icon">📄</div>
+<p class="bel-placeholder-text">Cliquez pour prendre une photo</p>
+<small>Format accepté : JPG, PNG (max. 5MB)</small>
+</div>
+</div>
+  
+<div class="bel-upload-controls">
+<input 
+ type="file" 
+ #passportInput
+ (change)="onPassportSelected($event)"
+ accept="image/jpeg,image/png"
+ capture="environment"
+ class="bel-file-input">
+  
+<button 
+ type="button" 
+ class="bel-btn-secondary bel-upload-btn"
+ (click)="passportInput.click()">
+<span class="bel-btn-icon">📷</span>
+ Prendre une Photo
+</button>
+  
+<div class="bel-upload-hints">
+<p class="bel-hint">💡 <strong>Conseils :</strong></p>
+<ul class="bel-hints-list">
+<li>Photo bien éclairée et lisible</li>
+<li>Masquez les informations sensibles si nécessaire</li>
+<li>Seule la photo sera visible par le créateur</li>
+</ul>
+</div>
+</div>
+</div>
 
-          <div *ngIf="adminForm.get('passportPhoto')?.invalid && adminForm.get('passportPhoto')?.touched" 
-               class="bel-error-message">
-            ⚠️ Une photo de pièce d'identité est requise
-          </div>
-        </div>
+<div *ngIf="adminForm.get('passportPhoto')?.invalid && adminForm.get('passportPhoto')?.touched" 
+  class="bel-error-message">
+⚠️ Une photo de pièce d'identité est requise
+</div>
+</div>
 
-        <!-- Information additionnelle -->
-        <div class="bel-form-group">
-          <label for="additionalInfo" class="bel-form-label">
-            💬 Votre Motivation *
-            <span class="bel-required">*</span>
-          </label>
-          
-          <textarea
-            id="additionalInfo"
-            formControlName="additionalInfo"
-            placeholder="Expliquez pourquoi vous souhaitez devenir administrateur et comment vous comptez contribuer à la communauté..."
-            rows="5"
-            maxlength="500"
-            class="bel-form-textarea"
-            [class.invalid]="adminForm.get('additionalInfo')?.invalid && adminForm.get('additionalInfo')?.touched">
-          </textarea>
-          
-          <div class="bel-textarea-meta">
-            <span class="bel-char-count">
-              {{ adminForm.get('additionalInfo')?.value?.length || 0 }}/500 caractères
-            </span>
-            <span *ngIf="adminForm.get('additionalInfo')?.invalid && adminForm.get('additionalInfo')?.touched" 
-                  class="bel-error-text">
-              Minimum 50 caractères requis
-            </span>
-          </div>
-        </div>
+<!-- Information additionnelle -->
+<div class="bel-form-group">
+<label for="additionalInfo" class="bel-form-label">
+💬 Votre Motivation *
+<span class="bel-required">*</span>
+</label>
+  
+<textarea
+id="additionalInfo"
+formControlName="additionalInfo"
+placeholder="Expliquez pourquoi vous souhaitez devenir administrateur et comment vous comptez contribuer à la communauté..."
+rows="5"
+maxlength="500"
+class="bel-form-textarea"
+[class.invalid]="adminForm.get('additionalInfo')?.invalid && adminForm.get('additionalInfo')?.touched">
+</textarea>
+  
+<div class="bel-textarea-meta">
+<span class="bel-char-count">
+ {{ adminForm.get('additionalInfo')?.value?.length || 0 }}/500 caractères
+</span>
+<span *ngIf="adminForm.get('additionalInfo')?.invalid && adminForm.get('additionalInfo')?.touched" 
+ class="bel-error-text">
+ Minimum 50 caractères requis
+</span>
+</div>
+</div>
 
-        <!-- Confidentialité -->
-        <div class="bel-privacy-notice">
-          <div class="bel-privacy-icon">🔒</div>
-          <div class="bel-privacy-content">
-            <h4>Confidentialité Garantie</h4>
-            <p>Votre pièce d'identité est envoyée uniquement au créateur de BELAFRICA et sera supprimée après vérification.</p>
-          </div>
-        </div>
+<!-- Confidentialité -->
+<div class="bel-privacy-notice">
+<div class="bel-privacy-icon">🔒</div>
+<div class="bel-privacy-content">
+<h4>Confidentialité Garantie</h4>
+<p>Votre pièce d'identité est envoyée uniquement au créateur de BELAFRICA et sera supprimée après vérification.</p>
+</div>
+</div>
 
-        <!-- Bouton de soumission -->
-        <button 
-          type="submit" 
-          class="bel-btn-primary bel-submit-btn"
-          [disabled]="!adminForm.valid || isLoading"
-          [class.loading]="isLoading">
-          
-          <span *ngIf="!isLoading" class="bel-btn-content">
-            <span class="bel-btn-icon">📨</span>
-            Soumettre ma Demande
-          </span>
-          
-          <span *ngIf="isLoading" class="bel-btn-content">
-            <span class="bel-loading-spinner"></span>
-            Envoi en cours...
-          </span>
-        </button>
+<!-- Bouton de soumission -->
+<button 
+type="submit" 
+class="bel-btn-primary bel-submit-btn"
+[disabled]="!adminForm.valid || isLoading"
+[class.loading]="isLoading">
+  
+<span *ngIf="!isLoading" class="bel-btn-content">
+<span class="bel-btn-icon">📨</span>
+Soumettre ma Demande
+</span>
+  
+<span *ngIf="isLoading" class="bel-btn-content">
+<span class="bel-loading-spinner"></span>
+Envoi en cours...
+</span>
+</button>
 
-      </form>
-    </div>
+</form>
+</div>
 
-    <!-- Section Code Admin -->
-    <div *ngIf="!isAdmin" class="bel-admin-code-section">
-      <div class="bel-code-header">
-        <h3>🔑 Code de Validation</h3>
-        <p *ngIf="!hasPendingRequest">Si vous avez déjà reçu un code :</p>
-      </div>
-      
-      <div class="bel-code-input-group">
-        <input 
-          type="text" 
-          [(ngModel)]="adminCode"
-          placeholder="Entrez votre code JWT ici..."
-          class="bel-code-input"
-          [class.has-code]="adminCode"
-          [disabled]="hasPendingRequest">
-        
-        <button 
-          (click)="validateAdminCode()"
-          class="bel-btn-secondary bel-validate-btn"
-          [disabled]="!adminCode || hasPendingRequest"
-          [class.loading]="validatingCode">
-          
-          <span *ngIf="!validatingCode">✅ Valider</span>
-          <span *ngIf="validatingCode" class="bel-loading-spinner small"></span>
-        </button>
-      </div>
+<!-- Section Code Admin -->
+<div *ngIf="!isAdmin" class="bel-admin-code-section">
+<div class="bel-code-header">
+<h3>🔑 Code de Validation</h3>
+<p *ngIf="!hasPendingRequest">Si vous avez déjà reçu un code après vérification :</p>
+</div>
+  
+<div class="bel-code-input-group">
+<input 
+type="text" 
+[(ngModel)]="adminCode"
+placeholder="Entrez votre code JWT ici..."
+class="bel-code-input"
+[class.has-code]="adminCode"
+[disabled]="hasPendingRequest">
+  
+<button 
+(click)="validateAdminCode()"
+class="bel-btn-secondary bel-validate-btn"
+[disabled]="!adminCode || hasPendingRequest"
+[class.loading]="validatingCode">
+  
+<span *ngIf="!validatingCode">✅ Valider</span>
+<span *ngIf="validatingCode" class="bel-loading-spinner small"></span>
+</button>
+</div>
 
-      <div *ngIf="codeError" class="bel-code-error">
-        ❌ {{ codeError }}
-      </div>
-    </div>
+<div *ngIf="codeError" class="bel-code-error">
+❌ {{ codeError }}
+</div>
+</div>
 
-  </div>
+</div>
 
-  <!-- Informations de contact -->
-  <footer class="bel-admin-footer">
-    <div class="bel-contact-card">
-      <div class="bel-contact-header">
-        <span class="bel-contact-icon">📞</span>
-        <h4>Support & Contact</h4>
-      </div>
-      
-      <div class="bel-contact-info">
-        <p><strong>Email du créateur :</strong> rollinloictianga@gmail.com</p>
-        <p><strong>Délai de traitement :</strong> 24-48 heures maximum</p>
-        <p class="bel-contact-note">Pour toute question concernant votre demande d'administration</p>
-      </div>
-    </div>
-  </footer>
+<!-- Informations de contact -->
+<footer class="bel-admin-footer">
+<div class="bel-contact-card">
+<div class="bel-contact-header">
+<span class="bel-contact-icon">📞</span>
+<h4>Support & Contact</h4>
+</div>
+  
+<div class="bel-contact-info">
+<p><strong>Email du créateur :</strong> rollinloictianga@gmail.com</p>
+<p><strong>Délai de traitement :</strong> 24-48 heures maximum</p>
+<p class="bel-contact-note">Pour toute question concernant votre demande d'administration</p>
+</div>
+</div>
+</footer>
 
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService, User, UserUpdateData } from '../../../../core/services/user.service';
 
@@ -21,6 +21,7 @@ export class ProfileComponent implements OnInit {
     profession: '',
     interests: []
   };
+
   
   genders = [
     { value: 'male', label: 'Homme' },
@@ -31,7 +32,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     public userService: UserService, 
-    private router: Router
+    private router: Router,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -114,6 +116,7 @@ export class ProfileComponent implements OnInit {
     } catch (error: any) {
       console.error('❌ Erreur upload avatar:', error);
       alert(error.message || 'Erreur lors de l\'upload de l\'avatar');
+    this.cd.detectChanges();
     } finally {
       this.isLoading = false;
       event.target.value = '';

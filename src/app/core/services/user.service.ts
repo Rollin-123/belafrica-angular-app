@@ -14,6 +14,7 @@ export interface User {
   avatar?: string;
   community: string;
   createdAt: string;
+  isPendingAdmin: boolean;
   
   // Champs admin
   isAdmin?: boolean;

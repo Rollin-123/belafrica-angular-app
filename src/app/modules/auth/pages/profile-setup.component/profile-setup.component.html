@@ -53,8 +53,10 @@
     <span class="bel-info-value">{{ userData?.countryName }}</span>
   </div>
   <div class="bel-info-item">
-    <span class="bel-info-label">🇨🇲 Nationalité</span>
-    <span class="bel-info-value">{{ userData?.nationalityName }}</span>
+    <span class="bel-info-label">{{ getFlagEmoji(userData?.nationality) }} Nationalité</span>
+    <span class="bel-info-value">
+       {{ userData?.nationalityName }}
+    </span>
   </div>
   <div class="bel-info-item">
     <span class="bel-info-label">👥 Votre communauté</span>
@@ -124,10 +126,10 @@
         </small>
       </div>
 
-      <!-- Email (optionnel) -->
+      <!-- Email (REQUIS) -->
       <div style="margin-bottom: var(--bel-spacing-xl);">
         <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
-          Adresse email (optionnel)
+          Adresse email *
         </label>
         <input 
           type="email" 
@@ -135,8 +137,18 @@
           placeholder="vous@exemple.com"
           class="form-field-bel"
         >
+        <small *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" 
+               style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
+          <!-- NOUVEAUX MESSAGES DE VALIDATION -->
+          <span *ngIf="profileForm.get('email')?.errors?.['required']">
+            L'email est requis pour la récupération de compte et les notifications.
+          </span>
+          <span *ngIf="profileForm.get('email')?.errors?.['email'] && !profileForm.get('email')?.errors?.['required']">
+            Veuillez entrer une adresse email valide.
+          </span>
+        </small>
         <small style="color: var(--bel-gray); margin-top: 4px; display: block;">
-          Pour la récupération de compte et les notifications
+          Nous utiliserons cet email pour la récupération de compte et les notifications.
         </small>
       </div>
 

@@ -43,8 +43,7 @@ export class AdminCodeGeneratorComponent implements OnInit {
     'Zambie', 'Zimbabwe'
   ];
 
-  // Niveaux de permissions
-// Niveaux de permissions COMPLETS
+  // Niveaux de permissions COMPLETS
 permissionLevels = [
   {
     value: 'national',
@@ -71,7 +70,7 @@ permissionLevels = [
 
   constructor(
     private fb: FormBuilder,
-    private adminService: AdminService
+    private adminService: AdminService // Assurez-vous que ce service contient la logique de persistance (Firestore/LocalStorage)
   ) {
     this.codeForm = this.fb.group({
       countryCode: ['', Validators.required],
@@ -93,6 +92,32 @@ permissionLevels = [
 
   ngOnInit() {
     this.loadGeneratedCodes();
+  }
+
+  // Ajout de la fonction de suppression
+  async deleteCode(codeToDelete: any) {
+    // ⚠️ IMPORTANT: Utiliser une modale custom au lieu de 'alert' ou 'confirm'
+    // Pour l'instant, utilisons la fonction simulée, mais cela DEVRAIT être remplacé par une modale.
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer le code admin pour ${codeToDelete.userEmail} ?`)) {
+      return;
+    }
+
+    try {
+      this.isLoading = true;
+      // ⚠️ Simulation d'un appel à un service pour supprimer le code
+      // Vous devez implémenter cette méthode dans votre AdminService.
+      // await this.adminService.deleteAdminCode(codeToDelete.code); 
+      
+      // Mise à jour de la liste locale après la suppression (ou simulation de suppression)
+      this.generatedCodes = this.generatedCodes.filter(c => c.code !== codeToDelete.code);
+      this.showSuccess(`🗑️ Code pour ${codeToDelete.userEmail} supprimé !`);
+
+    } catch (error) {
+      console.error('Erreur lors de la suppression du code:', error);
+      this.showError('❌ Échec de la suppression du code.');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
 async generateCode() {
@@ -152,11 +177,15 @@ getPermissionLabel(): string {
   return permissionMap[level as keyof typeof permissionMap] || 'Inconnu';
 }
   copyToClipboard() {
-    navigator.clipboard.writeText(this.generatedCode).then(() => {
-      this.showSuccess('📋 Code copié dans le presse-papier !');
-    }).catch(err => {
-      this.showError('❌ Erreur lors de la copie');
-    });
+    // Remplacer par une méthode plus robuste pour la compatibilité iFrame
+    const tempInput = document.createElement('textarea');
+    tempInput.value = this.generatedCode;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+
+    this.showSuccess('📋 Code copié dans le presse-papier !');
   }
 
   sendByEmail() {
@@ -178,6 +207,7 @@ getPermissionLabel(): string {
   }
 
   private loadGeneratedCodes() {
+    // Assurez-vous que getGeneratedCodes() existe dans votre service et renvoie un tableau d'objets { code: string, userEmail: string, ... }
     this.generatedCodes = this.adminService.getGeneratedCodes();
   }
 
@@ -190,11 +220,13 @@ getPermissionLabel(): string {
   private showSuccess(message: string) {
     // Remplacer par un toast plus tard
     console.log('✅ ' + message);
-    alert(message);
+    // REMPLACER alert() par une modale ou un toast custom
+    // alert(message); 
   }
 
   private showError(message: string) {
     console.error('❌ ' + message);
-    alert(message);
+    // REMPLACER alert() par une modale ou un toast custom
+    // alert(message); 
   }
 }

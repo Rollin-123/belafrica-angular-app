@@ -1,5 +1,5 @@
 import { StorageService } from './../../../../core/services/storage.service';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -27,7 +27,9 @@ export class ProfileSetupComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private cd: ChangeDetectorRef,
+    
   ) {
     this.profileForm = this.fb.group({
       pseudo: ['', [
@@ -37,6 +39,7 @@ export class ProfileSetupComponent implements OnInit {
         Validators.pattern(/^[a-zA-Z0-9_\- ]+$/)
       ]],
       email: ['', [
+        Validators.required,
         Validators.email
       ]],
       acceptTerms: [false, Validators.requiredTrue]
@@ -70,6 +73,19 @@ export class ProfileSetupComponent implements OnInit {
     }
   }
 
+  // NOUVELLE FONCTION : Convertit le code pays en emoji de drapeau (utilise le code de la nationalité)
+  getFlagEmoji(countryCode: string | undefined): string {
+    if (!countryCode) return '';
+    const code = countryCode.toUpperCase();
+    
+    // Fonctionnalité basée sur les emojis pour un environnement sans librairie d'images/assets
+    // Un code pays à deux lettres (ex: FR) est converti en deux lettres Unicode
+    // Ex: F -> 🇫 (U+1F1EB), R -> 🇷 (U+1F1F7)
+    return String.fromCodePoint(
+      ...code.split('').map(char => 127397 + char.charCodeAt(0))
+    );
+  }
+
   // Générer un pseudo suggéré basé sur la nationalité
   private generateSuggestedPseudo(): string {
     if (!this.userData?.nationalityName) return 'utilisateur';
@@ -87,12 +103,15 @@ export class ProfileSetupComponent implements OnInit {
   if (file) {
     // Validation du fichier
     if (file.size > 2 * 1024 * 1024) {
-      alert('⚠️ La photo ne doit pas dépasser 2MB');
+      // NOTE: Remplacer alert() par une modal ou un message d'erreur dans le template
+      alert('⚠️ La photo ne doit pas dépasser 2MB'); 
       return;
     }
     
     if (!file.type.match('image/(jpeg|png|jpg)')) {
-      alert('⚠️ Format non supporté. Utilisez JPG ou PNG');
+      // NOTE: Remplacer alert() par une modal ou un message d'erreur dans le template
+      alert('⚠️ Format non supporté. Utilisez JPG ou PNG'); 
+    this.cd.detectChanges();
       return;
     }
     
@@ -106,6 +125,8 @@ export class ProfileSetupComponent implements OnInit {
       }, 0);
     };
     reader.readAsDataURL(file);
+    this.cd.detectChanges();
+
   }
 }
 
