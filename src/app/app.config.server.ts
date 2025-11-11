@@ -7,14 +7,7 @@ import { routes } from './app.routes';
 
 const serverConfig: ApplicationConfig = {
   providers: [
-    provideServerRendering(withRoutes(serverRoutes)),
-    provideRouter(
-      routes,
-      withInMemoryScrolling({
-        scrollPositionRestoration: 'enabled',
-        anchorScrolling: 'enabled',
-      })
-    )
+    provideServerRendering(withRoutes(serverRoutes) ),
   ]
 };
 
