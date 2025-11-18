@@ -29,10 +29,91 @@
   }
 }
 
+.bel-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.bel-header-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.bel-create-post-btn {
+  background: var(--bel-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  
+  &:hover:not(:disabled) {
+    background: #e69a00;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(242, 169, 0, 0.3);
+  }
+  
+  &:disabled {
+    background: #CBD5E0;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .bel-btn-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+}
+
+.bel-refresh-btn {
+  background: var(--bel-secondary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  
+  &:hover:not(:disabled) {
+    background: #007044;
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    background: #CBD5E0;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
 // CONTAINER DES POSTS =================================
 .bel-posts-container {
   padding: 16px;
-  padding-bottom: 100px; // Espace pour la navigation bottom
+  padding-bottom: 100px;
 }
 
 // CARTE DE POST =======================================
@@ -46,6 +127,10 @@
   transition: all 0.3s ease;
   position: relative;
   
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
 }
 
 // EN-TÊTE DU POST =====================================
@@ -70,6 +155,12 @@
   object-fit: cover;
   border: 2px solid var(--bel-light);
   flex-shrink: 0;
+  background: var(--bel-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
 }
 
 .bel-post-info {
@@ -91,6 +182,17 @@
   flex-wrap: wrap;
 }
 
+.bel-post-community {
+  background: rgba(0, 135, 81, 0.1);
+  color: var(--bel-secondary);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(0, 135, 81, 0.2);
+  margin-right: 8px;
+}
+
 .bel-post-time {
   color: var(--bel-gray);
   font-size: 13px;
@@ -109,7 +211,7 @@
     border: 1px solid rgba(242, 169, 0, 0.2);
   }
   
-  &.international {
+  &.national {
     background: rgba(0, 135, 81, 0.1);
     color: var(--bel-secondary);
     border: 1px solid rgba(0, 135, 81, 0.2);
@@ -245,11 +347,59 @@
   }
 }
 
+.bel-admin-tip, .bel-user-tip {
+  background: rgba(242, 169, 0, 0.05);
+  border: 1px solid rgba(242, 169, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+  text-align: left;
+  
+  p {
+    margin: 4px 0;
+    color: var(--bel-primary);
+    font-size: 14px;
+  }
+}
+
+.bel-user-tip {
+  background: rgba(0, 135, 81, 0.05);
+  border-color: rgba(0, 135, 81, 0.2);
+  
+  p {
+    color: var(--bel-secondary);
+  }
+}
+
 .bel-expiry-note {
+  margin-top: 20px !important;
+  font-style: italic;
+  
   small {
     color: var(--bel-gray);
-    font-style: italic;
   }
+}
+
+// CHARGEMENT ==========================================
+.bel-loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--bel-gray);
+  
+  .bel-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bel-light);
+    border-top: 4px solid var(--bel-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 // RESPONSIVE ==========================================
@@ -280,5 +430,16 @@
   .bel-action-btn {
     padding: 6px 10px;
     font-size: 12px;
+  }
+  
+  .bel-header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .bel-create-post-btn,
+  .bel-refresh-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

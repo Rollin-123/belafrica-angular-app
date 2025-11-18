@@ -2,24 +2,55 @@
   
   <!-- Header du feed national -->
   <div class="bel-feed-header">
-    <h2>🏠 {{ userCommunity }}</h2>
-    <p>Publications de votre communauté • Expirent après 48h</p>
+    <div class="bel-header-content">
+      <div class="bel-header-info">
+        <h2>🏠 {{ userCommunity }}</h2>
+        <p>Publications de votre communauté • Expirent après 48h</p>
+      </div>
+      
+      <div class="bel-header-actions">
+        <!-- Bouton Nouveau Post (visible seulement pour les admins) -->
+        <button 
+          *ngIf="showCreatePostButton"
+          class="bel-create-post-btn"
+          (click)="openCreatePostModal()"
+          [disabled]="isLoading">
+          <span class="bel-btn-icon">+</span>
+          Nouveau Post
+        </button>
+        
+        <!-- <button 
+          class="bel-refresh-btn"
+          (click)="refreshPosts()"
+          [disabled]="isLoading">
+          <span class="bel-btn-icon">🔄</span>
+          Actualiser
+        </button> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicateur de chargement -->
+  <div *ngIf="isLoading" class="bel-loading-state">
+    <div class="bel-loading-spinner"></div>
+    <p>Chargement des publications...</p>
   </div>
 
   <!-- Liste des posts nationaux -->
-  <div class="bel-posts-container">
+  <div class="bel-posts-container" *ngIf="!isLoading">
     
     <div class="bel-post-card" *ngFor="let post of posts$ | async">
       
+      <!-- En-tête du post -->
       <div class="bel-post-header">
         <div class="bel-post-author">
-          <img 
-            [src]="post.authorAvatar || '👤'" 
-            alt="Avatar" 
-            class="bel-post-avatar">
+          <div class="bel-post-avatar">
+            {{ post.authorAvatar || '👤' }}
+          </div>
           <div class="bel-post-info">
             <strong class="bel-author-name">{{ post.authorName }}</strong>
             <div class="bel-post-meta">
+              <span class="bel-post-community">{{ post.community }}</span>
               <span class="bel-post-time">{{ post.createdAt | date:'dd/MM HH:mm' }}</span>
               <span class="bel-post-badge admin">👑 Admin</span>
               <span class="bel-post-badge national">🏠 National</span>
@@ -27,6 +58,7 @@
           </div>
         </div>
         
+        <!-- Indicateur d'expiration -->
         <div 
           class="bel-expiry-indicator"
           [class.expiring]="isExpiringSoon(post)"
@@ -35,29 +67,34 @@
         </div>
       </div>
 
+      <!-- Contenu du post -->
       <div class="bel-post-content">
         <p>{{ post.content }}</p>
         
+        <!-- Images du post -->
         <div *ngIf="post.imageUrls?.length" class="bel-post-images">
           <img 
             *ngFor="let imageUrl of post.imageUrls" 
             [src]="imageUrl" 
             alt="Image du post"
             class="bel-post-image">
+            <!-- (error)="imageUrl = 'assets/images/placeholder.jpg'"> -->
         </div>
       </div>
 
+      <!-- Actions du post -->
       <div class="bel-post-actions">
         <button 
           class="bel-action-btn like"
           [class.liked]="hasLiked(post)"
-          (click)="toggleLike(post.id)">
+          (click)="toggleLike(post.id)"
+          [disabled]="isLoading">
           ❤️ {{ post.likes.length }}
         </button>
         
-        <!-- <button class="bel-action-btn">
-          🔄 Partager
-        </button> -->
+        <button class="bel-action-btn share" title="Partager">
+          🔄
+        </button>
       </div>
 
     </div>
@@ -67,13 +104,20 @@
       <div class="bel-empty-icon">🏠</div>
       <h3>Aucune publication nationale</h3>
       <p>Les administrateurs de votre communauté publieront bientôt du contenu.</p>
+      
+      <div *ngIf="showCreatePostButton" class="bel-admin-tip">
+        <p>💡 <strong>Vous êtes administrateur !</strong></p>
+        <p>Utilisez le bouton "Nouveau Post" pour partager du contenu avec votre communauté.</p>
+      </div>
+      
+      <div *ngIf="!showCreatePostButton" class="bel-user-tip">
+        <p>📨 <strong>Devenez administrateur</strong></p>
+        <p>Rendez-vous dans les paramètres pour demander les droits d'administration.</p>
+      </div>
+      
       <p class="bel-expiry-note">
         <small>💡 Les posts nationaux expirent après 48h</small>
       </p>
     </div>
-
-    
-
   </div>
-
 </div>

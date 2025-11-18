@@ -22,6 +22,8 @@ export class AdminRequestComponent implements OnInit {
   isAdmin = false;
   codeError: string | null = '';
   user: any;
+  showCreatePostButton = false;
+  uploadError: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -40,9 +42,21 @@ export class AdminRequestComponent implements OnInit {
   ngOnInit() {
     this.loadUserData();
     
-    // S'abonner aux mises à jour de l'utilisateur
-    this.userService.userUpdate$.subscribe(() => {
-      this.loadUserData();
+    this.userService.currentUser$.subscribe(user => {
+      if (user) {
+        this.user = user;
+        this.isAdmin = user.isAdmin || false;
+        this.showCreatePostButton = this.adminService.canPostNational();
+        this.hasPendingRequest = this.adminService.hasPendingRequest();
+        
+        console.log('🔄 Mise à jour réactive du statut admin:', {
+          isAdmin: this.isAdmin,
+          pseudo: user.pseudo,
+          showCreatePostButton: this.showCreatePostButton
+        });
+
+        this.cd.detectChanges();
+      }
     });
   }
 
@@ -50,133 +64,132 @@ export class AdminRequestComponent implements OnInit {
     this.user = this.userService.getCurrentUser();
     this.isAdmin = this.adminService.isUserAdmin();
     this.hasPendingRequest = this.adminService.hasPendingRequest();
+    this.showCreatePostButton = this.adminService.canPostNational();
     
-    console.log('👤 Statut admin mis à jour:', {
+    console.log('👤 Statut admin initial:', {
       isAdmin: this.isAdmin,
       hasPendingRequest: this.hasPendingRequest,
-      user: this.user?.pseudo
+      user: this.user?.pseudo,
+      showCreatePostButton: this.showCreatePostButton
     });
 
     this.cd.detectChanges();
   }
 
- onPassportSelected(event: any): void {
+  onPassportSelected(event: any): void {
     const file: File = event.target.files[0];
 
     if (file) {
-      // 1. Crée un lecteur de fichier
-      const reader = new FileReader();
-
-      // 2. Déclenche la lecture en Base64 (Data URL)
-      reader.readAsDataURL(file);
-
-      // 3. Une fois la lecture terminée
-      reader.onload = () => {
-        // Stocke la Data URL (Base64) pour l'aperçu ET l'upload
-        this.passportPreview = reader.result;
-        this.selectedPassportBase64 = reader.result as string; 
-        
-        // Valide le champ du formulaire
+      this.uploadError = null;
+      
+      if (file.size > 5 * 1024 * 1024) {
+        this.uploadError = '⚠️ La photo ne doit pas dépasser 5MB';
         this.cd.detectChanges();
+        return;
+      }
+      
+      if (!file.type.match('image/(jpeg|png|jpg)')) {
+        this.uploadError = '⚠️ Format non supporté. Utilisez JPG ou PNG';
+        this.cd.detectChanges();
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.passportPreview = e.target.result;
+        this.selectedPassportBase64 = e.target.result as string; 
+        
         this.adminForm.get('passportPhoto')?.setValue(true);
+        this.uploadError = null;
+        this.cd.detectChanges();
       };
 
       reader.onerror = (error) => {
         console.error("Erreur de lecture de fichier:", error);
-        this.cd.detectChanges();
+        this.uploadError = '❌ Erreur de lecture du fichier';
         this.adminForm.get('passportPhoto')?.setValue(false);
+        this.cd.detectChanges();
       };
 
+      reader.readAsDataURL(file);
     } else {
       this.passportPreview = null;
       this.selectedPassportBase64 = null;
-      this.cd.detectChanges();
       this.adminForm.get('passportPhoto')?.setValue(false);
+      this.cd.detectChanges();
     }
   }
 
-  // Logique de soumission de la demande
   async submitRequest(): Promise<void> {
     if (this.adminForm.invalid || this.isLoading) {
-      this.adminForm.markAllAsTouched();
+      this.markFormGroupTouched();
       return;
     }
 
     if (!this.selectedPassportBase64) {
-      console.error("L'image Base64 est manquante.");
-      // Afficher un message d'erreur à l'utilisateur ici
+      this.uploadError = '⚠️ Veuillez sélectionner une photo de pièce d\'identité';
       return;
     }
 
     this.isLoading = true;
-    this.codeError = null; 
+    this.codeError = null;
+    this.uploadError = null;
 
     try {
-      // ⚠️ FIX: On passe la chaîne Base64 convertie et non l'objet File !
-      const imageUrl = await this.cloudinaryService.uploadImage(this.selectedPassportBase64); 
+      const imageUrl = await this.cloudinaryService.uploadImage(this.selectedPassportBase64);
+      
+      const success = await this.adminService.submitAdminRequest(
+        imageUrl, 
+        this.adminForm.value.additionalInfo
+      );
 
-      // 2. Préparation des données pour Firestore/Backend
-      const requestData = {
-        community: this.user?.community, // ou autre donnée utilisateur
-        additionalInfo: this.adminForm.value.additionalInfo,
-        passportImageUrl: imageUrl, // L'URL publique de Cloudinary
-        status: 'pending',
-        timestamp: new Date().toISOString()
-      };
-
-      // 3. Envoi au Backend / Firestore
-      console.log('Données à envoyer au backend/Firestore:', requestData);
-      // await this.adminService.createAdminRequest(requestData); 
-
-      // ... (Logique de succès, navigation, etc.)
-      this.hasPendingRequest = true; 
-
-    } catch (error) {
+      if (success) {
+        this.hasPendingRequest = true;
+        this.showSuccess('📨 Demande envoyée ! Vous recevrez un code par email sous 24-48h.');
+        this.adminForm.reset();
+        this.passportPreview = null;
+        this.selectedPassportBase64 = null;
+      } else {
+        this.codeError = '❌ Erreur lors de l\'envoi de la demande. Réessayez.';
+      }
+    } catch (error: any) {
       console.error("Erreur lors de la soumission de la demande:", error);
-      this.codeError = "Échec de l'envoi de la demande. Veuillez réessayer.";
+      this.codeError = "❌ Échec de l'envoi de la demande: " + (error.message || 'Erreur inconnue');
     } finally {
       this.isLoading = false;
+      this.cd.detectChanges();
     }
   }
 
-  // Validation du code JWT
   validateAdminCode(): void {
     const code = this.adminCode.trim();
     console.log('🔑 Tentative de validation du code :', code);
 
-    if (code) {
-      this.validatingCode = true;
-      this.codeError = '';
-      
-      // Simulation de délai pour l'UX
-      setTimeout(() => {
-        try {
-          // 💡 POINT CRITIQUE : Ici, vous devez implémenter la logique réelle.
-          const isValid = this.adminService.validateAdminCode(code);
-          
-          if (isValid) {
-            this.showSuccess('🎉 Félicitations ! Vous êtes maintenant administrateur.');
-            
-            // Recharger les données
-            this.loadUserData();
-            
-            // Redirection après succès
-            setTimeout(() => {
-              this.router.navigate(['/app/settings']);
-            }, 2000);
-          } else {
-            this.codeError = '❌ Code invalide, expiré ou ne correspond pas à votre communauté.';
-          }
-        } catch (error: any) {
-          this.codeError = '❌ Erreur de validation: ' + (error.message || 'Veuillez réessayer.');
-        } finally {
-          this.validatingCode = false;
-          this.cd.detectChanges();
-        }
-      }, 1000);
-    } else {
+    if (!code) {
       this.codeError = '⚠️ Veuillez entrer un code de validation.';
+      return;
     }
+
+    this.validatingCode = true;
+    this.codeError = '';
+    
+    this.adminService.validateAdminCodeWithRedirect(code, this.router)
+      .then(isValid => {
+        if (isValid) {
+          this.codeError = '🎉 Félicitations ! Vous êtes maintenant administrateur. Redirection...';
+          this.isAdmin = true;
+          this.showCreatePostButton = true;
+        } else {
+          this.codeError = '❌ Code invalide, expiré ou ne correspond pas à votre communauté.';
+        }
+      })
+      .catch(error => {
+        this.codeError = '❌ Erreur de validation: ' + (error.message || 'Veuillez réessayer.');
+      })
+      .finally(() => {
+        this.validatingCode = false;
+        this.cd.detectChanges();
+      });
   }
 
   private markFormGroupTouched(): void {
@@ -185,7 +198,6 @@ export class AdminRequestComponent implements OnInit {
     });
   }
 
-  // Remplacer les alert() par des messages stylisés est fortement recommandé en production
   private showError(message: string): void {
     alert(message);
   }
@@ -198,10 +210,18 @@ export class AdminRequestComponent implements OnInit {
     this.router.navigate(['/app/settings']);
   }
 
-  // Réinitialiser pour les tests
   resetForTesting(): void {
     this.adminService.resetAdminData();
     this.loadUserData();
     this.showSuccess('🔄 Données admin réinitialisées pour les tests');
+  }
+
+  // Nouvelle méthode pour ouvrir le modal de création de post
+  openCreatePostModal(): void {
+    if (this.showCreatePostButton) {
+      console.log('📝 Ouverture du modal de création de post');
+      // Implémenter l'ouverture du modal ici
+      this.showSuccess('Fonctionnalité de création de post bientôt disponible !');
+    }
   }
 }

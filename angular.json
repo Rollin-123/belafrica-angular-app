@@ -34,15 +34,17 @@
             "styles": [
               "src/styles.scss"
             ],
-            "server": "src/main.server.ts",
             "outputMode": "static",
-            "ssr": {
-              "entry": "src/main.server.ts"
+            "ssr": false,
+            "index": {
+              "input": "src/index.html",
+              "output": "index.html"
             }
           },
           "configurations": {
             "production": {
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/"
             },
             "development": {
               "optimization": false,

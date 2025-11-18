@@ -15,18 +15,6 @@
   border: 1px solid rgba(0, 135, 81, 0.2);
   margin-right: 8px;
 }
-
-.bel-feed-header {
-  background: linear-gradient(135deg, var(--bel-secondary), var(--bel-secondary-dark));
-  
-  h2 {
-    color: var(--bel-white);
-  }
-  
-  p {
-    color: rgba(255, 255, 255, 0.8);
-  }
-}
 // HEADER DU FEED ======================================
 .bel-feed-header {
   background: var(--bel-white);

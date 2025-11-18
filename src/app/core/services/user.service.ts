@@ -46,14 +46,12 @@ export interface UserUpdateData {
 export class UserService {
   private currentUser = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUser.asObservable();
-private userUpdate = new BehaviorSubject<User | null>(null);
-public userUpdate$ = this.userUpdate.asObservable();
 
   constructor(private storageService: StorageService) {
     this.loadUserFromStorage();
   }
 
-  // ✅ CORRECTION : Chargement utilisateur
+  // ✅ CORRIGÉ : Chargement SYNCHRONE et réactif
   private loadUserFromStorage(): void {
     const userData = this.storageService.getItem('belafrica_user_profile');
     
@@ -75,53 +73,15 @@ public userUpdate$ = this.userUpdate.asObservable();
     }
   }
 
-  
-  // ✅ AJOUTEZ CETTE MÉTHODE DANS UserServicegetCurrentUser
-// generateDefaultAvatar(pseudo: string): string {
-//   // Avatar par défaut avec les initiales sur fond coloré
-//   const initials = pseudo.charAt(0).toUpperCase();
-//   const colors = [
-//     '#F2A900', '#008751', '#E53E3E', '#3182CE', '#38A169', 
-//     '#D69E2E', '#805AD5', '#DD6B20'
-//   ];
-  
-//   const colorIndex = pseudo.charCodeAt(0) % colors.length;
-//   const backgroundColor = colors[colorIndex];
-  
-//   // SVG simple avec initiales
-//   return `data:image/svg+xml;base64,${btoa(`
-//     <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-//       <rect width="100" height="100" fill="${backgroundColor}" rx="50"/>
-//       <text x="50" y="60" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="40" font-weight="bold">${initials}</text>
-//     </svg>
-//   `)}`;
-// }
-
-// ✅ VERSION ALTERNATIVE AVEC EMOJI
-generateDefaultAvatar(pseudo: string): string {
-  const emojis = ['👤', '😊', '😎', '🤠', '🧑', '👨', '👩', '🧔', '👱', '👴'];
-  const emojiIndex = pseudo.charCodeAt(0) % emojis.length;
-  return emojis[emojiIndex];
-}
-
-  // ✅ MÉTHODES DE BASE
-  getCurrentUser(): User | null {
-    return this.currentUser.value;
+  // ✅ NOUVEAU : Mise à jour IMMÉDIATE et réactive
+  updateUser(userData: User): void {
+    this.storageService.setItem('belafrica_user_profile', userData);
+    this.currentUser.next(userData);
+    console.log('🔄 Utilisateur mis à jour:', userData.pseudo);
   }
 
-  getUserCommunity(): string {
-    return this.currentUser.value?.community || '';
-  }
-
-  logout(): void {
-    this.storageService.removeItem('belafrica_user_profile');
-    this.storageService.removeItem('tempPhone');
-    this.storageService.removeItem('userRegistrationData');
-    this.currentUser.next(null);
-  }
-
-  // ✅ MÉTHODES ADMIN
-  makeUserAdmin(permissions: string[] = ['post_national']): void {
+  // ✅ CORRIGÉ : Promotion admin avec notification
+  promoteToAdmin(permissions: string[] = ['post_national']): void {
     const currentUser = this.currentUser.value;
     if (!currentUser) return;
 
@@ -133,10 +93,15 @@ generateDefaultAvatar(pseudo: string): string {
       adminSince: new Date().toISOString()
     };
 
-    this.saveUser(updatedUser);
-    console.log('✅ Utilisateur promu admin:', currentUser.pseudo);
+    this.updateUser(updatedUser);
+    console.log('✅ Utilisateur promu admin:', {
+      pseudo: currentUser.pseudo,
+      permissions: permissions,
+      level: updatedUser.adminLevel
+    });
   }
 
+  // ✅ CORRIGÉ : Vérifications en temps réel
   canUserPost(): boolean {
     const user = this.currentUser.value;
     return user?.isAdmin || false;
@@ -150,7 +115,29 @@ generateDefaultAvatar(pseudo: string): string {
     return this.currentUser.value?.adminLevel || 'user';
   }
 
-  // ✅ MÉTHODES PROFIL
+  // ✅ MÉTHODES EXISTANTES AMÉLIORÉES
+  getCurrentUser(): User | null {
+    return this.currentUser.value;
+  }
+
+  getUserCommunity(): string {
+    return this.currentUser.value?.community || '';
+  }
+
+  logout(): void {
+    this.storageService.removeItem('belafrica_user_profile');
+    this.storageService.removeItem('tempPhone');
+    this.storageService.removeItem('userRegistrationData');
+    this.currentUser.next(null);
+    console.log('🚪 Utilisateur déconnecté');
+  }
+
+  generateDefaultAvatar(pseudo: string): string {
+    const emojis = ['👤', '😊', '😎', '🤠', '🧑', '👨', '👩', '🧔', '👱', '👴'];
+    const emojiIndex = pseudo.charCodeAt(0) % emojis.length;
+    return emojis[emojiIndex];
+  }
+
   updateProfile(updateData: UserUpdateData): Promise<User> {
     return new Promise((resolve, reject) => {
       try {
@@ -165,7 +152,7 @@ generateDefaultAvatar(pseudo: string): string {
           ...updateData
         };
 
-        this.saveUser(updatedUser);
+        this.updateUser(updatedUser);
         resolve(updatedUser);
       } catch (error) {
         reject(error);
@@ -173,7 +160,6 @@ generateDefaultAvatar(pseudo: string): string {
     });
   }
 
-  // ✅ UPLOAD AVATAR
   async uploadAvatar(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!file?.type.startsWith('image/')) {
@@ -197,13 +183,31 @@ generateDefaultAvatar(pseudo: string): string {
       reader.readAsDataURL(file);
     });
   }
-  notifyUserUpdate(): void {
-  this.userUpdate.next(this.currentUser.value);
-}
 
-  // ✅ MÉTHODE PRIVÉE POUR SAUVEGARDE
-  private saveUser(user: User): void {
-    this.storageService.setItem('belafrica_user_profile', user);
-    this.currentUser.next(user);
+  // ✅ NOUVEAU : Vérification des permissions spécifiques
+  canPostNational(): boolean {
+    const user = this.currentUser.value;
+    return user?.isAdmin && user?.adminPermissions?.includes('post_national') || false;
+  }
+
+  canPostInternational(): boolean {
+    const user = this.currentUser.value;
+    return user?.isAdmin && user?.adminPermissions?.includes('post_international') || false;
+  }
+
+  // ✅ NOUVEAU : Réinitialisation pour les tests
+  resetAdminStatus(): void {
+    const currentUser = this.currentUser.value;
+    if (currentUser) {
+      const updatedUser = {
+        ...currentUser,
+        isAdmin: false,
+        adminPermissions: undefined,
+        adminLevel: undefined,
+        adminSince: undefined
+      };
+      this.updateUser(updatedUser);
+      console.log('🔄 Statut admin réinitialisé');
+    }
   }
 }
