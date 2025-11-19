@@ -1,0 +1,302 @@
+.bel-settings-container {
+  min-height: 100vh;
+  background: var(--bel-light);
+  padding-bottom: 80px;
+}
+
+.bel-avatar-default {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bel-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  border: 3px solid var(--bel-white);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* HEADER ============================================== */
+.bel-settings-header {
+  background: var(--bel-white);
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--bel-border);
+  
+  h1 {
+    margin: 0 0 4px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+  
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+  }
+}
+
+/* CARTE UTILISATEUR ================================== */
+.bel-user-card {
+  background: var(--bel-white);
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--bel-border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bel-user-avatar {
+  .bel-avatar-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bel-primary);
+  }
+  
+  .bel-avatar-fallback {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--bel-primary);
+    color: var(--bel-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    border: 3px solid var(--bel-primary-light);
+  }
+}
+
+.bel-user-info {
+  flex: 1;
+  
+  .bel-user-name {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+  }
+  
+  .bel-user-email {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+  }
+}
+
+.bel-user-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bel-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--bel-font-body);
+  
+  &.bel-badge-community {
+    background: var(--bel-primary-light);
+    color: var(--bel-primary-dark);
+  }
+  
+  &.bel-badge-verified {
+    background: var(--bel-secondary-light);
+    color: var(--bel-secondary-dark);
+  }
+}
+
+/* SECTIONS DES PARAMÈTRES ============================ */
+.bel-settings-sections {
+  padding: 20px 16px;
+}
+
+.bel-settings-group {
+  margin-bottom: 32px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.bel-settings-group-title {
+  margin: 0 0 16px 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--bel-dark);
+  font-family: var(--bel-font-heading);
+}
+
+.bel-settings-list {
+  background: var(--bel-white);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid var(--bel-border);
+}
+
+.bel-settings-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--bel-border-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover:not(.disabled) {
+    background: var(--bel-light);
+  }
+  
+  &:active:not(.disabled) {
+    background: var(--bel-border-light);
+  }
+  
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Style pour les actions critiques */
+  &.bel-settings-item-critical {
+    &.bel-danger {
+      .bel-settings-item-title {
+        color: var(--bel-accent);
+      }
+      
+      &:hover {
+        background: rgba(229,62,62,0.05);
+      }
+    }
+  }
+}
+
+.bel-settings-item-icon {
+  font-size: 20px;
+  margin-right: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+.bel-settings-item-content {
+  flex: 1;
+  
+  .bel-settings-item-title {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-body);
+  }
+  
+  .bel-settings-item-desc {
+    margin: 0;
+    font-size: 13px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+    line-height: 1.4;
+  }
+}
+
+.bel-settings-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bel-settings-badge {
+  background: var(--bel-primary-light);
+  color: var(--bel-primary-dark);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--bel-font-body);
+}
+
+.bel-settings-arrow {
+  font-size: 18px;
+  color: var(--bel-gray);
+  font-weight: 300;
+}
+
+/* INFORMATIONS APPLICATION =========================== */
+.bel-app-info {
+  margin-top: 40px;
+  text-align: center;
+  
+  .bel-version-info {
+    .bel-version {
+      margin: 0 0 4px 0;
+      font-size: 13px;
+      color: var(--bel-gray);
+      font-family: var(--bel-font-body);
+    }
+    
+    .bel-copyright {
+      margin: 0;
+      font-size: 12px;
+      color: var(--bel-gray-light);
+      font-family: var(--bel-font-body);
+    }
+  }
+}
+
+/* AVATAR PAR DÉFAUT ================================= */
+.bel-avatar-default {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--bel-gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 3px solid var(--bel-border);
+}
+
+.bel-avatar-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bel-primary);
+}
+
+/* RESPONSIVE ========================================= */
+@media (max-width: 480px) {
+  .bel-settings-header {
+    padding: 16px 12px;
+    
+    h1 {
+      font-size: 22px;
+    }
+  }
+  
+  .bel-user-card {
+    padding: 16px 12px;
+  }
+  
+  .bel-settings-sections {
+    padding: 16px 12px;
+  }
+  
+  .bel-settings-item {
+    padding: 14px 12px;
+  }
+}

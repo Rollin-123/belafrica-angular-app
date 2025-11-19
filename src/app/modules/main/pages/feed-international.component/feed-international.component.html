@@ -1,1 +1,83 @@
-<p>feed-international.component works!</p>
+<div class="bel-page-container">
+  
+  <!-- Header du feed international -->
+  <div class="bel-feed-header">
+    <h2>🌍 Fil International</h2>
+    <p>Toutes les publications des communautés • Expirent après 72h</p>
+  </div>
+
+  <!-- Liste des posts internationaux -->
+  <div class="bel-posts-container">
+    
+    <div class="bel-post-card" *ngFor="let post of posts$ | async">
+      
+      <!-- En-tête du post -->
+      <div class="bel-post-header">
+        <div class="bel-post-author">
+          <img 
+            [src]="post.authorAvatar || '👤'" 
+            alt="Avatar" 
+            class="bel-post-avatar">
+          <div class="bel-post-info">
+            <strong class="bel-author-name">{{ post.authorName }}</strong>
+            <div class="bel-post-meta">
+              <span class="bel-post-community">{{ post.community }}</span>
+              <span class="bel-post-time">{{ post.createdAt | date:'dd/MM HH:mm' }}</span>
+              <span class="bel-post-badge admin">👑 Admin</span>
+              <span class="bel-post-badge international">🌍 International</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Indicateur d'expiration -->
+        <div 
+          class="bel-expiry-indicator"
+          [class.expiring]="isExpiringSoon(post)"
+          [title]="'Expire le ' + (post.expiresAt | date:'dd/MM HH:mm')">
+          ⏳ {{ getTimeRemaining(post) }}
+        </div>
+      </div>
+
+      <!-- Contenu du post -->
+      <div class="bel-post-content">
+        <p>{{ post.content }}</p>
+        
+        <!-- Images du post -->
+        <div *ngIf="post.imageUrls?.length" class="bel-post-images">
+          <img 
+            *ngFor="let imageUrl of post.imageUrls" 
+            [src]="imageUrl" 
+            alt="Image du post"
+            class="bel-post-image">
+        </div>
+      </div>
+
+      <!-- Actions du post -->
+      <div class="bel-post-actions">
+        <button 
+          class="bel-action-btn like"
+          [class.liked]="hasLiked(post)"
+          (click)="toggleLike(post.id)">
+          ❤️ {{ post.likes.length }}
+        </button>
+        
+        <button class="bel-action-btn">
+          🔄 Partager
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Message si pas de posts -->
+    <div *ngIf="(posts$ | async)?.length === 0" class="bel-empty-state">
+      <div class="bel-empty-icon">🌍</div>
+      <h3>Aucune publication internationale</h3>
+      <p>Les administrateurs publieront bientôt du contenu pour toutes les communautés.</p>
+      <p class="bel-expiry-note">
+        <small>💡 Les posts internationaux expirent après 72h</small>
+      </p>
+    </div>
+
+  </div>
+
+</div>

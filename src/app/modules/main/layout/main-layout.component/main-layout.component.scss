@@ -66,16 +66,16 @@
 .bel-main-content {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 80px; // Espace pour la navigation bottom
+  // padding-bottom: 80px; // Espace pour la navigation bottom
   background: var(--bel-white);
 }
 
 // NAVIGATION BOTTOM ===================================
 .bel-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  // position: fixed;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
   background: var(--bel-white);
   display: flex;
   justify-content: space-around;
@@ -186,6 +186,28 @@
     .bel-nav-label {
       font-size: 10px;
     }
+  }
+}
+
+.bel-fab {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bel-primary);
+  color: var(--bel-white);
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(242, 169, 0, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1000;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(242, 169, 0, 0.4);
   }
 }
 

@@ -21,6 +21,4 @@ export class AuthService {
       }
     }
   }
-
-  // Vos autres méthodes...
 }

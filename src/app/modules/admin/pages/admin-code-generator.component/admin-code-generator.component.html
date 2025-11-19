@@ -1,0 +1,162 @@
+<div class="bel-admin-generator-container">
+  
+  <header class="bel-generator-header">
+    <h1>🔑 Générateur de Codes Admin</h1>
+    <p>Générez des codes courts pour les administrateurs des communautés</p>
+  </header>
+
+  <div class="bel-generator-content">
+    
+    <form [formGroup]="codeForm" (ngSubmit)="generateCode()" class="bel-generator-form">
+      
+      <div class="bel-form-grid">
+        
+        <!-- Sélection du pays de résidence -->
+        <div class="bel-form-group">
+          <label class="bel-form-label">🇪🇺 Pays de résidence *</label>
+          <select formControlName="countryCode" class="bel-form-select">
+            <option value="">Choisissez un pays</option>
+            <option *ngFor="let country of europeanCountries" [value]="country.code">
+              {{ country.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Sélection de la nationalité -->
+        <div class="bel-form-group">
+          <label class="bel-form-label">🌍 Nationalité africaine *</label>
+          <select formControlName="nationality" class="bel-form-select">
+            <option value="">Choisissez une nationalité</option>
+            <option *ngFor="let nationality of africanNationalities" [value]="nationality">
+              {{ nationality }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Prévisualisation communauté -->
+        <div class="bel-form-group" *ngIf="codeForm.get('countryName')?.value && codeForm.get('nationality')?.value">
+          <label class="bel-form-label">🏠 Communauté générée</label>
+          <div class="bel-community-preview">
+            <strong>{{ getPreviewCommunity() }}</strong>
+            <small>Cette communauté sera créée automatiquement</small>
+          </div>
+        </div>
+
+        <!-- Email de l'admin -->
+        <div class="bel-form-group">
+          <label class="bel-form-label">📧 Email de l'admin *</label>
+          <input 
+            type="email" 
+            formControlName="userEmail"
+            placeholder="admin@exemple.com"
+            class="bel-form-input">
+          <div *ngIf="codeForm.get('userEmail')?.invalid && codeForm.get('userEmail')?.touched" 
+               class="bel-error-message">
+            ⚠️ Email invalide
+          </div>
+        </div>
+
+        <!-- Niveau de permissions -->
+<div class="bel-form-group">
+  <label class="bel-form-label">👑 Niveau d'administration *</label>
+  <div class="bel-permission-options">
+    <label *ngFor="let level of permissionLevels" class="bel-permission-option">
+      <input 
+        type="radio" 
+        formControlName="permissionLevel"
+        [value]="level.value"
+        class="bel-radio-input">
+      <span class="bel-radio-custom"></span>
+      <span class="bel-permission-content">
+        <strong>{{ level.label }}</strong>
+        <small>{{ level.description }}</small>
+        <span class="bel-permission-badge" [class]="level.value">
+          {{ level.badge }}
+        </span>
+      </span>
+    </label>
+  </div>
+</div>
+
+        <!-- Durée de validité -->
+        <div class="bel-form-group">
+          <label class="bel-form-label">⏰ Validité du code *</label>
+          <select formControlName="expiresIn" class="bel-form-select">
+            <option [value]="24">24 heures</option>
+            <option [value]="48">48 heures</option>
+            <option [value]="168">7 jours</option>
+          </select>
+          <small>Expire le : {{ getExpiryDate(codeForm.get('expiresIn')?.value || 24) }}</small>
+        </div>
+
+      </div>
+
+      <!-- Bouton de génération -->
+      <button 
+        type="submit" 
+        class="bel-btn-primary bel-generate-btn"
+        [disabled]="!codeForm.valid || isLoading">
+        
+        <span *ngIf="!isLoading" class="bel-btn-content">
+          <span class="bel-btn-icon">🔑</span>
+          Générer le Code Admin
+        </span>
+        
+        <span *ngIf="isLoading" class="bel-btn-content">
+          <span class="bel-loading-spinner"></span>
+          Génération en cours...
+        </span>
+      </button>
+
+    </form>
+
+    <!-- Code généré -->
+    <div *ngIf="generatedCode && showCode" class="bel-generated-code">
+      <div class="bel-code-header">
+        <h3>✅ Code Admin Généré</h3>
+        <p>Code envoyé par email à l'administrateur</p>
+      </div>
+      
+      <div class="bel-code-display">
+        <code class="bel-jwt-code">{{ generatedCode }}</code>
+        
+        <div class="bel-code-actions">
+          <button (click)="copyToClipboard()" class="bel-btn-secondary">
+            📋 Copier le code
+          </button>
+          <button (click)="sendByEmail()" class="bel-btn-secondary">
+            📧 Renvoyer l'email
+          </button>
+        </div>
+        
+        <div class="bel-code-info">
+  <p><strong>📧 Email :</strong> {{ codeForm.get('userEmail')?.value }}</p>
+  <p><strong>🏠 Communauté :</strong> {{ getPreviewCommunity() }}</p>
+  <p><strong>⏰ Expire dans :</strong> {{ codeForm.get('expiresIn')?.value }} heures</p>
+  <p><strong>👑 Permissions :</strong> {{ getPermissionLabel() }}</p>
+</div>
+      </div>
+    </div>
+
+    <!-- Historique des codes générés -->
+    <div class="bel-recent-codes" *ngIf="generatedCodes.length > 0">
+      <h3>📜 Codes Actifs Récemment Générés</h3>
+      <div class="bel-codes-list">
+        <div *ngFor="let code of generatedCodes" class="bel-code-item">
+          <div class="bel-code-details">
+            <strong class="bel-code-value">{{ code.code }}</strong>
+            <span class="bel-code-community">{{ code.community }}</span>
+            <span class="bel-code-email">{{ code.userEmail }}</span>
+            <span class="bel-code-expiry">Expire: {{ code.expiresAt | date:'dd/MM HH:mm' }}</span>
+          </div>
+          <!-- 🚨 Bouton de suppression ajouté -->
+          <button (click)="deleteCode(code)" class="bel-btn-icon-only bel-btn-delete" title="Supprimer le code">
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

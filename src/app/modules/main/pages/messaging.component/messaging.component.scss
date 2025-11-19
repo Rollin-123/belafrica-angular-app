@@ -1,0 +1,958 @@
+.bel-messaging-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bel-light);
+  position: relative;
+  overflow: hidden;
+
+  // HEADER ==============================================
+  .bel-messaging-header {
+    background: var(--bel-white);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--bel-border);
+    flex-shrink: 0;
+
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--bel-dark);
+      font-family: var(--bel-font-heading);
+    }
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--bel-gray);
+      font-family: var(--bel-font-body);
+    }
+  }
+
+  // NAVIGATION PAR ONGLETS =============================
+  .bel-messaging-tabs {
+    display: flex;
+    background: var(--bel-white);
+    border-bottom: 1px solid var(--bel-border);
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+
+  .bel-tab-button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 16px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--bel-gray);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    font-family: var(--bel-font-body);
+
+    &.active {
+      color: var(--bel-primary);
+      border-bottom-color: var(--bel-primary);
+      font-weight: 600;
+    }
+    &:hover:not(.active) {
+      color: var(--bel-dark);
+      background: var(--bel-light);
+    }
+  }
+
+  // CONTENU PRINCIPAL ==================================
+  .bel-messaging-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; // Important pour le flex
+  }
+
+  // CONTAINER CHAT DE GROUPE ==========================
+  .bel-group-chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bel-white);
+    min-height: 0; // Important pour le flex
+  }
+
+  // HEADER DU GROUPE ==================================
+  .bel-group-header {
+    background: var(--bel-white);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--bel-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+
+    .bel-group-info {
+      h2 {
+        margin: 0 0 4px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--bel-dark);
+        font-family: var(--bel-font-heading);
+      }
+      p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--bel-gray);
+        font-family: var(--bel-font-body);
+      }
+    }
+
+    .bel-members-count {
+      font-size: 13px;
+      color: var(--bel-gray);
+      font-family: var(--bel-font-body);
+    }
+  }
+
+  // ZONE DES MESSAGES =================================
+  .bel-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: var(--bel-light);
+    scroll-behavior: smooth;
+    min-height: 0; // Important pour le flex
+  }
+
+  .bel-no-messages {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--bel-gray);
+
+    .bel-no-messages-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    h3 {
+      margin: 0 0 8px 0;
+      color: var(--bel-dark);
+      font-family: var(--bel-font-heading);
+    }
+    p {
+      margin: 0;
+      line-height: 1.5;
+      font-family: var(--bel-font-body);
+    }
+  }
+
+  .bel-messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bel-message-wrapper {
+    display: flex;
+
+    &.my-message {
+      justify-content: flex-end;
+      .bel-message-bubble {
+        background: var(--bel-primary);
+        color: var(--bel-white);
+        border-bottom-right-radius: 4px;
+
+        .bel-message-time {
+          color: rgba(255, 255, 255, 0.7);
+        }
+        .bel-message-sender {
+          color: rgba(255, 255, 255, 0.9);
+        }
+        .bel-reply-indicator {
+          background: rgba(255, 255, 255, 0.1);
+          border-left-color: rgba(255, 255, 255, 0.5);
+          .bel-reply-content {
+            strong {
+              color: rgba(255, 255, 255, 0.9);
+            }
+            p {
+              color: rgba(255, 255, 255, 0.7);
+            }
+          }
+        }
+      }
+    }
+
+    &.other-message {
+      justify-content: flex-start;
+      .bel-message-bubble {
+        background: var(--bel-secondary-light);
+        color: var(--bel-light);
+        border-bottom-left-radius: 4px;
+
+        .bel-message-time {
+          color: var(--bel-gray);
+        }
+        .bel-reply-indicator {
+          background: rgba(0, 0, 0, 0.05);
+          border-left-color: var(--bel-secondary);
+          .bel-reply-content {
+            strong {
+              color: var(--bel-secondary-dark);
+            }
+            p {
+              color: var(--bel-gray);
+            }
+          }
+        }
+      }
+    }
+
+    // Animation de surbrillance
+    &.bel-message-highlight {
+      animation: highlightMessage 2s ease;
+    }
+  }
+
+  @keyframes highlightMessage {
+    0% {
+      background: transparent;
+    }
+    10% {
+      background: rgba(242, 169, 0, 0.1);
+    }
+    100% {
+      background: transparent;
+    }
+  }
+
+  .bel-message-bubble {
+    width: 85%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    animation: messageAppear 0.3s ease;
+    position: relative;
+    cursor: pointer;
+  }
+
+  @keyframes messageAppear {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // INDICATEUR DE RÉPONSE ==============================
+  .bel-reply-indicator {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 12px;
+    margin: -8px -12px 8px -12px;
+    border-radius: 12px 12px 0 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-left: 3px solid;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  .bel-reply-line {
+    width: 2px;
+    background: currentColor;
+    border-radius: 1px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    opacity: 0.6;
+  }
+
+  .bel-reply-content {
+    flex: 1;
+
+    strong {
+      font-size: 12px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 2px;
+      font-family: var(--bel-font-body);
+    }
+    p {
+      margin: 0;
+      font-size: 11px;
+      opacity: 0.8;
+      line-height: 1.3;
+      font-family: var(--bel-font-body);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  // EN-TÊTE DU MESSAGE ================================
+  .bel-message-header {
+    margin-bottom: 4px;
+  }
+
+  .bel-message-sender-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bel-user-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .bel-user-avatar-placeholder {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bel-primary);
+    color: var(--bel-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .bel-message-sender {
+    font-size: 13px;
+    color: var(--bel-secondary);
+    font-weight: 600;
+    font-family: var(--bel-font-body);
+  }
+
+  // CONTENU DU MESSAGE ================================
+  .bel-message-content {
+    font-size: 15px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-family: var(--bel-font-body);
+  }
+
+  // MENTIONS DANS LE MESSAGE ==========================
+  .mention-highlight {
+    background: rgba(242, 169, 0, 0.2);
+    color: var(--bel-primary-dark);
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 4px;
+    margin: 0 1px;
+  }
+
+  // PIED DU MESSAGE ===================================
+  .bel-message-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .bel-message-time {
+    font-size: 11px;
+    opacity: 0.8;
+    font-family: var(--bel-font-body);
+  }
+
+  .bel-message-status {
+    font-size: 12px;
+    &[title='sending'] {
+      color: var(--bel-gray);
+    }
+    &[title='sent'] {
+      color: var(--bel-gray);
+    }
+    &[title='delivered'] {
+      color: var(--bel-primary);
+    }
+    &[title='read'] {
+      color: var(--bel-secondary);
+    }
+  }
+
+  // MESSAGE SUPPRIMÉ ==================================
+  .bel-deleted-message {
+    color: var(--bel-gray);
+    font-style: italic;
+    opacity: 0.7;
+    font-size: 14px;
+  }
+
+  .bel-edited-badge {
+    font-size: 11px;
+    color: var(--bel-gray);
+    font-style: italic;
+    margin-left: 4px;
+    font-family: var(--bel-font-body);
+  }
+
+  // ÉDITION DE MESSAGE ================================
+  .bel-message-edit {
+    .bel-edit-input {
+      width: 100%;
+      border: 2px solid var(--bel-primary);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 60px;
+      background: var(--bel-white);
+      color: var(--bel-dark);
+      &:focus {
+        outline: none;
+        border-color: var(--bel-primary-dark);
+      }
+    }
+    .bel-edit-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      justify-content: flex-end;
+    }
+  }
+
+  .bel-btn-cancel,
+  .bel-btn-save {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    transition: all 0.2s ease;
+  }
+  .bel-btn-cancel {
+    background: var(--bel-light);
+    color: var(--bel-gray);
+    &:hover {
+      background: var(--bel-border);
+    }
+  }
+  .bel-btn-save {
+    background: var(--bel-secondary);
+    color: var(--bel-white);
+    &:hover {
+      background: var(--bel-secondary-dark);
+    }
+  }
+
+  // PRÉVISUALISATION DE RÉPONSE =======================
+  .bel-reply-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bel-light);
+    padding: 12px 16px;
+    border-top: 1px solid var(--bel-border);
+    animation: slideUp 0.3s ease;
+    flex-shrink: 0;
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .bel-reply-preview-content {
+      flex: 1;
+      strong {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--bel-dark);
+        display: block;
+        margin-bottom: 2px;
+        font-family: var(--bel-font-body);
+      }
+      p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--bel-gray);
+        font-family: var(--bel-font-body);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .bel-cancel-reply {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--bel-gray);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      &:hover {
+        background: var(--bel-border);
+        color: var(--bel-dark);
+      }
+    }
+  }
+
+  // INPUT D'ENVOI =====================================
+  .bel-chat-input {
+    background: var(--bel-white);
+    padding: 16px 20px;
+    border-top: 1px solid var(--bel-border);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .bel-input-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .bel-emoji-btn,
+  .bel-send-btn {
+    background: none;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    font-family: var(--bel-font-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover:not(:disabled) {
+      background: var(--bel-light);
+    }
+  }
+
+  .bel-emoji-btn {
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .bel-send-btn {
+    background: var(--bel-primary);
+    color: var(--bel-white);
+    width: 40px;
+    height: 40px;
+    &:hover:not(:disabled) {
+      background: var(--bel-primary-dark);
+      transform: scale(1.05);
+    }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    &.sending {
+      animation: pulse 1.5s infinite;
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .bel-message-input {
+    flex: 1;
+    border: 2px solid var(--bel-border);
+    border-radius: 24px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: var(--bel-font-body);
+    resize: none;
+    max-height: 120px;
+    min-height: 44px;
+    transition: border-color 0.2s ease;
+    background: var(--bel-white);
+    &:focus {
+      outline: none;
+      border-color: var(--bel-primary);
+    }
+    &:disabled {
+      background: var(--bel-light);
+      cursor: not-allowed;
+    }
+  }
+
+  // SÉLECTEUR D'ÉMOJIS ================================
+  .bel-emoji-picker {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bel-white);
+    border: 1px solid var(--bel-border);
+    border-radius: 16px 16px 0 0;
+    padding: 16px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease;
+    z-index: 1000;
+    margin-bottom: 8px;
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .bel-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+  }
+
+  .bel-emoji {
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.2s ease;
+    &:hover {
+      background: var(--bel-light);
+      transform: scale(1.2);
+    }
+    &:active {
+      transform: scale(1.1);
+    }
+  }
+
+  // LISTE DES MENTIONS ================================
+  .bel-mentions-list {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bel-white);
+    border: 1px solid var(--bel-border);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease;
+    z-index: 1001;
+    margin-bottom: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .bel-mentions-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--bel-border);
+    font-size: 13px;
+    color: var(--bel-gray);
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+  }
+
+  .bel-mentions-candidates {
+    padding: 8px 0;
+  }
+
+  .bel-mention-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    &:hover {
+      background: var(--bel-light);
+    }
+  }
+
+  .bel-mention-avatar {
+    .bel-mention-avatar-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .bel-mention-avatar-placeholder {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bel-primary);
+      color: var(--bel-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+  }
+
+  .bel-mention-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-body);
+  }
+
+  .bel-no-mentions {
+    padding: 16px;
+    text-align: center;
+    color: var(--bel-gray);
+    font-size: 13px;
+    font-family: var(--bel-font-body);
+  }
+
+  // MENU CONTEXTUEL ===================================
+  .bel-context-menu {
+    position: fixed;
+    background: var(--bel-white);
+    border: 1px solid var(--bel-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 8px;
+    z-index: 1002;
+    animation: contextMenuAppear 0.2s ease;
+    min-width: 160px;
+  }
+
+  @keyframes contextMenuAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .bel-context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-family: var(--bel-font-body);
+    font-size: 14px;
+    color: var(--bel-dark);
+    text-align: left;
+    &:hover {
+      background: var(--bel-light);
+    }
+    &:active {
+      background: var(--bel-border);
+    }
+  }
+
+  .bel-context-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+  }
+
+  .bel-context-label {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  // MESSAGERIE PRIVÉE =================================
+  .bel-private-chat-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bel-white);
+  }
+
+  .bel-feature-development {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 400px;
+  }
+
+  .bel-development-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.7;
+  }
+
+  .bel-development-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    margin: 0 0 12px 0;
+    font-family: var(--bel-font-heading);
+  }
+
+  .bel-feature-description {
+    font-size: 15px;
+    color: var(--bel-gray);
+    margin: 0 0 32px 0;
+    line-height: 1.5;
+    font-family: var(--bel-font-body);
+  }
+
+  // RESPONSIVE ========================================
+  @media (max-width: 768px) {
+    .bel-message-bubble {
+      width: 75%;
+    }
+    .bel-emoji-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .bel-context-menu {
+      min-width: 140px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .bel-messaging-header {
+      padding: 14px 16px;
+      h1 {
+        font-size: 20px;
+      }
+    }
+    .bel-messaging-tabs {
+      padding: 0 16px;
+    }
+    .bel-tab-button {
+      padding: 14px 8px;
+      font-size: 13px;
+    }
+    .bel-group-header {
+      padding: 14px 16px;
+      h2 {
+        font-size: 16px;
+      }
+    }
+    .bel-chat-messages {
+      padding: 16px 12px;
+    }
+    .bel-message-bubble {
+      padding: 10px 14px;
+    }
+    .bel-chat-input {
+      padding: 12px 16px;
+    }
+    .bel-input-container {
+      gap: 8px;
+    }
+    .bel-emoji-btn,
+    .bel-send-btn {
+      width: 36px;
+      height: 36px;
+      padding: 8px;
+    }
+    .bel-message-input {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+    .bel-emoji-grid {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    .bel-emoji {
+      font-size: 18px;
+      padding: 6px;
+    }
+    .bel-context-menu {
+      min-width: 120px;
+      padding: 6px;
+    }
+    .bel-context-menu-item {
+      padding: 10px 12px;
+      font-size: 13px;
+      gap: 8px;
+    }
+    .bel-context-icon {
+      font-size: 14px;
+      width: 16px;
+    }
+    .bel-mentions-list {
+      max-height: 150px;
+    }
+    .bel-mention-item {
+      padding: 10px 12px;
+    }
+  }
+
+  // ANIMATIONS SUPPLÉMENTAIRES ========================
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // ACCESSIBILITÉ =====================================
+  @media (prefers-reduced-motion: reduce) {
+    .bel-message-wrapper,
+    .bel-context-menu,
+    .bel-emoji-picker,
+    .bel-reply-preview,
+    .bel-mentions-list {
+      animation: none;
+    }
+    .bel-send-btn.sending {
+      animation: none;
+    }
+  }
+
+  // MODE TOUCH OPTIMISÉ ===============================
+  @media (hover: none) and (pointer: coarse) {
+    .bel-emoji:hover {
+      transform: none;
+      background: transparent;
+    }
+    .bel-context-menu-item:hover {
+      background: none;
+    }
+    // Agrandir les zones de touche pour mobile
+    .bel-emoji-btn,
+    .bel-send-btn,
+    .bel-context-menu-item,
+    .bel-mention-item {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    .bel-message-input {
+      min-height: 44px;
+    }
+  }
+}

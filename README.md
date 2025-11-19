@@ -39,7 +39,9 @@ git clone https://github.com/VOTRE_USERNAME/belafrica.git
 npm install
 
 # Lancer en développement
-ng serve
+ng serve 
+#ou bien
+ng serve --host 0.0.0.0 --port 4200
 
 # Structure du projet
 belafrica/

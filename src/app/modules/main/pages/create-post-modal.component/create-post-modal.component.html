@@ -1,0 +1,143 @@
+<div class="bel-modal-overlay" (click)="closeModal()">
+  <div class="bel-modal-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header du modal -->
+    <header class="bel-modal-header">
+      <h2>📝 Créer une Publication</h2>
+      <button (click)="closeModal()" class="bel-modal-close" title="Fermer">
+        ×
+      </button>
+    </header>
+
+    <!-- Formulaire de création -->
+    <form [formGroup]="postForm" (ngSubmit)="createPost()" class="bel-post-form">
+      
+      <!-- Sélection de la visibilité -->
+      <div class="bel-form-section">
+        <label class="bel-form-label">🌍 Visibilité de la publication</label>
+        <div class="bel-visibility-options">
+          <label class="bel-radio-option">
+            <input 
+              type="radio" 
+              formControlName="visibility"
+              value="national"
+              class="bel-radio-input">
+            <span class="bel-radio-custom"></span>
+            <span class="bel-radio-content">
+              <strong>🏠 National</strong>
+              <small>Visible uniquement par votre communauté • Expire dans 48h</small>
+            </span>
+          </label>
+          
+          <label class="bel-radio-option">
+            <input 
+              type="radio" 
+              formControlName="visibility"
+              value="international"
+              class="bel-radio-input">
+            <span class="bel-radio-custom"></span>
+            <span class="bel-radio-content">
+              <strong>🌍 International</strong>
+              <small>Visible par toutes les communautés • Expire dans 72h</small>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Contenu du post -->
+      <div class="bel-form-section">
+        <label for="postContent" class="bel-form-label">
+          💬 Contenu de la publication *
+        </label>
+        <textarea
+          id="postContent"
+          formControlName="content"
+          placeholder="Partagez une information, une annonce, ou une actualité avec la communauté..."
+          rows="6"
+          maxlength="1000"
+          class="bel-form-textarea"></textarea>
+        
+        <div class="bel-textarea-info">
+          <span class="bel-char-count">
+            {{ postForm.get('content')?.value?.length || 0 }}/1000 caractères
+          </span>
+          <small>Les publications doivent respecter les règles de la communauté</small>
+        </div>
+
+        <div *ngIf="postForm.get('content')?.errors?.['required'] && postForm.get('content')?.touched" 
+             class="bel-error-message">
+          ⚠️ Le contenu de la publication est obligatoire
+        </div>
+      </div>
+
+      <!-- Upload d'images -->
+      <div class="bel-form-section">
+        <label class="bel-form-label">🖼️ Images (optionnel)</label>
+        
+        <div class="bel-images-upload">
+          <div class="bel-images-preview">
+            <div *ngFor="let image of imagePreviews; let i = index" class="bel-image-preview">
+              <img [src]="image" alt="Prévisualisation" class="bel-preview-img">
+              <button type="button" (click)="removeImage(i)" class="bel-remove-image">
+                ×
+              </button>
+            </div>
+            
+            <div *ngIf="imagePreviews.length < 4" class="bel-image-upload-btn" (click)="imageInput.click()">
+              <span class="bel-upload-icon">+</span>
+              <small>Ajouter une image</small>
+            </div>
+          </div>
+          
+          <input 
+            type="file" 
+            #imageInput
+            (change)="onImageSelected($event)"
+            accept="image/*"
+            multiple
+            class="bel-file-input">
+        </div>
+        
+        <small>Maximum 4 images • Formats: JPG, PNG • 5MB max par image</small>
+      </div>
+
+      <!-- Aperçu de la durée de vie -->
+      <div class="bel-expiry-preview">
+        <div class="bel-expiry-info">
+          <span class="bel-expiry-icon">⏰</span>
+          <div class="bel-expiry-details">
+            <strong>Durée de vie</strong>
+            <span *ngIf="postForm.get('visibility')?.value === 'national'">
+              Cette publication expirera dans <strong>48 heures</strong>
+            </span>
+            <span *ngIf="postForm.get('visibility')?.value === 'international'">
+              Cette publication expirera dans <strong>72 heures</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bel-modal-actions">
+        <button type="button" (click)="closeModal()" class="bel-btn-cancel">
+          Annuler
+        </button>
+        <button 
+          type="submit" 
+          class="bel-btn-primary"
+          [disabled]="!postForm.valid || isLoading">
+          <span *ngIf="!isLoading">
+            <span class="bel-btn-icon">📨</span>
+            Publier
+          </span>
+          <span *ngIf="isLoading">
+            <span class="bel-btn-icon">⏳</span>
+            Publication...
+          </span>
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>

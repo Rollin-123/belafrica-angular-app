@@ -1,1 +1,148 @@
-<p>settings.component works!</p>
+<div class="bel-settings-container">
+  
+  <!-- Header -->
+  <header class="bel-settings-header">
+    <p>Gérez vos préférences et paramètres de compte</p>
+  </header>
+
+<div class="bel-user-card" *ngIf="user">
+  <div class="bel-user-avatar">
+    <!-- Version avec vérification -->
+    <!-- <img 
+      *ngIf="user.avatar && user.avatar.startsWith('data:image')"
+      [src]="user.avatar" 
+      [alt]="user.pseudo"
+      class="bel-avatar-img"> -->
+    
+    <!-- Version avec avatar par défaut -->
+    <div 
+      *ngIf="!user.avatar || !user.avatar.startsWith('data:image')"
+      class="bel-avatar-default">
+      {{ userService.generateDefaultAvatar(user.pseudo) }}
+    </div>
+  </div>
+
+  <!-- Sections des Paramètres -->
+  <main class="bel-settings-sections">
+    
+    <!-- Paramètres Principaux -->
+    <section class="bel-settings-group">
+      <h3 class="bel-settings-group-title">Préférences du compte</h3>
+      
+      <div class="bel-settings-list">
+        <div 
+          *ngFor="let section of settingsSections"
+          class="bel-settings-item"
+          [class.disabled]="section.disabled"
+          (click)="navigateToSection(section)">
+          
+          <div class="bel-settings-item-icon">
+            {{ section.icon }}
+          </div>
+          
+          <div class="bel-settings-item-content">
+            <h4 class="bel-settings-item-title">{{ section.title }}</h4>
+            <p class="bel-settings-item-desc">{{ section.description }}</p>
+          </div>
+          
+          <div class="bel-settings-item-actions">
+            <span *ngIf="section.badge" class="bel-settings-badge">
+              {{ section.badge }}
+            </span>
+            <span class="bel-settings-arrow" *ngIf="!section.disabled">›</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Section Administration -->
+@if (user && !user.isAdmin) {
+  <section class="bel-settings-group">
+    <h3 class="bel-settings-group-title">👑 Administration</h3>
+    
+    <div class="bel-settings-list">
+      <div 
+        class="bel-settings-item"
+        (click)="navigateToAdminRequest()">
+        
+        <div class="bel-settings-item-icon">
+          👑
+        </div>
+        
+        <div class="bel-settings-item-content">
+          <h4 class="bel-settings-item-title">Devenir Administrateur</h4>
+          <p class="bel-settings-item-desc">Publiez du contenu pour votre communauté</p>
+        </div>
+        
+        <div class="bel-settings-item-actions">
+          <span class="bel-settings-badge">Vérification requise</span>
+          <span class="bel-settings-arrow">›</span>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+@if (user && user.isAdmin) {
+  <section class="bel-settings-group">
+    <h3 class="bel-settings-group-title">👑 Administration</h3>
+    
+    <div class="bel-settings-list">
+      <div class="bel-settings-item bel-settings-item-success">
+        
+        <div class="bel-settings-item-icon">
+          ✅
+        </div>
+        
+        <div class="bel-settings-item-content">
+          <h4 class="bel-settings-item-title">Administrateur Actif</h4>
+          <p class="bel-settings-item-desc">Vous pouvez publier du contenu</p>
+        </div>
+        
+        <div class="bel-settings-item-actions">
+          <span class="bel-settings-badge success">Actif</span>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+
+    <!-- Actions Critiques -->
+    <section class="bel-settings-group">
+      <h3 class="bel-settings-group-title">Actions</h3>
+      
+      <div class="bel-settings-list">
+        <div 
+          *ngFor="let action of criticalActions"
+          class="bel-settings-item bel-settings-item-critical"
+          [class.bel-danger]="action.color === 'danger'"
+          (click)="navigateToSection(action)">
+          
+          <div class="bel-settings-item-icon">
+            {{ action.icon }}
+          </div>
+          
+          <div class="bel-settings-item-content">
+            <h4 class="bel-settings-item-title">{{ action.title }}</h4>
+            <p class="bel-settings-item-desc">{{ action.description }}</p>
+          </div>
+          
+          <div class="bel-settings-item-actions">
+            <span class="bel-settings-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Informations Version -->
+    <section class="bel-app-info">
+      <div class="bel-version-info">
+        <p class="bel-version">BELAFRICA v2.0.0</p>
+        <p class="bel-copyright">© 2025 BELAFRICA. Tous droits réservés By Rollin.</p>
+      </div>
+    </section>
+
+  </main>
+
+</div>

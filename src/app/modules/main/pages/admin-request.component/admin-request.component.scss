@@ -1,0 +1,558 @@
+.bel-admin-request-container {
+    min-height: 100vh;
+    background: var(--bel-light);
+    padding-bottom: 40px;
+}
+
+.bel-admin-header {
+    background: var(--bel-white);
+    padding: 16px;
+    border-bottom: 1px solid var(--bel-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    .bel-back-btn {
+        background: none;
+        border: none;
+        color: var(--bel-primary);
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 8px 0;
+        margin-bottom: 8px;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+
+    h1 {
+        margin: 0 0 4px 0;
+        font-size: 22px;
+        color: var(--bel-dark);
+        font-weight: 700;
+    }
+
+    p {
+        margin: 0;
+        color: var(--bel-gray);
+        font-size: 14px;
+        line-height: 1.4;
+    }
+}
+
+.bel-admin-process {
+    padding: 16px;
+}
+
+// Statuts
+.bel-admin-status {
+    background: var(--bel-white);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+    &.success {
+        border-left: 4px solid var(--bel-secondary);
+        background: rgba(0, 135, 81, 0.05);
+    }
+
+    &.pending {
+        border-left: 4px solid var(--bel-primary);
+        background: rgba(242, 169, 0, 0.05);
+    }
+
+    .bel-status-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .bel-status-content {
+        flex: 1;
+
+        h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--bel-dark);
+        }
+
+        p {
+            margin: 0 0 8px 0;
+            color: var(--bel-gray);
+            line-height: 1.5;
+        }
+
+        .bel-status-note {
+            font-size: 13px;
+            color: var(--bel-primary);
+            font-weight: 500;
+        }
+    }
+}
+
+// Étapes du processus
+.bel-admin-steps {
+    background: var(--bel-white);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.bel-admin-step {
+    margin-bottom: 24px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .bel-step-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+
+        .bel-step-number {
+            background: var(--bel-primary);
+            color: var(--bel-white);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--bel-dark);
+        }
+    }
+
+    p {
+        margin: 0 0 16px 0;
+        color: var(--bel-gray);
+        line-height: 1.5;
+    }
+}
+
+.bel-requirements {
+    background: var(--bel-light);
+    border-radius: 12px;
+    padding: 16px;
+
+    h4 {
+        margin: 0 0 12px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--bel-dark);
+    }
+}
+
+.bel-requirements-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        padding: 8px 0;
+        color: var(--bel-gray);
+        line-height: 1.4;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        strong {
+            color: var(--bel-dark);
+        }
+    }
+}
+
+// Formulaire
+.bel-admin-form {
+    .bel-form-group {
+        margin-bottom: 24px;
+    }
+}
+
+.bel-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-size: 15px;
+
+    .bel-required {
+        color: var(--bel-accent);
+    }
+}
+
+// Upload passeport
+.bel-passport-upload {
+    &.has-image {
+        .bel-passport-preview {
+            border-color: var(--bel-primary);
+        }
+    }
+}
+
+.bel-passport-preview {
+    border: 2px dashed var(--bel-border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    transition: border-color 0.3s ease;
+    background: var(--bel-light);
+
+    .bel-passport-image {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.bel-passport-placeholder {
+    .bel-placeholder-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    .bel-placeholder-text {
+        margin: 0 0 8px 0;
+        font-weight: 600;
+        color: var(--bel-dark);
+    }
+
+    small {
+        color: var(--bel-gray);
+    }
+}
+
+.bel-upload-controls {
+    .bel-upload-btn {
+        width: 100%;
+        margin-bottom: 16px;
+
+        .bel-btn-icon {
+            margin-right: 8px;
+        }
+    }
+}
+
+.bel-upload-hints {
+    background: rgba(242, 169, 0, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+
+    .bel-hint {
+        margin: 0 0 8px 0;
+        font-weight: 600;
+        color: var(--bel-primary);
+    }
+
+    .bel-hints-list {
+        margin: 0;
+        padding: 0 0 0 16px;
+        color: var(--bel-gray);
+        font-size: 13px;
+
+        li {
+            margin-bottom: 4px;
+        }
+    }
+}
+
+.bel-file-input {
+    display: none;
+}
+
+// Textarea
+.bel-form-textarea {
+    width: 100%;
+    border: 2px solid var(--bel-border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+    background: var(--bel-white);
+
+    &:focus {
+        outline: none;
+        border-color: var(--bel-primary);
+        box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.1);
+    }
+
+    &.invalid {
+        border-color: var(--bel-accent);
+    }
+}
+
+.bel-textarea-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+
+    .bel-char-count {
+        font-size: 12px;
+        color: var(--bel-gray);
+    }
+
+    .bel-error-text {
+        font-size: 12px;
+        color: var(--bel-accent);
+        font-weight: 500;
+    }
+}
+
+// Avis confidentialité
+.bel-privacy-notice {
+    background: rgba(0, 135, 81, 0.05);
+    border: 1px solid rgba(0, 135, 81, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .bel-privacy-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .bel-privacy-content {
+        flex: 1;
+
+        h4 {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--bel-secondary-dark);
+        }
+
+        p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--bel-secondary-dark);
+            line-height: 1.4;
+        }
+    }
+}
+
+// Section code admin
+.bel-admin-code-section {
+    background: var(--bel-white);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+    .bel-code-header {
+        margin-bottom: 16px;
+
+        h3 {
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--bel-dark);
+        }
+
+        p {
+            margin: 0;
+            color: var(--bel-gray);
+            font-size: 14px;
+        }
+    }
+}
+
+.bel-code-input-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.bel-code-input {
+    flex: 1;
+    border: 2px solid var(--bel-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 15px;
+    transition: border-color 0.3s ease;
+    background: var(--bel-white);
+
+    &:focus {
+        outline: none;
+        border-color: var(--bel-primary);
+        box-shadow: 0 0 0 3px rgba(242, 169, 0, 0.1);
+    }
+
+    &.has-code {
+        border-color: var(--bel-primary);
+    }
+
+    &:disabled {
+        background: var(--bel-light);
+        cursor: not-allowed;
+    }
+}
+
+.bel-validate-btn {
+    white-space: nowrap;
+
+    &.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
+
+.bel-code-error {
+    color: var(--bel-accent);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+
+// Boutons
+.bel-submit-btn,
+.bel-validate-btn {
+    width: 100%;
+
+    &.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
+
+.bel-btn-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.bel-loading-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+
+    &.small {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+// Footer contact
+.bel-admin-footer {
+    padding: 0 16px;
+}
+
+.bel-contact-card {
+    background: var(--bel-white);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+    .bel-contact-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+
+        .bel-contact-icon {
+            font-size: 20px;
+        }
+
+        h4 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--bel-dark);
+        }
+    }
+
+    .bel-contact-info {
+        p {
+            margin: 0 0 8px 0;
+            color: var(--bel-gray);
+            font-size: 14px;
+
+            strong {
+                color: var(--bel-dark);
+            }
+        }
+
+        .bel-contact-note {
+            font-size: 13px;
+            font-style: italic;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--bel-light);
+        }
+    }
+}
+
+// Messages d'erreur
+.bel-error-message {
+    color: var(--bel-accent);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 6px;
+    display: block;
+}
+
+// Responsive
+@media (max-width: 480px) {
+    .bel-admin-header {
+        padding: 12px;
+
+        h1 {
+            font-size: 20px;
+        }
+    }
+
+    .bel-admin-process {
+        padding: 12px;
+    }
+
+    .bel-admin-steps,
+    .bel-admin-status,
+    .bel-admin-code-section {
+        padding: 16px;
+    }
+
+    .bel-code-input-group {
+        flex-direction: column;
+    }
+}

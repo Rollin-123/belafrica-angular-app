@@ -21,7 +21,6 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            
             "outputPath": "dist/belafrica",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
@@ -35,27 +34,17 @@
             "styles": [
               "src/styles.scss"
             ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
+            "outputMode": "static",
+            "ssr": false,
+            "index": {
+              "input": "src/index.html",
+              "output": "index.html"
             }
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
-                }
-              ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/"
             },
             "development": {
               "optimization": false,

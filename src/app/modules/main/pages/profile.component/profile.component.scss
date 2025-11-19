@@ -1,0 +1,546 @@
+/* CONTENEUR GLOBAL ================================== */
+.bel-profile-container {
+    min-height: 100vh;
+    background: var(--bel-light);
+    padding-bottom: 80px;
+}
+
+/* HEADER ============================================== */
+.bel-profile-header {
+    background: var(--bel-white);
+    padding: 20px 16px;
+    border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-profile-header .bel-profile-header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.bel-profile-header .bel-back-btn {
+    background: none;
+    border: none;
+    color: var(--bel-primary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 0;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    transition: opacity 0.2s ease;
+}
+
+.bel-profile-header .bel-back-btn:hover {
+    opacity: 0.8;
+}
+
+.bel-profile-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-profile-header p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+}
+
+/* SECTION AVATAR ===================================== */
+.bel-profile-avatar-section {
+    background: var(--bel-white);
+    padding: 24px 16px;
+    border-bottom: 1px solid var(--bel-border);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.bel-avatar-container {
+    position: relative;
+}
+
+.bel-avatar-container .bel-avatar-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bel-primary);
+}
+
+/* Style pour l'avatar par défaut */
+.bel-avatar-container .bel-avatar-default {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--bel-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--bel-white);
+    border: 3px solid var(--bel-primary-light);
+}
+
+.bel-avatar-container .bel-avatar-actions {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.bel-avatar-container .bel-avatar-actions .bel-file-input {
+    display: none;
+}
+
+.bel-avatar-container .bel-avatar-actions .bel-avatar-upload-btn {
+    background: var(--bel-primary);
+    color: var(--bel-white);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.bel-avatar-container .bel-avatar-actions .bel-avatar-upload-btn:hover {
+    background: var(--bel-primary-dark);
+    transform: scale(1.1);
+}
+
+.bel-user-basic-info {
+    flex: 1;
+}
+
+.bel-user-basic-info .bel-user-name {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-user-basic-info .bel-user-community {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+}
+
+.bel-user-basic-info .bel-user-member-since {
+    margin: 0;
+    font-size: 13px;
+    color: var(--bel-gray-light);
+    font-family: var(--bel-font-body);
+}
+
+/* CONTENU PRINCIPAL ================================== */
+.bel-profile-content {
+    padding: 20px 16px;
+}
+
+/* CARTE D'INFORMATIONS =============================== */
+.bel-info-card {
+    background: var(--bel-white);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid var(--bel-border);
+}
+
+.bel-info-card .bel-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.bel-info-card .bel-card-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-info-card .bel-card-header .bel-edit-btn {
+    background: var(--bel-primary);
+    color: var(--bel-white);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--bel-font-body);
+    transition: all 0.2s ease;
+}
+
+.bel-info-card .bel-card-header .bel-edit-btn:hover {
+    background: var(--bel-primary-dark);
+}
+
+.bel-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.bel-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.bel-info-item .bel-info-label {
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    min-width: 120px;
+}
+
+.bel-info-item .bel-info-value {
+    font-size: 14px;
+    color: var(--bel-dark);
+    font-weight: 400;
+    font-family: var(--bel-font-body);
+    text-align: right;
+    flex: 1;
+    margin-left: 16px;
+}
+
+/* SECTION BIO ======================================== */
+.bel-bio-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--bel-border-light);
+}
+
+.bel-bio-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-bio-section .bel-bio-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bel-dark);
+    line-height: 1.5;
+    font-family: var(--bel-font-body);
+    white-space: pre-wrap;
+}
+
+/* CENTRES D'INTÉRÊT ================================== */
+.bel-interests-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--bel-border-light);
+}
+
+.bel-interests-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-interests-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bel-interest-badge {
+    background: var(--bel-primary-light);
+    color: var(--bel-primary-dark);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+}
+
+/* SECTION ÉDITION ==================================== */
+.bel-edit-section {}
+
+.bel-edit-section .bel-edit-card {
+    background: var(--bel-white);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid var(--bel-border);
+}
+
+.bel-edit-section .bel-edit-card h3 {
+    margin: 0 0 24px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.bel-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bel-form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-body);
+}
+
+.bel-form-group small {
+    font-size: 12px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+}
+
+.bel-form-input,
+.bel-form-textarea,
+.bel-form-select {
+    border: 2px solid var(--bel-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-family: var(--bel-font-body);
+    background: var(--bel-white);
+    transition: all 0.2s ease;
+}
+
+.bel-form-input:focus,
+.bel-form-textarea:focus,
+.bel-form-select:focus {
+    outline: none;
+    border-color: var(--bel-primary);
+    box-shadow: 0 0 0 3px rgba(242,169,0,0.1);
+}
+
+.bel-form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.bel-form-select {
+    cursor: pointer;
+}
+
+/* CENTRES D'INTÉRÊT (ÉDITION) ======================== */
+.bel-interests-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 12px;
+    border: 2px solid var(--bel-border);
+    border-radius: 8px;
+    background: var(--bel-white);
+    min-height: 52px;
+}
+
+.bel-interests-container:focus-within {
+    border-color: var(--bel-primary);
+}
+
+.bel-interest-tag {
+    background: var(--bel-primary-light);
+    color: var(--bel-primary-dark);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bel-interest-tag .bel-interest-remove {
+    background: none;
+    border: none;
+    color: var(--bel-primary-dark);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bel-interest-tag .bel-interest-remove:hover {
+    opacity: 0.7;
+}
+
+.bel-interest-input {
+    border: none;
+    outline: none;
+    padding: 6px 0;
+    font-size: 13px;
+    font-family: var(--bel-font-body);
+    background: transparent;
+    flex: 1;
+    min-width: 150px;
+}
+
+.bel-interest-input::placeholder {
+    color: var(--bel-gray-light);
+}
+
+/* ACTIONS DU FORMULAIRE ============================== */
+.bel-form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--bel-border-light);
+}
+
+.bel-btn-cancel,
+.bel-btn-primary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--bel-font-body);
+    transition: all 0.2s ease;
+}
+
+.bel-btn-cancel:disabled,
+.bel-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bel-btn-cancel {
+    background: var(--bel-light);
+    color: var(--bel-gray);
+}
+
+.bel-btn-cancel:hover:not(:disabled) {
+    background: var(--bel-border);
+}
+
+.bel-btn-primary {
+    background: var(--bel-primary);
+    color: var(--bel-white);
+}
+
+.bel-btn-primary:hover:not(:disabled) {
+    background: var(--bel-primary-dark);
+}
+
+/* RESPONSIVE ========================================= */
+@media (max-width: 480px) {
+    .bel-profile-header {
+        padding: 16px 12px;
+    }
+
+    .bel-profile-header h1 {
+        font-size: 22px;
+    }
+
+    .bel-profile-avatar-section {
+        padding: 20px 12px;
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+
+    .bel-profile-content {
+        padding: 16px 12px;
+    }
+
+    .bel-info-card,
+    .bel-edit-card {
+        padding: 16px;
+    }
+
+    .bel-info-item {
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+
+    .bel-info-item .bel-info-value {
+        text-align: left;
+        margin-left: 0;
+    }
+
+    .bel-form-actions {
+        flex-direction: column;
+    }
+
+    .bel-btn-cancel,
+    .bel-btn-primary {
+        width: 100%;
+    }
+}
+
+/* ANIMATIONS ========================================= */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bel-edit-section,
+.bel-view-section {
+    animation: fadeIn 0.3s ease;
+}
+
+.bel-no-user {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--bel-gray);
+}
+
+.bel-no-user .bel-no-user-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.bel-no-user h3 {
+    margin: 0 0 12px 0;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-no-user p {
+    margin: 0;
+    line-height: 1.5;
+    font-family: var(--bel-font-body);
+}
