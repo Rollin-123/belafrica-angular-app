@@ -7,10 +7,10 @@ import { ProfileSetupComponent } from './pages/profile-setup.component/profile-s
 
 const routes: Routes = [
   {path:'', redirectTo:'phone', pathMatch:'full'},
-  {path:'phone', component:PhoneVerificationComponent},
-  {path:'otp', component:OtpVerificationComponent},
-  {path:'nationality', component:NationalitySelectionComponent},
-  {path:'profile', component:ProfileSetupComponent}
+  {path:'phone', component:PhoneVerificationComponent, data: { title: 'Vérification Téléphone'}},
+  {path:'otp', component:OtpVerificationComponent, data: { title: 'Vérification OTP' }},
+  {path:'nationality', component:NationalitySelectionComponent, data: { title: 'Sélection Nationalité' }},
+  {path:'profile', component:ProfileSetupComponent,data: { title: 'Création Profil' }}
 ];
 
 @NgModule({

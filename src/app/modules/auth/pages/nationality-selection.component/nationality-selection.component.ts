@@ -1,7 +1,8 @@
+// src/app/modules/auth/pages/nationality-selection.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { StorageService } from '../../../../core/services/storage.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface AfricanCountry {
   code: string;
@@ -11,8 +12,8 @@ interface AfricanCountry {
 
 @Component({
   selector: 'app-nationality-selection',
-  standalone: false,
   templateUrl: './nationality-selection.component.html',
+  standalone: false,
   styleUrls: ['./nationality-selection.component.scss']
 })
 export class NationalitySelectionComponent implements OnInit {
@@ -21,8 +22,10 @@ export class NationalitySelectionComponent implements OnInit {
   detectedCountry: string = '';
   selectedCountryName: string = '';
   selectedCountryFlag: string = '';
+  errorMessage: string = '';
+  communityPreview: string = '';
 
-  // Liste complète des pays africains
+  // ✅ LISTE COMPLÈTE DES PAYS AFRICAINS AVEC DRAPEAUX
   africanCountries: AfricanCountry[] = [
     { code: 'DZ', name: 'Algérie', flag: '🇩🇿' },
     { code: 'AO', name: 'Angola', flag: '🇦🇴' },
@@ -83,7 +86,7 @@ export class NationalitySelectionComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private storageService: StorageService
+    private authService: AuthService
   ) {
     this.nationalityForm = this.fb.group({
       nationality: ['', Validators.required]
@@ -91,81 +94,146 @@ export class NationalitySelectionComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Récupérer le pays de résidence depuis les données temporaires
-    const tempData = this.storageService.getItem('tempPhone');
-    if (tempData) {
-      this.detectedCountry = this.getCountryNameFromCode(tempData.countryCode);
-    } else {
-      // Si pas de données, retour à l'écran téléphone
-      this.router.navigate(['/auth/phone']);
+    // Vérifier que l'utilisateur vient bien de l'étape OTP
+    const tempData = localStorage.getItem('tempPhone');
+    const verifiedPhone = localStorage.getItem('verified_phone');
+    
+    if (!tempData && !verifiedPhone) {
+      console.error('❌ Aucune donnée de vérification trouvée');
+      this.showErrorModal(
+        'Données manquantes', 
+        'Veuillez d\'abord vérifier votre numéro de téléphone.'
+      );
+      setTimeout(() => this.router.navigate(['/auth/phone']), 2000);
+      return;
     }
 
-    // Écouter les changements de nationalité
+    if (tempData) {
+      try {
+        const phoneData = JSON.parse(tempData);
+        this.detectedCountry = this.getCountryNameFromCode(phoneData.countryCode);
+        console.log('🌍 Pays détecté:', this.detectedCountry);
+      } catch (error) {
+        console.error('❌ Erreur parsing tempPhone:', error);
+        this.router.navigate(['/auth/phone']);
+      }
+    }
+
+    // S'abonner aux changements de sélection
     this.nationalityForm.get('nationality')?.valueChanges.subscribe(value => {
       this.updateSelectedCountryInfo(value);
+      this.updateCommunityPreview();
     });
   }
 
-  // Mettre à jour les informations du pays sélectionné
   updateSelectedCountryInfo(countryCode: string) {
     if (countryCode) {
       const country = this.africanCountries.find(c => c.code === countryCode);
-      this.selectedCountryName = country?.name || '';
-      this.selectedCountryFlag = country?.flag || '';
+      if (country) {
+        this.selectedCountryName = country.name;
+        this.selectedCountryFlag = country.flag;
+        console.log('✅ Pays sélectionné:', country.name);
+      } else {
+        this.selectedCountryName = '';
+        this.selectedCountryFlag = '';
+      }
     } else {
       this.selectedCountryName = '';
       this.selectedCountryFlag = '';
     }
   }
 
-  onNationalityChange() {
-    // Cette méthode est appelée quand la sélection change
-    console.log('Nationalité sélectionnée:', this.nationalityForm.get('nationality')?.value);
+  updateCommunityPreview() {
+    const selectedCode = this.nationalityForm.get('nationality')?.value;
+    if (selectedCode && this.detectedCountry) {
+      const country = this.africanCountries.find(c => c.code === selectedCode);
+      if (country) {
+        // Format: "TunisieEnFrance"
+        this.communityPreview = `${country.name}En${this.detectedCountry.replace(/\s/g, '')}`;
+        console.log('🏠 Prévisualisation communauté:', this.communityPreview);
+      }
+    } else {
+      this.communityPreview = '';
+    }
   }
 
-  // Soumission du formulaire - VERSION CORRIGÉE
   onSubmit() {
     if (this.nationalityForm.valid) {
       this.isLoading = true;
+      this.errorMessage = '';
 
-      // Récupérer les données existantes
-      const tempData = this.storageService.getItem('tempPhone');
-      if (tempData) {
-        // TROUVER LE PAYS SÉLECTIONNÉ
+      const tempData = localStorage.getItem('tempPhone');
+      const verifiedPhone = localStorage.getItem('verified_phone');
+      
+      if (!tempData && !verifiedPhone) {
+        this.errorMessage = 'Veuillez d\'abord vérifier votre numéro de téléphone';
+        this.isLoading = false;
+        this.showErrorModal('Données manquantes', this.errorMessage);
+        return;
+      }
+
+      try {
+        let phoneData;
+        if (tempData) {
+          phoneData = JSON.parse(tempData);
+        } else if (verifiedPhone) {
+          // Récupérer les infos depuis le backend si nécessaire
+          phoneData = {
+            fullPhoneNumber: verifiedPhone,
+            countryCode: '+375', // Valeur par défaut, à ajuster
+            detectedCountry: this.detectedCountry || 'Biélorussie'
+          };
+        }
+
         const selectedCountry = this.africanCountries.find(
           c => c.code === this.nationalityForm.get('nationality')?.value
         );
-        
+
         if (!selectedCountry) {
-          alert('❌ Pays non trouvé');
+          this.errorMessage = 'Veuillez sélectionner un pays valide';
           this.isLoading = false;
+          this.showErrorModal('Sélection invalide', this.errorMessage);
           return;
         }
 
-        // Créer l'objet COMPLET avec toutes les propriétés
-        const userData = {
-          phoneNumber: `${tempData.countryCode}${tempData.phoneNumber.replace(/\s/g, '')}`,
-          countryCode: tempData.countryCode,
+        // Créer la communauté selon le format attendu
+        const community = `${selectedCountry.name}En${this.detectedCountry.replace(/\s/g, '')}`;
+        
+        const profileData = {
+          phoneNumber: phoneData.fullPhoneNumber,
+          countryCode: phoneData.countryCode,
           countryName: this.detectedCountry,
-          nationality: this.nationalityForm.get('nationality')?.value,
-          nationalityName: selectedCountry.name
+          nationality: selectedCountry.code,
+          nationalityName: selectedCountry.name,
+          community: community
         };
 
-        console.log('🌍 Données utilisateur COMPLÈTES:', userData);
+        console.log('📋 Données pour création profil:', profileData);
+        
+        // Sauvegarder pour l'étape suivante
+        localStorage.setItem('userRegistrationData', JSON.stringify(profileData));
 
-        // Stocker les données complètes
-        this.storageService.setItem('userRegistrationData', userData);
+        // Afficher confirmation
+        this.showSuccessModal(
+          'Nationalité sélectionnée',
+          `Vous rejoindrez la communauté :<br><strong>${selectedCountry.name} en ${this.detectedCountry}</strong>`
+        );
 
-        // Simulation traitement
+        // Rediriger vers le profil
         setTimeout(() => {
           this.isLoading = false;
           this.router.navigate(['/auth/profile']);
-        }, 1000);
-      } else {
+        }, 2000);
+
+      } catch (error: any) {
+        console.error('❌ Erreur:', error);
+        this.errorMessage = error.message || 'Erreur lors du traitement';
         this.isLoading = false;
-        alert('❌ Données téléphone non trouvées');
-        this.router.navigate(['/auth/phone']);
+        this.showErrorModal('Erreur', this.errorMessage);
       }
+    } else {
+      this.errorMessage = 'Veuillez sélectionner votre nationalité';
+      this.showErrorModal('Champ requis', this.errorMessage);
     }
   }
 
@@ -173,7 +241,6 @@ export class NationalitySelectionComponent implements OnInit {
     this.router.navigate(['/auth/otp']);
   }
 
-  // Helper pour obtenir le nom du pays depuis le code
   private getCountryNameFromCode(code: string): string {
     const countries: {[key: string]: string} = {
       '+33': 'France',
@@ -188,5 +255,181 @@ export class NationalitySelectionComponent implements OnInit {
       '+375': 'Biélorussie'
     };
     return countries[code] || 'Pays inconnu';
+  }
+
+  // ✅ MODAL D'ERREUR PROFESSIONNELLE
+  private showErrorModal(title: string, message: string): void {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    `;
+    
+    modalContent.innerHTML = `
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 48px; color: #E53E3E; margin-bottom: 10px;">⚠️</div>
+        <h2 style="margin: 0 0 10px 0; color: #2D3748; font-size: 22px;">
+          ${title}
+        </h2>
+      </div>
+      
+      <div style="
+        background: #FED7D7;
+        border-left: 4px solid #E53E3E;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: left;
+      ">
+        <p style="color: #742A2A; margin: 0; font-size: 15px; line-height: 1.4;">
+          ${message}
+        </p>
+      </div>
+      
+      <button class="modal-close-btn" style="
+        background: #E53E3E;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.3s;
+      " onmouseover="this.style.background='#C53030'" onmouseout="this.style.background='#E53E3E'">
+        Compris
+      </button>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Fermer la modal
+    const closeBtn = modalContent.querySelector('.modal-close-btn');
+    closeBtn?.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      }
+    });
+  }
+
+  // ✅ MODAL DE SUCCÈS PROFESSIONNELLE
+  private showSuccessModal(title: string, message: string): void {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      animation: fadeIn 0.3s ease;
+    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    `;
+    
+    modalContent.innerHTML = `
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 48px; color: #38A169; margin-bottom: 10px;">✅</div>
+        <h2 style="margin: 0 0 10px 0; color: #2D3748; font-size: 22px;">
+          ${title}
+        </h2>
+      </div>
+      
+      <div style="
+        background: #C6F6D5;
+        border-left: 4px solid #38A169;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: left;
+      ">
+        <p style="color: #276749; margin: 0; font-size: 15px; line-height: 1.4;">
+          ${message}
+        </p>
+      </div>
+      
+      <button class="modal-close-btn" style="
+        background: #38A169;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.3s;
+      " onmouseover="this.style.background='#2F855A'" onmouseout="this.style.background='#38A169'">
+        Continuer
+      </button>
+      
+      <style>
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      </style>
+    `;
+    
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Fermer la modal automatiquement après 3s
+    setTimeout(() => {
+      if (document.body.contains(modal)) {
+        document.body.removeChild(modal);
+      }
+    }, 3000);
+    
+    // Fermer manuellement
+    const closeBtn = modalContent.querySelector('.modal-close-btn');
+    closeBtn?.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      }
+    });
   }
 }

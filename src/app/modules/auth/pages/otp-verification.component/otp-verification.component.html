@@ -1,10 +1,11 @@
+<!-- otp-verification.component.html - MODIFIEZ LA SECTION COMPTE À REBOURS -->
 <div class="bel-container">
   <div class="bel-card">
     
     <!-- Header -->
     <div class="bel-auth-header">
-   <app-logo size="medium"></app-logo>
-</div>
+      <app-logo size="medium"></app-logo>
+    </div>
 
     <!-- Titre -->
     <div style="margin-bottom: var(--bel-spacing-xl);">
@@ -22,11 +23,8 @@
       
       <!-- Champ OTP -->
       <div style="margin-bottom: var(--bel-spacing-lg);">
-        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
-          Code de vérification
-        </label>
         <input 
-        #otpInput
+          #otpInput
           type="text" 
           formControlName="otpCode"
           placeholder="Entrez le code à 6 chiffres"
@@ -39,22 +37,7 @@
         >
         <small *ngIf="otpForm.get('otpCode')?.invalid && otpForm.get('otpCode')?.touched" 
                style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
-          Le code doit contenir 6 chiffres
         </small>
-      </div>
-
-      <!-- Compteur de réenvoi -->
-      <div style="text-align: center; margin-bottom: var(--bel-spacing-lg);">
-        <p style="color: var(--bel-gray); font-size: 14px;">
-          <span *ngIf="canResend">Vous n'avez pas reçu le code ? </span>
-          <a *ngIf="canResend" href="javascript:void(0)" (click)="resendOtp()" 
-             style="color: var(--bel-primary); font-weight: 600;">
-            Renvoyer le code
-          </a>
-          <span *ngIf="!canResend">
-            Renvoyer le code dans {{ countdown }} secondes
-          </span>
-        </p>
       </div>
 
       <!-- Boutons -->
@@ -74,7 +57,6 @@
         [disabled]="isLoading">
         ← Retour
       </button>
-
     </form>
   </div>
 </div>

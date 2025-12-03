@@ -12,6 +12,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProfileComponent } from './pages/profile.component/profile.component';
 import { AdminRequestComponent } from './pages/admin-request.component/admin-request.component';
 import { CreatePostModalComponent } from './pages/create-post-modal.component/create-post-modal.component';
+import { provideHttpClient } from '@angular/common/http';
 
 
 @NgModule({
@@ -31,6 +32,9 @@ import { CreatePostModalComponent } from './pages/create-post-modal.component/cr
     MainRoutingModule,
     ReactiveFormsModule,
     SharedModule
+  ],
+   providers: [
+    provideHttpClient() 
   ]
 })
 export class MainModule { }

@@ -1,47 +1,42 @@
+// src/app/core/guards/auth.guard.ts - CORRIGÉ
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { StorageService } from '../services/storage.service';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { Observable } from 'rxjs';
+import { AuthService } from '../services/auth.service';
+import { map, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
-  
+export class AuthGuard {
   constructor(
-    private storageService: StorageService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
-  canActivate(): boolean {
-    // ✅ VÉRIFICATION COMPLÈTE ET DÉBOGAGE
-    const userProfile = this.storageService.getItem('belafrica_user_profile');
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     
-    // console.log('🔐 AuthGuard - Vérification:', {
-    //   userExists: !!userProfile,
-    //   userData: userProfile
-    // });
-
-    if (userProfile && this.isValidUser(userProfile)) {
-      console.log('✅ AuthGuard - Accès autorisé');
+    console.log('🔐 AuthGuard vérification...');
+    
+    // Vérifier si l'utilisateur est authentifié
+    const isAuthenticated = this.authService.isLoggedIn();
+    
+    if (isAuthenticated) {
+      console.log('✅ AuthGuard: Utilisateur authentifié');
       return true;
     } else {
-      // console.log('❌ AuthGuard - Redirection vers auth');
-      this.router.navigate(['/auth/phone']);
-      return false;
+      console.log('❌ AuthGuard: Utilisateur non authentifié, redirection vers /auth/phone');
+      
+      // Rediriger vers la page téléphone
+      return this.router.createUrlTree(['/auth/phone'], {
+        queryParams: { 
+          returnUrl: state.url,
+          reason: 'auth_required'
+        }
+      });
     }
-  }
-
-  private isValidUser(user: any): boolean {
-    // ✅ VÉRIFICATION PLUS TOLÉRANTE POUR LES TESTS
-    const isValid = !!(user && user.userId);
-    
-    console.log('👤 Validation utilisateur:', {
-      hasUserId: !!user?.userId,
-      hasPhone: !!user?.phoneNumber, 
-      hasCommunity: !!user?.community,
-      isValid: isValid
-    });
-    
-    return isValid;
   }
 }

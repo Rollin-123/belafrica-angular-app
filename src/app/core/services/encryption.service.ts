@@ -7,10 +7,6 @@ export class EncryptionService {
   
   constructor() {}
 
-  // =================================================================================
-  // GESTION DES CLÉS
-  // =================================================================================
-
   // ✅ GÉNÉRER UNE CLÉ DE CHIFFREMENT PAR UTILISATEUR
   async generateEncryptionKey(): Promise<CryptoKey> {
     return await window.crypto.subtle.generateKey(

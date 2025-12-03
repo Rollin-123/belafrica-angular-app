@@ -33,7 +33,7 @@ BELAFRICA est une plateforme de communication communautaire sécurisée pour la 
 
 ```bash
 # Cloner le projet
-git clone https://github.com/VOTRE_USERNAME/belafrica.git
+git clone https://github.com/Rollin-123/belafrica-angular-app.git
 
 # Installer les dépendances
 npm install
@@ -44,13 +44,6 @@ ng serve
 ng serve --host 0.0.0.0 --port 4200
 
 # Structure du projet
-belafrica/
-├── src/app/
-│   ├── modules/auth/          # Authentification
-│   ├── shared/               # Composants réutilisables
-│   └── core/                 # Services fondamentaux
-├── src/assets/styles/        # Charte graphique
-└── README.md
 
 # Equipe BelAfrica
 Développé avec passion pour la communauté africaine.---

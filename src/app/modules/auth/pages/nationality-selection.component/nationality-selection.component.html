@@ -20,7 +20,7 @@
     <!-- Formulaire de sélection -->
     <form [formGroup]="nationalityForm" (ngSubmit)="onSubmit()">
       
-      <!-- Sélection de la nationalité - VERSION LISTE DÉROULANTE -->
+      <!-- Sélection de la nationalité -->
       <div style="margin-bottom: var(--bel-spacing-xl);">
         <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
           Sélectionnez votre nationalité
@@ -31,7 +31,6 @@
           <select 
             formControlName="nationality"
             class="bel-select"
-            (change)="onNationalityChange()"
             [class.selected]="nationalityForm.get('nationality')?.value">
             
             <option value="">-- Choisissez votre nationalité --</option>
@@ -73,13 +72,20 @@
         </div>
         
         <!-- Information importante -->
-        <div class="bel-info-box">
+        <div class="bel-info-box" *ngIf="selectedCountryName">
           <p style="margin: 0; font-size: 13px; color: var(--bel-dark);">
-            💡 <strong>Votre communauté :</strong> Vous rejoindrez automatiquement la communauté 
-            <strong>{{ selectedCountryName || '...[nationalité]' }}</strong> 
+            Votre communauté :
+            <strong>{{ communityPreview }}</strong> <br>
+            💡 Vous rejoindrez la communauté <strong>{{ selectedCountryName }}</strong> 
             résidant en <strong>{{ detectedCountry }}</strong>
           </p>
         </div>
+      </div>
+
+      <!-- Message d'erreur général -->
+      <div *ngIf="errorMessage" class="bel-alert-error">
+        <span class="bel-alert-icon">❌</span>
+        <span class="bel-alert-text">{{ errorMessage }}</span>
       </div>
 
       <!-- Boutons -->
@@ -88,15 +94,15 @@
           type="submit" 
           class="bel-btn-primary"
           [disabled]="!nationalityForm.valid || isLoading">
-          <span *ngIf="!isLoading">Créer mon compte</span>
-          <span *ngIf="isLoading">Création en cours...</span>
+          <span *ngIf="!isLoading">Continuer vers le profil</span>
+          <span *ngIf="isLoading">Chargement...</span>
         </button>
 
         <button 
           type="button" 
           class="bel-btn-secondary"
           (click)="goBack()">
-          ← Retour à la vérification
+          ← Retour
         </button>
       </div>
 

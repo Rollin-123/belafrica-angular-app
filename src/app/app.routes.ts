@@ -4,7 +4,7 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { CreatorGuard } from './core/guards/creator.guard';
 
 export const routes: Routes = [
-  {
+{
   path: '',
   redirectTo: 'auth/phone',
   pathMatch: 'full'
@@ -22,7 +22,7 @@ export const routes: Routes = [
 { 
   path: 'admin', 
   loadChildren: ()=> import('./modules/admin/admin.module').then(m => m.AdminModule),
-  // canActivate: [CreatorGuard]
+  canActivate: [CreatorGuard]
 },
 
 //Routes de page not found 
