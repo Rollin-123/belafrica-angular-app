@@ -9,7 +9,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideZonelessChangeDetection(),
+    provideZonelessChangeDetection(),provideClientHydration(),
     provideHttpClient(),importProvidersFrom(BrowserAnimationsModule),
     provideRouter(routes), provideClientHydration(withEventReplay())
   ]

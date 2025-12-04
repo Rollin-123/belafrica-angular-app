@@ -2,7 +2,7 @@ export const environment = {
   production: true,
   appName: 'BELAFRICA',
   
-  apiUrl: 'https://belafrica-backend.onrender.com',
+  apiUrl: 'https://belafrica-backend.onrender.com/api',
   apiVersion: 'v1',
   
   supabaseUrl: 'https://zaaubhewtugkgsuoxgqi.supabase.co',
