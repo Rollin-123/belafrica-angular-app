@@ -1,8 +1,9 @@
 // src/app/modules/auth/pages/nationality-selection.component.ts
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, Inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, Form } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ModalService } from '../../../../core/services/modal.service';
 
 interface AfricanCountry {
   code: string;
@@ -86,7 +87,8 @@ export class NationalitySelectionComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(ModalService) private modalService: ModalService // ✅ INJECTER LE SERVICE
   ) {
     this.nationalityForm = this.fb.group({
       nationality: ['', Validators.required]
@@ -100,7 +102,7 @@ export class NationalitySelectionComponent implements OnInit {
     
     if (!tempData && !verifiedPhone) {
       console.error('❌ Aucune donnée de vérification trouvée');
-      this.showErrorModal(
+      this.modalService.showError( // ✅ UTILISER LE SERVICE
         'Données manquantes', 
         'Veuillez d\'abord vérifier votre numéro de téléphone.'
       );
@@ -168,7 +170,7 @@ export class NationalitySelectionComponent implements OnInit {
       if (!tempData && !verifiedPhone) {
         this.errorMessage = 'Veuillez d\'abord vérifier votre numéro de téléphone';
         this.isLoading = false;
-        this.showErrorModal('Données manquantes', this.errorMessage);
+        this.modalService.showError('Données manquantes', this.errorMessage); // ✅ UTILISER LE SERVICE
         return;
       }
 
@@ -192,7 +194,7 @@ export class NationalitySelectionComponent implements OnInit {
         if (!selectedCountry) {
           this.errorMessage = 'Veuillez sélectionner un pays valide';
           this.isLoading = false;
-          this.showErrorModal('Sélection invalide', this.errorMessage);
+          this.modalService.showError('Sélection invalide', this.errorMessage); // ✅ UTILISER LE SERVICE
           return;
         }
 
@@ -214,7 +216,7 @@ export class NationalitySelectionComponent implements OnInit {
         localStorage.setItem('userRegistrationData', JSON.stringify(profileData));
 
         // Afficher confirmation
-        this.showSuccessModal(
+        this.modalService.showSuccess( // ✅ UTILISER LE SERVICE
           'Nationalité sélectionnée',
           `Vous rejoindrez la communauté :<br><strong>${selectedCountry.name} en ${this.detectedCountry}</strong>`
         );
@@ -229,11 +231,11 @@ export class NationalitySelectionComponent implements OnInit {
         console.error('❌ Erreur:', error);
         this.errorMessage = error.message || 'Erreur lors du traitement';
         this.isLoading = false;
-        this.showErrorModal('Erreur', this.errorMessage);
+        this.modalService.showError('Erreur', this.errorMessage); // ✅ UTILISER LE SERVICE
       }
     } else {
       this.errorMessage = 'Veuillez sélectionner votre nationalité';
-      this.showErrorModal('Champ requis', this.errorMessage);
+      this.modalService.showError('Champ requis', this.errorMessage); // ✅ UTILISER LE SERVICE
     }
   }
 
@@ -257,179 +259,5 @@ export class NationalitySelectionComponent implements OnInit {
     return countries[code] || 'Pays inconnu';
   }
 
-  // ✅ MODAL D'ERREUR PROFESSIONNELLE
-  private showErrorModal(title: string, message: string): void {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      animation: fadeIn 0.3s ease;
-    `;
-    
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    `;
-    
-    modalContent.innerHTML = `
-      <div style="margin-bottom: 20px;">
-        <div style="font-size: 48px; color: #E53E3E; margin-bottom: 10px;">⚠️</div>
-        <h2 style="margin: 0 0 10px 0; color: #2D3748; font-size: 22px;">
-          ${title}
-        </h2>
-      </div>
-      
-      <div style="
-        background: #FED7D7;
-        border-left: 4px solid #E53E3E;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 20px 0;
-        text-align: left;
-      ">
-        <p style="color: #742A2A; margin: 0; font-size: 15px; line-height: 1.4;">
-          ${message}
-        </p>
-      </div>
-      
-      <button class="modal-close-btn" style="
-        background: #E53E3E;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 30px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        transition: background 0.3s;
-      " onmouseover="this.style.background='#C53030'" onmouseout="this.style.background='#E53E3E'">
-        Compris
-      </button>
-    `;
-    
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    // Fermer la modal
-    const closeBtn = modalContent.querySelector('.modal-close-btn');
-    closeBtn?.addEventListener('click', () => {
-      document.body.removeChild(modal);
-    });
-    
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        document.body.removeChild(modal);
-      }
-    });
-  }
-
-  // ✅ MODAL DE SUCCÈS PROFESSIONNELLE
-  private showSuccessModal(title: string, message: string): void {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      animation: fadeIn 0.3s ease;
-    `;
-    
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-      background: white;
-      border-radius: 16px;
-      padding: 30px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    `;
-    
-    modalContent.innerHTML = `
-      <div style="margin-bottom: 20px;">
-        <div style="font-size: 48px; color: #38A169; margin-bottom: 10px;">✅</div>
-        <h2 style="margin: 0 0 10px 0; color: #2D3748; font-size: 22px;">
-          ${title}
-        </h2>
-      </div>
-      
-      <div style="
-        background: #C6F6D5;
-        border-left: 4px solid #38A169;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 20px 0;
-        text-align: left;
-      ">
-        <p style="color: #276749; margin: 0; font-size: 15px; line-height: 1.4;">
-          ${message}
-        </p>
-      </div>
-      
-      <button class="modal-close-btn" style="
-        background: #38A169;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 30px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        transition: background 0.3s;
-      " onmouseover="this.style.background='#2F855A'" onmouseout="this.style.background='#38A169'">
-        Continuer
-      </button>
-      
-      <style>
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      </style>
-    `;
-    
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    // Fermer la modal automatiquement après 3s
-    setTimeout(() => {
-      if (document.body.contains(modal)) {
-        document.body.removeChild(modal);
-      }
-    }, 3000);
-    
-    // Fermer manuellement
-    const closeBtn = modalContent.querySelector('.modal-close-btn');
-    closeBtn?.addEventListener('click', () => {
-      document.body.removeChild(modal);
-    });
-    
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        document.body.removeChild(modal);
-      }
-    });
-  }
+  // ❌ SUPPRIMER LES FONCTIONS showErrorModal et showSuccessModal
 }
