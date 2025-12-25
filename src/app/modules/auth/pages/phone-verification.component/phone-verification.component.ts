@@ -93,7 +93,7 @@ export class PhoneVerificationComponent {
       localStorage.removeItem('userRegistrationData');
       localStorage.removeItem('geo_validation');
 
-      this.authService.requestOTP(phoneNumber, formValue.countryCode)
+      this.authService.requestOtp(phoneNumber, formValue.countryCode)
         .subscribe({
           next: (response) => {
             this.isLoading = false;
@@ -101,31 +101,15 @@ export class PhoneVerificationComponent {
             
             if (response.success) {
               // Sauvegarder les données pour les étapes suivantes
-              const phoneData = {
-                phoneNumber: phoneNumber,
-                countryCode: formValue.countryCode,
+              const phoneData = { 
                 fullPhoneNumber: fullPhoneNumber,
-                receivedCode: response.code,
-                detectedCountry: response.detectedCountry
+                countryCode: formValue.countryCode // ✅ AJOUTER CETTE LIGNE
               };
-              
               localStorage.setItem('tempPhone', JSON.stringify(phoneData));
-              
-              this.successMessage = response.message || 'Code OTP envoyé avec succès';
-              
-              // Afficher le code pour le test
-              if (response.code) {
-                console.log('🔑 Code OTP généré:', response.code);
-                
-                // Afficher dans une modal au lieu d'alert
-                this.showOTPModal(response.code, phoneData);
-              } else {
-                // Rediriger vers OTP
-                setTimeout(() => {
-                  this.router.navigate(['/auth/otp']);
-                }, 1500);
-              }
-              
+              this.successMessage = response.message || 'Un code a été généré. Veuillez consulter notre bot Telegram.';
+              setTimeout(() => {
+                this.router.navigate(['/auth/otp']);
+              }, 1500);
             } else {
               this.errorMessage = response.error || 'Erreur lors de l\'envoi du code';
               this.showError(this.errorMessage);
@@ -134,100 +118,19 @@ export class PhoneVerificationComponent {
           error: (error) => {
             this.isLoading = false;
             console.error('❌ Erreur OTP:', error);
-            this.errorMessage = error.message || 'Erreur de connexion au serveur';
+            // ✅ Logique améliorée pour extraire le message d'erreur de l'API
+            let apiErrorMessage = 'Erreur de connexion au serveur. Veuillez réessayer.';
+            if (error.error && typeof error.error.error === 'string') {
+              // Le message d'erreur est directement dans error.error.error
+              apiErrorMessage = error.error.error;
+            } else if (error.message) {
+              apiErrorMessage = error.message;
+            }
+            this.errorMessage = apiErrorMessage;
             this.showError(this.errorMessage);
           }
         });
     }
-  }
-
-  // ✅ MODAL POUR AFFICHER LE CODE OTP
-  private showOTPModal(code: string, phoneData: any): void {
-    // Créer une modal custom
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      animation: fadeIn 0.3s ease;
-    `;
-    
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    `;
-    
-    modalContent.innerHTML = `
-      <div style="margin-bottom: 20px;">
-        <h2 style="color: #F2A900; margin-bottom: 10px;">Code de verification</h2>
-      </div>
-      
-      <div style="
-        background: #f8f9fa;
-        border: 2px dashed #F2A900;
-        border-radius: 10px;
-        padding: 20px;
-        margin: 20px 0;
-      ">
-        <div style="font-size: 40px; font-weight: bold; color: #F2A900; letter-spacing: 5px;">
-          ${code}
-        </div>
-        <p style="color: #666; font-size: 14px; margin-top: 10px;">
-          Valide 10 minutes
-        </p>
-      </div>
-      
-      <div style="margin: 20px 0;">
-        <p style="color: #666; font-size: 14px;">
-          📱 Numéro: ${phoneData.fullPhoneNumber}<br>
-          🌍 Localisation détectée: ${phoneData.detectedCountry || 'Inconnue'}
-        </p>
-      </div>
-      
-      <button id="continueBtn" style="
-        background: #F2A900;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 30px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        margin-top: 10px;
-      ">
-        Continuer vers la vérification
-      </button>
-    `;
-    
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    // Gérer la fermeture
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        document.body.removeChild(modal);
-        this.router.navigate(['/auth/otp']);
-      }
-    });
-    
-    document.getElementById('continueBtn')?.addEventListener('click', () => {
-      document.body.removeChild(modal);
-      this.router.navigate(['/auth/otp']);
-    });
   }
 
   // ✅ AFFICHER LES ERREURS DANS UNE MODAL

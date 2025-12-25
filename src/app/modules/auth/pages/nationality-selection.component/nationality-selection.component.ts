@@ -3,7 +3,8 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, Form } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
-import { ModalService } from '../../../../core/services/modal.service';
+import { ModalService } from '../../../../core/services/modal.service'; 
+import { ConfigService } from '../../../../core/services/config.service';
 
 interface AfricanCountry {
   code: string;
@@ -26,73 +27,24 @@ export class NationalitySelectionComponent implements OnInit {
   errorMessage: string = '';
   communityPreview: string = '';
 
-  // ✅ LISTE COMPLÈTE DES PAYS AFRICAINS AVEC DRAPEAUX
-  africanCountries: AfricanCountry[] = [
-    { code: 'DZ', name: 'Algérie', flag: '🇩🇿' },
-    { code: 'AO', name: 'Angola', flag: '🇦🇴' },
-    { code: 'BJ', name: 'Bénin', flag: '🇧🇯' },
-    { code: 'BW', name: 'Botswana', flag: '🇧🇼' },
-    { code: 'BF', name: 'Burkina Faso', flag: '🇧🇫' },
-    { code: 'BI', name: 'Burundi', flag: '🇧🇮' },
-    { code: 'CM', name: 'Cameroun', flag: '🇨🇲' },
-    { code: 'CV', name: 'Cap-Vert', flag: '🇨🇻' },
-    { code: 'CF', name: 'République centrafricaine', flag: '🇨🇫' },
-    { code: 'TD', name: 'Tchad', flag: '🇹🇩' },
-    { code: 'KM', name: 'Comores', flag: '🇰🇲' },
-    { code: 'CG', name: 'République du Congo', flag: '🇨🇬' },
-    { code: 'CD', name: 'République démocratique du Congo', flag: '🇨🇩' },
-    { code: 'CI', name: "Côte d'Ivoire", flag: '🇨🇮' },
-    { code: 'DJ', name: 'Djibouti', flag: '🇩🇯' },
-    { code: 'EG', name: 'Égypte', flag: '🇪🇬' },
-    { code: 'GQ', name: 'Guinée équatoriale', flag: '🇬🇶' },
-    { code: 'ER', name: 'Érythrée', flag: '🇪🇷' },
-    { code: 'SZ', name: 'Eswatini', flag: '🇸🇿' },
-    { code: 'ET', name: 'Éthiopie', flag: '🇪🇹' },
-    { code: 'GA', name: 'Gabon', flag: '🇬🇦' },
-    { code: 'GM', name: 'Gambie', flag: '🇬🇲' },
-    { code: 'GH', name: 'Ghana', flag: '🇬🇭' },
-    { code: 'GN', name: 'Guinée', flag: '🇬🇳' },
-    { code: 'GW', name: 'Guinée-Bissau', flag: '🇬🇼' },
-    { code: 'KE', name: 'Kenya', flag: '🇰🇪' },
-    { code: 'LS', name: 'Lesotho', flag: '🇱🇸' },
-    { code: 'LR', name: 'Libéria', flag: '🇱🇷' },
-    { code: 'LY', name: 'Libye', flag: '🇱🇾' },
-    { code: 'MG', name: 'Madagascar', flag: '🇲🇬' },
-    { code: 'MW', name: 'Malawi', flag: '🇲🇼' },
-    { code: 'ML', name: 'Mali', flag: '🇲🇱' },
-    { code: 'MR', name: 'Mauritanie', flag: '🇲🇷' },
-    { code: 'MU', name: 'Maurice', flag: '🇲🇺' },
-    { code: 'MA', name: 'Maroc', flag: '🇲🇦' },
-    { code: 'MZ', name: 'Mozambique', flag: '🇲🇿' },
-    { code: 'NA', name: 'Namibie', flag: '🇳🇦' },
-    { code: 'NE', name: 'Niger', flag: '🇳🇪' },
-    { code: 'NG', name: 'Nigéria', flag: '🇳🇬' },
-    { code: 'RW', name: 'Rwanda', flag: '🇷🇼' },
-    { code: 'ST', name: 'Sao Tomé-et-Principe', flag: '🇸🇹' },
-    { code: 'SN', name: 'Sénégal', flag: '🇸🇳' },
-    { code: 'SC', name: 'Seychelles', flag: '🇸🇨' },
-    { code: 'SL', name: 'Sierra Leone', flag: '🇸🇱' },
-    { code: 'SO', name: 'Somalie', flag: '🇸🇴' },
-    { code: 'ZA', name: 'Afrique du Sud', flag: '🇿🇦' },
-    { code: 'SS', name: 'Soudan du Sud', flag: '🇸🇸' },
-    { code: 'SD', name: 'Soudan', flag: '🇸🇩' },
-    { code: 'TZ', name: 'Tanzanie', flag: '🇹🇿' },
-    { code: 'TG', name: 'Togo', flag: '🇹🇬' },
-    { code: 'TN', name: 'Tunisie', flag: '🇹🇳' },
-    { code: 'UG', name: 'Ouganda', flag: '🇺🇬' },
-    { code: 'ZM', name: 'Zambie', flag: '🇿🇲' },
-    { code: 'ZW', name: 'Zimbabwe', flag: '🇿🇼' }
-  ];
+  africanCountries: AfricanCountry[] = [];
+  private countryNames: { [key: string]: string } = {};
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
-    @Inject(ModalService) private modalService: ModalService // ✅ INJECTER LE SERVICE
+    @Inject(ModalService) private modalService: ModalService,
+    private configService: ConfigService 
   ) {
     this.nationalityForm = this.fb.group({
       nationality: ['', Validators.required]
     });
+
+    // ✅ Initialiser les listes depuis les constantes chargées
+    const appConstants = this.configService.constants;
+    this.africanCountries = appConstants.AFRICAN_COUNTRIES;
+    this.countryNames = appConstants.COUNTRY_NAMES;
   }
 
   ngOnInit() {
@@ -102,7 +54,7 @@ export class NationalitySelectionComponent implements OnInit {
     
     if (!tempData && !verifiedPhone) {
       console.error('❌ Aucune donnée de vérification trouvée');
-      this.modalService.showError( // ✅ UTILISER LE SERVICE
+      this.modalService.showError( 
         'Données manquantes', 
         'Veuillez d\'abord vérifier votre numéro de téléphone.'
       );
@@ -244,19 +196,8 @@ export class NationalitySelectionComponent implements OnInit {
   }
 
   private getCountryNameFromCode(code: string): string {
-    const countries: {[key: string]: string} = {
-      '+33': 'France',
-      '+32': 'Belgique', 
-      '+49': 'Allemagne',
-      '+39': 'Italie',
-      '+34': 'Espagne',
-      '+41': 'Suisse',
-      '+44': 'Royaume-Uni',
-      '+1': 'Canada',
-      '+7': 'Russie',
-      '+375': 'Biélorussie'
-    };
-    return countries[code] || 'Pays inconnu';
+    // ✅ UTILISER LES CONSTANTES CHARGÉES
+    return this.countryNames[code as keyof typeof this.countryNames] || 'Pays inconnu';
   }
 
   // ❌ SUPPRIMER LES FONCTIONS showErrorModal et showSuccessModal
