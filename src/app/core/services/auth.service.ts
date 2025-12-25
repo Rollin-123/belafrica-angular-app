@@ -1,52 +1,145 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment'; 
+import { User } from './user.service'; 
+
+export interface AuthUser {
+  id: string;
+  pseudo: string;
+  phoneNumber: string;
+  community: string;
+  isAdmin: boolean;
+  avatar?: string;
+}
+interface AuthResponse {
+  success: boolean;
+  user: User;
+  token: string;
+  error?: string;
+}
+
+interface GenericResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private api: ApiService) {}
+  private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
+  
+  private apiUrl = `${environment.apiUrl}/auth`;
 
-  // ✅ Demander OTP
-  requestOTP(phoneNumber: string, countryCode: string): Observable<any> {
-    return this.api.post('auth/request-otp', {
+  constructor(private http: HttpClient) {
+    this.loadUserFromStorage();
+  }
+
+  private loadUserFromStorage(): void {
+    try {
+      const userData = localStorage.getItem('belafrica_user');
+      const token = localStorage.getItem('belafrica_token');
+      
+      if (userData && token) {
+        const user = JSON.parse(userData);
+        this.currentUserSubject.next(user);
+        console.log('👤 Utilisateur chargé:', user.pseudo);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement:', error);
+      this.clearStorage();
+    }
+  }
+
+  requestOtp(phoneNumber: string, countryCode: string): Observable<any> {
+    return this.http.post<GenericResponse & { code?: string }>(`${this.apiUrl}/request-otp`, {
       phoneNumber,
       countryCode
-    });
+    }).pipe(
+      tap((response: any) => {
+        console.log('✅ OTP demandé');
+        localStorage.setItem('temp_phone', JSON.stringify({
+          phone: `${countryCode}${phoneNumber}`,
+          countryCode,
+          time: Date.now()
+        }));
+      }),
+      catchError(error => {
+        console.error('❌ Erreur OTP:', error);
+        throw error;
+      })
+    );
   }
 
-  // ✅ Vérifier OTP
-  verifyOTP(phoneNumber: string, code: string): Observable<any> {
-    return this.api.post('auth/verify-otp', {
+  verifyOtp(phoneNumber: string, code: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/verify-otp`, {
       phoneNumber,
       code
-    });
+    }).pipe( // @ts-ignore
+      tap((response: { success: boolean, tempToken?: string }) => {
+        console.log('✅ OTP vérifié');
+        if (response.success && response.tempToken) {
+          localStorage.setItem('belafrica_temp_token', response.tempToken);
+        }
+      }),
+      catchError(error => {
+        console.error('❌ Erreur vérification:', error);
+        throw error;
+      })
+    );
   }
 
-  // ✅ Compléter le profil
-  completeProfile(profileData: any): Observable<any> {
-    return this.api.post('auth/complete-profile', profileData);
+  completeProfile(profileData: any): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/complete-profile`, profileData).pipe(
+      tap(response => {
+        if (response.success && response.user && response.token) {
+          // Mettre à jour l'utilisateur et le token après la finalisation du profil
+          const user = response.user as AuthUser;
+          this.currentUserSubject.next(user);
+          // Nettoyer les tokens temporaires et stocker les définitifs
+          localStorage.removeItem('belafrica_temp_token');
+          localStorage.setItem('belafrica_user', JSON.stringify(user));
+          localStorage.setItem('belafrica_token', response.token);
+          console.log('✅ Profil finalisé et utilisateur mis à jour:', user.pseudo);
+        }
+      }),
+      catchError(error => {
+        console.error('❌ Erreur lors de la finalisation du profil:', error);
+        throw error;
+      })
+    );
   }
 
-  // ✅ Sauvegarder le token
-  saveToken(token: string): void {
-    localStorage.setItem('belafrica_token', token);
+  isAuthenticated(): boolean {
+    const user = this.currentUserSubject.value;
+    const token = localStorage.getItem('belafrica_token');
+    return !!(user && token);
   }
 
-  // ✅ Récupérer le token
-  getToken(): string | null {
-    return localStorage.getItem('belafrica_token');
+  getCurrentUser(): AuthUser | null {
+    return this.currentUserSubject.value;
   }
 
-  // ✅ Vérifier si connecté
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-
-  // ✅ Déconnexion
   logout(): void {
-    localStorage.removeItem('belafrica_token');
-    localStorage.removeItem('belafrica_user_profile');
+    this.clearStorage();
+    this.currentUserSubject.next(null);
+    console.log('👋 Déconnexion');
+  }
+
+  private clearStorage(): void {
+    const keys = [
+      'belafrica_user',
+      'belafrica_token',
+      'temp_phone',
+      'verified_phone',
+      'userRegistrationData',
+      'belafrica_temp_token'
+    ];
+    
+    keys.forEach(key => localStorage.removeItem(key));
   }
 }

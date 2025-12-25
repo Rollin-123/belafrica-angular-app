@@ -1,8 +1,7 @@
 // src/app/modules/auth/auth.module.ts
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms'; // Gardez ReactiveFormsModule
 
 import { AuthRoutingModule } from './auth-routing.module';
 
@@ -18,12 +17,11 @@ import { SharedModule } from "../../shared/shared/shared.module";
     PhoneVerificationComponent,
     OtpVerificationComponent,
     NationalitySelectionComponent,
-    ProfileSetupComponent
+    ProfileSetupComponent,
   ],
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    HttpClientModule,
+    ReactiveFormsModule, // Gardez ReactiveFormsModule
     AuthRoutingModule,
     SharedModule
 ]

@@ -47,8 +47,6 @@ export class AdminRequestComponent implements OnInit {
         this.user = user;
         this.isAdmin = user.isAdmin || false;
         this.showCreatePostButton = this.adminService.canPostNational();
-        this.hasPendingRequest = this.adminService.hasPendingRequest();
-        
         console.log('🔄 Mise à jour réactive du statut admin:', {
           isAdmin: this.isAdmin,
           pseudo: user.pseudo,
@@ -63,7 +61,6 @@ export class AdminRequestComponent implements OnInit {
   private loadUserData(): void {
     this.user = this.userService.getCurrentUser();
     this.isAdmin = this.adminService.isUserAdmin();
-    this.hasPendingRequest = this.adminService.hasPendingRequest();
     this.showCreatePostButton = this.adminService.canPostNational();
     
     console.log('👤 Statut admin initial:', {
@@ -137,13 +134,9 @@ export class AdminRequestComponent implements OnInit {
 
     try {
       const imageUrl = await this.cloudinaryService.uploadImage(this.selectedPassportBase64);
-      
-      const success = await this.adminService.submitAdminRequest(
-        imageUrl, 
-        this.adminForm.value.additionalInfo
-      );
+      const success = false;
 
-      if (success) {
+      if (success !== undefined && success) {
         this.hasPendingRequest = true;
         this.showSuccess('📨 Demande envoyée ! Vous recevrez un code par email sous 24-48h.');
         this.adminForm.reset();
@@ -173,23 +166,25 @@ export class AdminRequestComponent implements OnInit {
     this.validatingCode = true;
     this.codeError = '';
     
-    this.adminService.validateAdminCodeWithRedirect(code, this.router)
-      .then(isValid => {
-        if (isValid) {
+    this.adminService.validateAdminCode(code).subscribe({
+      next: (response) => {
+        if (response.success) {
           this.codeError = '🎉 Félicitations ! Vous êtes maintenant administrateur. Redirection...';
           this.isAdmin = true;
           this.showCreatePostButton = true;
+          this.router.navigate(['/app/settings']); // Rediriger après succès
         } else {
-          this.codeError = '❌ Code invalide, expiré ou ne correspond pas à votre communauté.';
+          this.codeError = response.error || '❌ Code invalide, expiré ou ne correspond pas à votre communauté.';
         }
-      })
-      .catch(error => {
+      },
+      error: (error) => {
         this.codeError = '❌ Erreur de validation: ' + (error.message || 'Veuillez réessayer.');
-      })
-      .finally(() => {
+      },
+      complete: () => {
         this.validatingCode = false;
         this.cd.detectChanges();
-      });
+      }
+    });
   }
 
   private markFormGroupTouched(): void {

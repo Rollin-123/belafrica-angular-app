@@ -15,5 +15,5 @@ export const environment = {
   otpTimeout: 600000,
   
   telegramBot: 'https://t.me/Belafrica_bot',
-  supportEmail: 'rollinloictianga@gmail.com'
+  supportEmail: 'rollinloictianga@gmail.com' 
 };

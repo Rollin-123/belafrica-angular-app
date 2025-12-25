@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from '../../../../core/services/admin.service';
+import { ConfigService } from '../../../../core/services/config.service'; 
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-code-generator',
@@ -8,41 +10,18 @@ import { AdminService } from '../../../../core/services/admin.service';
   templateUrl: './admin-code-generator.component.html',
   styleUrls: ['./admin-code-generator.component.scss']
 })
-export class AdminCodeGeneratorComponent implements OnInit {
+export class AdminCodeGeneratorComponent implements OnInit, OnDestroy {
   codeForm: FormGroup;
   isLoading = false;
   generatedCode: string = '';
   generatedCodes: any[] = [];
   showCode = false;
+  private adminSub: Subscription = new Subscription();
 
-  // Liste des pays européens
-  europeanCountries = [
-    { name: 'France', code: 'FR' },
-    { name: 'Belgique', code: 'BE' },
-    { name: 'Allemagne', code: 'DE' },
-    { name: 'Italie', code: 'IT' },
-    { name: 'Espagne', code: 'ES' },
-    { name: 'Suisse', code: 'CH' },
-    { name: 'Royaume-Uni', code: 'UK' },
-    { name: 'Canada', code: 'CA' },
-    { name: 'Russie', code: 'RU' },
-    { name: 'Biélorussie', code: 'BY' }
-  ];
-
-  // Liste des nationalités africaines
-  africanNationalities = [
-    'Algérie', 'Angola', 'Bénin', 'Botswana', 'Burkina Faso', 'Burundi',
-    'Cameroun', 'Cap-Vert', 'République centrafricaine', 'Tchad', 'Comores',
-    'Congo', 'Côte d\'Ivoire', 'Djibouti', 'Égypte', 'Guinée équatoriale',
-    'Érythrée', 'Eswatini', 'Éthiopie', 'Gabon', 'Gambie', 'Ghana',
-    'Guinée', 'Guinée-Bissau', 'Kenya', 'Lesotho', 'Libéria', 'Libye',
-    'Madagascar', 'Malawi', 'Mali', 'Mauritanie', 'Maurice', 'Maroc',
-    'Mozambique', 'Namibie', 'Niger', 'Nigéria', 'Rwanda', 'Sao Tomé-et-Principe',
-    'Sénégal', 'Seychelles', 'Sierra Leone', 'Somalie', 'Afrique du Sud',
-    'Soudan du Sud', 'Soudan', 'Tanzanie', 'Togo', 'Tunisie', 'Ouganda',
-    'Zambie', 'Zimbabwe'
-  ];
-
+  // ✅ Listes qui seront initialisées depuis le ConfigService
+  europeanCountries: any[] = [];
+  africanNationalities: string[] = [];
+  
   // Niveaux de permissions COMPLETS
 permissionLevels = [
   {
@@ -70,7 +49,8 @@ permissionLevels = [
 
   constructor(
     private fb: FormBuilder,
-    private adminService: AdminService // Assurez-vous que ce service contient la logique de persistance (Firestore/LocalStorage)
+    private adminService: AdminService,
+    private configService: ConfigService // ✅ Injecter le service
   ) {
     this.codeForm = this.fb.group({
       countryCode: ['', Validators.required],
@@ -80,6 +60,16 @@ permissionLevels = [
       permissionLevel: ['national', Validators.required],
       expiresIn: [24, Validators.required]
     });
+
+    // ✅ Initialiser les listes depuis les constantes chargées
+    const appConstants = this.configService.constants;
+    this.africanNationalities = appConstants.AFRICAN_COUNTRIES.map((country: any) => country.name);
+    
+    // ✅ Utiliser le mapping complet pour avoir le nom et le code ISO
+    this.europeanCountries = Object.entries(appConstants.PHONE_COUNTRY_MAPPING).map(([phoneCode, isoCodes]: [string, any]) => ({
+        name: appConstants.COUNTRY_NAMES[phoneCode as keyof typeof appConstants.COUNTRY_NAMES],
+        code: isoCodes[0] // On prend le premier code ISO comme référence (ex: 'FR' pour '+33')
+    }));
 
     // Mettre à jour countryName quand countryCode change
     this.codeForm.get('countryCode')?.valueChanges.subscribe(code => {
@@ -94,76 +84,74 @@ permissionLevels = [
     this.loadGeneratedCodes();
   }
 
+  ngOnDestroy() {
+    this.adminSub.unsubscribe();
+  }
+
   // Ajout de la fonction de suppression
-  async deleteCode(codeToDelete: any) {
-    // ⚠️ IMPORTANT: Utiliser une modale custom au lieu de 'alert' ou 'confirm'
-    // Pour l'instant, utilisons la fonction simulée, mais cela DEVRAIT être remplacé par une modale.
+  deleteCode(codeToDelete: any) {
+    // ✅ Utiliser une confirmation native. Idéalement, la remplacer par un service de modale.
     if (!confirm(`Êtes-vous sûr de vouloir supprimer le code admin pour ${codeToDelete.userEmail} ?`)) {
       return;
     }
 
-    try {
-      this.isLoading = true;
-      // ⚠️ Simulation d'un appel à un service pour supprimer le code
-      // Vous devez implémenter cette méthode dans votre AdminService.
-      // await this.adminService.deleteAdminCode(codeToDelete.code); 
-      
-      // Mise à jour de la liste locale après la suppression (ou simulation de suppression)
-      this.generatedCodes = this.generatedCodes.filter(c => c.code !== codeToDelete.code);
-      this.showSuccess(`🗑️ Code pour ${codeToDelete.userEmail} supprimé !`);
-
-    } catch (error) {
-      console.error('Erreur lors de la suppression du code:', error);
-      this.showError('❌ Échec de la suppression du code.');
-    } finally {
-      this.isLoading = false;
-    }
+    this.isLoading = true;
+    this.adminSub.add(this.adminService.deleteAdminCode(codeToDelete.code).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.showSuccess(response.message || `🗑️ Code pour ${codeToDelete.userEmail} supprimé !`);
+          // Recharger la liste pour refléter la suppression
+          this.loadGeneratedCodes();
+        } else {
+          this.showError(response.error || '❌ Échec de la suppression du code.');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.showError(err.error?.error || '❌ Erreur serveur lors de la suppression.');
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    }));
   }
 
-async generateCode() {
-  if (this.codeForm.valid) {
+  generateCode() {
+    if (this.codeForm.valid) {
     this.isLoading = true;
     this.generatedCode = '';
     this.showCode = false;
 
     const formValue = this.codeForm.value;
-    
-    try {
-      // Récupérer les permissions
-      const selectedLevel = this.permissionLevels.find(level => level.value === formValue.permissionLevel);
-      const permissions = selectedLevel?.permissions || ['post_national'];
 
-      // ✅ CORRECTION : Récupérer le résultat complet
-      const result = await this.adminService.generateAdminCode(
-        formValue.countryCode,
-        formValue.countryName, 
-        formValue.nationality,
-        formValue.userEmail,
-        permissions,
-        formValue.expiresIn
-      );
+    // Récupérer les permissions
+    const selectedLevel = this.permissionLevels.find(level => level.value === formValue.permissionLevel);
+    const permissions = selectedLevel?.permissions || ['post_national'];
 
-      // ✅ CORRECTION : Extraire le code du résultat
-      if (result.success && result.code) {
-        this.generatedCode = result.code;
-        this.showCode = true;
-        
-        // Recharger la liste des codes
-        this.loadGeneratedCodes();
-        
-        this.showSuccess('✅ Code admin généré et envoyé par email !');
-      } else {
-        this.showError('❌ Erreur: ' + (result.error || 'Échec de la génération'));
+    // ✅ APPEL À L'API VIA LE SERVICE
+    this.adminSub = this.adminService.generateAdminCode(
+      formValue.countryName,
+      formValue.nationality,
+      formValue.userEmail,
+      permissions,
+      formValue.expiresIn
+    ).subscribe({
+        next: (result) => {
+          if (result.success && result.code) {
+            this.generatedCode = result.code;
+            this.showCode = true;
+            this.loadGeneratedCodes(); // Recharger la liste (devra aussi venir de l'API)
+            this.showSuccess(result.message || '✅ Code admin généré avec succès !');
+          } else {
+            this.showError('❌ Erreur: ' + (result.error || 'Échec de la génération du code.'));
+          }
+        },
+        error: (err) => this.showError('❌ Erreur: ' + (err.message || 'Échec de la génération')),
+        complete: () => this.isLoading = false
       }
-      
-    } catch (error: any) {
-      console.error('Erreur génération code:', error);
-      this.showError('❌ Erreur: ' + (error.message || 'Échec de la génération'));
-    } finally {
-      this.isLoading = false;
+    );
     }
   }
-}
 
 getPermissionLabel(): string {
   const level = this.codeForm.get('permissionLevel')?.value as 'national' | 'international' | 'both' | string;
@@ -207,8 +195,10 @@ getPermissionLabel(): string {
   }
 
   private loadGeneratedCodes() {
-    // Assurez-vous que getGeneratedCodes() existe dans votre service et renvoie un tableau d'objets { code: string, userEmail: string, ... }
-    this.generatedCodes = this.adminService.getGeneratedCodes();
+    // ✅ Cette méthode devrait maintenant s'abonner à un Observable
+    this.adminSub = this.adminService.getGeneratedCodes().subscribe(codes => {
+      this.generatedCodes = codes;
+    });
   }
 
   getExpiryDate(hours: number): string {

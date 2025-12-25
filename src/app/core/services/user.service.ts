@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { StorageService } from './storage.service';
 
 export interface User {
+  id: any;
   userId: string;
   phoneNumber: string;
   countryCode: string;

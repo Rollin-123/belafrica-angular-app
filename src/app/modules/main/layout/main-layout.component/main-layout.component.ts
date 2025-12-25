@@ -127,13 +127,4 @@ export class MainLayoutComponent implements OnInit {
   // Logique de rechargement/mise à jour du fil
   this.closeCreatePostModal();
  }
-
- // Actions header (laissé tel quel)
- onSearch(): void {
-  console.log('Recherche activée');
- }
-
- onMenu(): void {
-  console.log('Menu activé');
- }
 }
