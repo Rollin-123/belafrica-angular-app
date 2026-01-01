@@ -68,12 +68,19 @@ export class OtpVerificationComponent implements OnInit {
       this.authService.verifyOtp(this.phoneNumber, otp).subscribe({
         next: (response) => {
           console.log('✅ OTP validé:', response);
-          localStorage.setItem('verified_phone', this.phoneNumber); // ✅ Sauvegarder le numéro vérifié
-          
-          // Rediriger vers la sélection de nationalité
-          setTimeout(() => {
+
+          if (response.success && response.tempToken) {
+            // ✅ CORRECTION DÉFINITIVE: Sauvegarder le token temporaire.
+            // L'intercepteur HTTP l'utilisera pour la prochaine requête.
+            // Assurez-vous que la clé 'belafrica_token' est celle que votre intercepteur recherche.
+            localStorage.setItem('belafrica_token', response.tempToken);
+            
+            // Rediriger vers la sélection de nationalité
             this.router.navigate(['/auth/nationality']);
-          }, 500);
+          } else {
+            this.errorMessage = response.error || 'Réponse invalide du serveur après vérification OTP.';
+            this.isLoading = false;
+          }
         },
         error: (error) => {
           console.error('❌ Erreur vérification OTP:', error);
