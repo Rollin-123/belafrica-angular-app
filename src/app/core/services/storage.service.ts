@@ -27,9 +27,16 @@ export class StorageService {
     if (this.isBrowser) {
       try {
         const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : null;
+        if (!item) return null;
+
+        // ✅ CORRECTION: Essayer de parser. Si ça échoue, c'est probablement une chaîne brute (comme un token).
+        try {
+          return JSON.parse(item);
+        } catch (e) {
+          return item; // Retourner la chaîne brute si ce n'est pas du JSON
+        }
       } catch (error) {
-        console.error('❌ Erreur localStorage getItem:', error);
+        console.error(`❌ Erreur localStorage getItem pour la clé "${key}":`, error);
         return null;
       }
     }
