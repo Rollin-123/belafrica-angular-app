@@ -27,8 +27,8 @@ export class CreatePostModalComponent implements OnInit {
       content: ['', [Validators.required, Validators.minLength(1)]]
     });
   }
-  ngOnInit(): void {
-    throw new Error('Method not implemented.');
+  ngOnInit(): void { // ✅ CORRECTION: Laisser la méthode vide
+    this.postForm.get('visibility')?.setValue(this.visibility);
   }
 
   onImageSelected(event: any): void {

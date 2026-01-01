@@ -72,9 +72,10 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Charger la conversation de groupe
     this.groupConversation$ = this.messagingService.getConversations().pipe(
-      map(conversations => conversations.find(c => 
-        c.type === 'group' && c.name.includes(this.userCommunity)
-      )),
+      // ✅ Logique plus robuste: Le backend ne retourne que les conversations de l'utilisateur.
+      // On cherche simplement la première de type 'group'.
+      // Pour une app plus complexe, on pourrait avoir un identifiant spécifique pour le groupe principal.
+      map(conversations => conversations.find(c => c.type === 'group')),
       tap(conversation => {
         if (conversation) {
           this.conversationParticipants = conversation.participantsDetails || [];
