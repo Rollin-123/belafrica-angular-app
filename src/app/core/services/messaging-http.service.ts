@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Message, Conversation, MessageAction } from '../models/message.model';
 import { MessagingService } from './messaging.service';
 import { EncryptionService } from './encryption.service';
+import { StorageService } from './storage.service';
 @Injectable()
 export class MessagingHttpService extends MessagingService {
   private apiUrl = `${environment.apiUrl}/messaging`;
@@ -16,11 +17,32 @@ export class MessagingHttpService extends MessagingService {
 
   constructor(
     private http: HttpClient,
-    private encryptionService: EncryptionService // ✅ Injecter pour le déchiffrement
+    private encryptionService: EncryptionService, // ✅ Injecter pour le déchiffrement
+    private storageService: StorageService // ✅ Injecter pour la clé
   ) {
     super();
     console.log('⚡️ MessagingHttpService initialisé (mode production)');
-    // TODO: Initialiser la clé de chiffrement et la connexion WebSocket/Realtime
+    this.initializeEncryption();
+    // TODO: Initialiser la connexion WebSocket/Realtime ici
+  }
+
+  private async initializeEncryption(): Promise<void> {
+    try {
+      const savedKey = this.storageService.getItem('belafrica_user_encryption_key');
+      if (savedKey) {
+        this.userEncryptionKey = await this.encryptionService.importKey(savedKey);
+        console.log('⚡️ [HTTP] Clé de chiffrement chargée.');
+      } else {
+        // En production, la clé devrait idéalement être gérée de manière plus sécurisée,
+        // mais pour la cohérence avec le mock, nous la générons si elle n'existe pas.
+        this.userEncryptionKey = await this.encryptionService.generateEncryptionKey();
+        const keyString = await this.encryptionService.exportKey(this.userEncryptionKey);
+        this.storageService.setItem('belafrica_user_encryption_key', keyString);
+        console.log('⚡️ [HTTP] Nouvelle clé de chiffrement générée.');
+      }
+    } catch (error) {
+      console.error('❌ [HTTP] Erreur initialisation chiffrement:', error);
+    }
   }
 
   getConversations(): Observable<Conversation[]> {
@@ -37,18 +59,52 @@ export class MessagingHttpService extends MessagingService {
   getMessages(conversationId: string): Observable<Message[]> {
     // ✅ Implémentation réelle avec appel HTTP
     return this.http.get<{ messages: Message[] }>(`${this.apiUrl}/conversations/${conversationId}/messages`).pipe(
-      map(response => response.messages || [])
-      // TODO: Ajouter le déchiffrement des messages ici
+      map(response => response.messages || []),
+      // ✅ Déchiffrer les messages reçus
+      switchMap(async (messages) => {
+        if (!this.userEncryptionKey) {
+          console.warn('⚠️ [HTTP] Clé de chiffrement non prête, messages non déchiffrés.');
+          return messages.map(msg => ({ ...msg, content: 'Chargement...' }));
+        }
+        
+        const decryptionPromises = messages.map(async (message) => {
+          if (message.isDeleted || !message.encryptedContent || !message.encryptionKey) {
+            return { ...message, content: 'Message supprimé' };
+          }
+          try {
+            const decryptedContent = await this.encryptionService.deserializeAndDecrypt(
+              { iv: message.encryptionKey, encryptedContent: message.encryptedContent },
+              this.userEncryptionKey!
+            );
+            return { ...message, content: decryptedContent };
+          } catch (error) {
+            console.error(`❌ [HTTP] Erreur déchiffrement message ${message.id}:`, error);
+            return { ...message, content: '🔒 Message non déchiffrable' };
+          }
+        });
+        return Promise.all(decryptionPromises);
+      })
     );
   }
 
   async sendMessage(content: string, conversationId: string, type: 'group' | 'private', replyTo?: any): Promise<Message> {
-    // TODO: Chiffrer le contenu avant de l'envoyer
-    const encryptedData = { encryptedContent: 'contenu chiffré (TODO)', iv: 'iv (TODO)' };
+    if (!this.userEncryptionKey) {
+      throw new Error('Clé de chiffrement non disponible pour l\'envoi.');
+    }
+
+    // ✅ Chiffrer le contenu avant de l'envoyer
+    const encryptedData = await this.encryptionService.encryptAndSerialize(
+      content,
+      this.userEncryptionKey
+    );
 
     const response = await this.http.post<{ message: Message }>(
       `${this.apiUrl}/conversations/${conversationId}/messages`,
-      encryptedData
+      { 
+        encryptedContent: encryptedData.encryptedContent,
+        iv: encryptedData.iv,
+        replyToId: replyTo?.messageId || null
+      }
     ).toPromise();
 
     if (!response?.message) {

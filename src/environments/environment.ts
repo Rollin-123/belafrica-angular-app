@@ -12,6 +12,6 @@ export const environment = {
   enableLogging: true,
   requestTimeout: 30000,
   otpTimeout: 600000, 
-  telegramBot: 'https://t.me/Belafrica_bot',
+  telegramBot: 'https://t.me/BelafricaDevBot', 
   supportEmail: 'rollinloictianga@gmail.com'
 };
