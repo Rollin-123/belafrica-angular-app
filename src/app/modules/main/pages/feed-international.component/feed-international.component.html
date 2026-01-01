@@ -18,7 +18,7 @@
             [src]="post.authorAvatar || 'assets/images/default-avatar.png'" 
             alt="Avatar" 
             class="bel-post-avatar"
-            (error)="$event.target.src='assets/images/default-avatar.png'"
+            (error)="handleImageError($event)"
           >
           <div class="bel-post-info">
             <strong class="bel-author-name">{{ post.authorName }}</strong>

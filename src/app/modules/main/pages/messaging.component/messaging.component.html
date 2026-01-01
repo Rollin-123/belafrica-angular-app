@@ -95,8 +95,8 @@
                     }
                     
                     <!-- AFFICHAGE NORMAL -->
-                    @else {
-                      <!-- En-tête du message -->
+                    @if (editingMessageId !== message.id) {
+                      <!-- En-tête du message (uniquement pour les autres) -->
                       @if (!isMyMessage(message) && !message.isDeleted) {
                         <div class="bel-message-header">
                           <div class="bel-message-sender-info">
@@ -111,7 +111,6 @@
                           </div>
                         </div>
                       }
-
                       <!-- Contenu du message -->
                       <div class="bel-message-content">
                         @if (message.isDeleted) {

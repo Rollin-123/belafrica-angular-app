@@ -80,4 +80,9 @@ export class FeedInternationalComponent implements OnInit, OnDestroy {
       alert('Fonctionnalité de création de post bientôt disponible !');
     }
   }
+
+  // ✅ NOUVEAU: Gérer l'erreur de chargement d'image
+  handleImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = 'assets/images/default-avatar.png';
+  }
 }
