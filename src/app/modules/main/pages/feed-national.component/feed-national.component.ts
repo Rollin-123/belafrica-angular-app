@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { UserService } from '../../../../core/services/user.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Observable, of, Subscription } from 'rxjs';
+import { UserService, User } from '../../../../core/services/user.service';
 import { PostsService } from '../../../../core/services/posts.service';
-import { Post } from '../../../../core/models/post.model';
+import { Post, isExpiringSoon, getTimeRemaining } from '../../../../core/models/post.model';
 
 @Component({
   selector: 'app-feed-national',
@@ -10,47 +10,59 @@ import { Post } from '../../../../core/models/post.model';
   styleUrls: ['./feed-national.component.scss'],
   standalone: false
 })
-export class FeedNationalComponent implements OnInit {
+export class FeedNationalComponent implements OnInit, OnDestroy {
   posts$: Observable<Post[]>;
   userCommunity: string = '';
   showCreatePostButton: boolean = false;
   isLoading: boolean = true;
+  private userSubscription: Subscription | undefined;
 
   constructor(
     private userService: UserService,
     private postsService: PostsService
   ) {
-    this.posts$ = this.postsService.getNationalPosts();
+    // On ne charge les posts que lorsque l'utilisateur est connu
+    this.posts$ = of([]); 
   }
 
   ngOnInit() {
-    this.userCommunity = this.userService.getUserCommunity();
-    
-    this.userService.currentUser$.subscribe(user => {
-      this.showCreatePostButton = user?.isAdmin || false;
-      
-      console.log('🔄 FeedNational - Statut admin mis à jour:', {
-        showCreatePostButton: this.showCreatePostButton,
-        pseudo: user?.pseudo,
-        community: this.userCommunity
-      });
-    });
-
-    this.posts$.subscribe(posts => {
-      this.isLoading = false;
-      console.log('📝 Posts chargés:', posts.length);
-    });
-
-    console.log('🏠 FeedNational initialisé:', {
-      community: this.userCommunity,
-      showCreatePostButton: this.showCreatePostButton
+    this.userSubscription = this.userService.currentUser$.subscribe(user => {
+      if (user) {
+        this.userCommunity = user.community;
+        this.showCreatePostButton = this.userService.canPostNational();
+        console.log(`🏠 FeedNational initialisé pour la communauté: ${this.userCommunity}`);
+        this.loadNationalPosts();
+      } else {
+        // Gérer le cas où l'utilisateur se déconnecte
+        this.userCommunity = '';
+        this.showCreatePostButton = false;
+        this.isLoading = false;
+      }
     });
   }
 
-  // Méthodes pour la gestion des posts
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
+  }
+
+  loadNationalPosts(): void {
+    this.isLoading = true;
+    this.posts$ = this.postsService.getNationalPosts();
+    this.posts$.subscribe({
+      next: (posts) => {
+        this.isLoading = false;
+        console.log(`📝 ${posts.length} posts nationaux chargés.`);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('❌ Erreur chargement posts nationaux:', err);
+      }
+    });
+  }
+
   hasLiked(post: Post): boolean {
     const user = this.userService.getCurrentUser();
-    return user ? post.likes.includes(user.userId) : false;
+    return user ? post.likes.includes(user.id) : false; // ✅ Correction: user.id
   }
 
   toggleLike(postId: string): void {
@@ -59,26 +71,11 @@ export class FeedNationalComponent implements OnInit {
   }
 
   isExpiringSoon(post: Post): boolean {
-    const now = new Date();
-    const expiry = new Date(post.expiresAt);
-    const hoursRemaining = (expiry.getTime() - now.getTime()) / (1000 * 60 * 60);
-    return hoursRemaining < 6;
+    return isExpiringSoon(post);
   }
 
   getTimeRemaining(post: Post): string {
-    const now = new Date();
-    const expiry = new Date(post.expiresAt);
-    const hoursRemaining = (expiry.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    if (hoursRemaining < 1) {
-      const minutes = Math.floor(hoursRemaining * 60);
-      return `${minutes}m`;
-    } else if (hoursRemaining < 24) {
-      return `${Math.floor(hoursRemaining)}h`;
-    } else {
-      const days = Math.floor(hoursRemaining / 24);
-      return `${days}j`;
-    }
+    return getTimeRemaining(post);
   }
 
   openCreatePostModal(): void {
@@ -96,11 +93,7 @@ export class FeedNationalComponent implements OnInit {
 
   refreshPosts(): void {
     this.isLoading = true;
-    console.log('🔄 Actualisation des posts...');
-    
-    setTimeout(() => {
-      this.isLoading = false;
-      console.log('✅ Posts actualisés');
-    }, 500);
+    console.log('🔄 Actualisation des posts nationaux...');
+    this.loadNationalPosts();
   }
 }

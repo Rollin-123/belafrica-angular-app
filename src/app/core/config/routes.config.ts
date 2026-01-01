@@ -16,7 +16,6 @@ export const AppRoutes = {
     MESSAGES: '/app/messages',
     SETTINGS: '/app/settings'
   },
-  
   // Routes admin
   ADMIN: {
     ROOT: '/admin',

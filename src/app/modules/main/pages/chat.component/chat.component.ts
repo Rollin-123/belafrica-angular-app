@@ -14,8 +14,8 @@ import { UserService } from '../../../../core/services/user.service';
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss'],
-  standalone: true, // ⬅️ IMPORTANT pour Angular 16+
-  imports: [CommonModule, FormsModule] // ⬅️ IMPORTANT pour les directives
+  standalone: true, 
+  imports: [CommonModule, FormsModule] 
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -127,7 +127,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isMyMessage(message: Message): boolean {
     const user = this.userService.getCurrentUser();
-    return message.fromUserId === user?.userId;
+    return message.fromUserId === user?.id;
   }
 
   formatMessageTime(timestamp: Date): string {
@@ -136,7 +136,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       minute: '2-digit' 
     });
   }
-
   goBack(): void {
     this.router.navigate(['/app/messaging']);
   }

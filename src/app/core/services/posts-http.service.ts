@@ -1,0 +1,77 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { Post } from '../models/post.model';
+import { PostsService } from './posts.service';
+
+@Injectable()
+export class PostsHttpService extends PostsService {
+  private apiUrl = `${environment.apiUrl}/posts`;
+
+  constructor(private http: HttpClient) {
+    super();
+    console.log('⚡️ PostsHttpService initialisé (mode production)');
+  }
+
+  getNationalPosts(): Observable<Post[]> {
+    return this.http.get<{ posts: Post[] }>(`${this.apiUrl}/national`).pipe(
+      map(res => res.posts || [])
+    );
+  }
+
+  getInternationalPosts(): Observable<Post[]> {
+    return this.http.get<{ posts: Post[] }>(`${this.apiUrl}/international`).pipe(
+      map(res => res.posts || [])
+    );
+  }
+
+  getPosts(visibility?: 'national' | 'international'): Observable<Post[]> {
+    if (visibility === 'national') {
+      return this.getNationalPosts();
+    }
+    if (visibility === 'international') {
+      return this.getInternationalPosts();
+    }
+    // Fallback, bien que non idéal. Le backend devrait avoir une route /all
+    return of([]);
+  }
+
+  async createPost(content: string, imageUrls: string[], visibility: 'national' | 'international'): Promise<Post> {
+    const response = await this.http.post<{ post: Post }>(this.apiUrl, { content, imageUrls, visibility }).toPromise();
+    if (!response?.post) {
+      throw new Error('La création du post a échoué.');
+    }
+    return response.post;
+  }
+
+  async toggleLike(postId: string): Promise<void> {
+    // Le backend retourne { success: true, liked: boolean, likesCount: number }
+    // Nous n'avons pas besoin de la réponse ici, mais nous attendons que la requête se termine.
+    await this.http.post(`${this.apiUrl}/${postId}/like`, {}).toPromise();
+  }
+
+  async deletePost(postId: string): Promise<boolean> {
+    // Le backend retourne { success: true, message: '...' }
+    const response = await this.http.delete<{ success: boolean }>(`${this.apiUrl}/${postId}`).toPromise();
+    return response?.success ?? false;
+  }
+
+  // --- Méthodes non implémentées car pas de route backend ---
+
+  getStats(): any {
+    console.warn('[PostsHttpService] getStats() non implémenté côté backend.');
+    return {
+      total: 0,
+      national: 0,
+      international: 0,
+    };
+  }
+
+  getPostsByCommunity(community: string): Observable<Post[]> {
+    console.warn('[PostsHttpService] getPostsByCommunity() non implémenté côté backend.');
+    // Idéalement, il faudrait une route comme GET /api/posts/community/:communityName
+    return of([]);
+  }
+}

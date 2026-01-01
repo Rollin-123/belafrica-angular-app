@@ -15,9 +15,11 @@
       <div class="bel-post-header">
         <div class="bel-post-author">
           <img 
-            [src]="post.authorAvatar || '👤'" 
+            [src]="post.authorAvatar || 'assets/images/default-avatar.png'" 
             alt="Avatar" 
-            class="bel-post-avatar">
+            class="bel-post-avatar"
+            (error)="$event.target.src='assets/images/default-avatar.png'"
+          >
           <div class="bel-post-info">
             <strong class="bel-author-name">{{ post.authorName }}</strong>
             <div class="bel-post-meta">
@@ -60,12 +62,10 @@
           (click)="toggleLike(post.id)">
           ❤️ {{ post.likes.length }}
         </button>
-        
         <button class="bel-action-btn">
           🔄 Partager
         </button>
       </div>
-
     </div>
 
     <!-- Message si pas de posts -->
@@ -77,7 +77,6 @@
         <small>💡 Les posts internationaux expirent après 72h</small>
       </p>
     </div>
-
   </div>
 
 </div>

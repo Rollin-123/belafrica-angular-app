@@ -7,21 +7,12 @@
 
 <div class="bel-user-card" *ngIf="user">
   <div class="bel-user-avatar">
-    <!-- Version avec vérification -->
-    <!-- <img 
-      *ngIf="user.avatar && user.avatar.startsWith('data:image')"
-      [src]="user.avatar" 
-      [alt]="user.pseudo"
-      class="bel-avatar-img"> -->
-    
-    <!-- Version avec avatar par défaut -->
     <div 
-      *ngIf="!user.avatar || !user.avatar.startsWith('data:image')"
+      *ngIf="!user.avatar_url"
       class="bel-avatar-default">
       {{ userService.generateDefaultAvatar(user.pseudo) }}
     </div>
   </div>
-
   <!-- Sections des Paramètres -->
   <main class="bel-settings-sections">
     
@@ -55,7 +46,7 @@
       </div>
     </section>
     <!-- Section Administration -->
-@if (user && !user.isAdmin) {
+@if (user && !user.is_admin) {
   <section class="bel-settings-group">
     <h3 class="bel-settings-group-title">👑 Administration</h3>
     
@@ -82,7 +73,7 @@
   </section>
 }
 
-@if (user && user.isAdmin) {
+@if (user && user.is_admin) {
   <section class="bel-settings-group">
     <h3 class="bel-settings-group-title">👑 Administration</h3>
     

@@ -19,7 +19,6 @@ export function calculateExpiration(visibility: 'national' | 'international'): D
   const hours = visibility === 'national' ? 48 : 72;
   return new Date(now.getTime() + hours * 60 * 60 * 1000);
 }
-
 // ✅ VÉRIFIER SI UN POST EST EXPIRÉ
 export function isPostExpired(post: Post): boolean {
   return new Date() > new Date(post.expiresAt);
@@ -28,7 +27,6 @@ export function isPostExpired(post: Post): boolean {
 export function formatCommunityName(nationality: string, country: string): string {
   return `${nationality}En${country.replace(/\s/g, '')}`;
 }
-
 // ✅ FORMATER LE TEMPS RESTANT
 export function getTimeRemaining(post: Post): string {
   const now = new Date();

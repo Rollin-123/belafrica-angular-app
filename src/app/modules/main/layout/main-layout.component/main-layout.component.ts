@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { UserService } from '../../../../core/services/user.service';
-import { AdminService } from '../../../../core/services/admin.service'; // <-- NOUVEAU
+import { MessagingService } from '../../../../core/services/messaging.service'; // ✅ Import du service de messagerie
+import { User, UserService } from '../../../../core/services/user.service';
+import { Subscription } from 'rxjs';
 
 @Component({
  selector: 'app-main-layout',
@@ -10,26 +11,44 @@ import { AdminService } from '../../../../core/services/admin.service'; // <-- N
  templateUrl: './main-layout.component.html',
  styleUrls: ['./main-layout.component.scss']
 })
-export class MainLayoutComponent implements OnInit {
+export class MainLayoutComponent implements OnInit, OnDestroy {
  activeTab: string = 'national';
- unreadCount: number = 3; // Temporaire - à connecter avec le service de messages
+ unreadCount: number = 0; // ✅ Initialisation à 0, sera mis à jour par le service
+  user: User | null = null;
+  private userSubscription: Subscription | undefined;
+  private subscriptions: Subscription = new Subscription(); // ✅ Propriété manquante
+  private routerSubscription: Subscription | undefined;
 
  constructor(
   private router: Router,
-  private userService: UserService,
-  private adminService: AdminService // <-- NOUVEAU: Injection du service admin
- ) {}
+  private userService: UserService, 
+  private messagingService: MessagingService,
+ ) { }
 
  ngOnInit() {
-  // Détecter l'onglet actif basé sur la route
-  this.router.events
-   .pipe(filter(event => event instanceof NavigationEnd))
-   .subscribe((event: any) => {
-    this.updateActiveTab(event.urlAfterRedirects);
-   });
+    // ✅ S'abonner aux changements de l'utilisateur
+    this.userSubscription = this.userService.currentUser$.subscribe(user => {
+      this.user = user;
+    });
 
-  // Initialiser l'onglet actif
-  this.updateActiveTab(this.router.url);
+    // Détecter l'onglet actif basé sur la route
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.updateActiveTab(event.urlAfterRedirects);
+      });
+
+    // Initialiser l'onglet actif
+    this.updateActiveTab(this.router.url);
+
+    // ✅ S'abonner au nombre de messages non lus
+    this.subscriptions.add(this.messagingService.getConversations().subscribe(conversations => {
+      this.unreadCount = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
+    }));
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe(); // ✅ Se désabonner de tous les abonnements
  }
 
  // Mettre à jour l'onglet actif selon la route
@@ -68,8 +87,7 @@ export class MainLayoutComponent implements OnInit {
 
  // Titre dynamique du header
  getCurrentTitle(): string {
-  const user = this.userService.getCurrentUser();
-  const community = user?.community || 'Communauté';
+  const community = this.user?.community || 'Communauté';
   
   switch(this.activeTab) {
    case 'national':
@@ -89,32 +107,28 @@ export class MainLayoutComponent implements OnInit {
 
  // Remplacé par showFabButton
  get isUserAdmin(): boolean {
-  return this.userService.canUserPost();
+  return this.userService.isUserAdmin();
  }
-
  // 🆕 NOUVEAU: Logique pour afficher le FAB
  get showFabButton(): boolean {
   // 1. Vérifier si l'utilisateur est admin (général)
-  if (!this.adminService.isUserAdmin()) {
+  if (!this.userService.isUserAdmin()) {
    return false;
   }
 
   // 2. Vérifier si l'utilisateur est sur l'onglet National ET a la permission Nationale
-  if (this.activeTab === 'national' && this.adminService.canPostNational()) {
+  if (this.activeTab === 'national' && this.userService.canPostNational()) {
    return true;
   }
 
   // 3. Vérifier si l'utilisateur est sur l'onglet International ET a la permission Internationale
-  if (this.activeTab === 'international' && this.adminService.canPostInternational()) {
+  if (this.activeTab === 'international' && this.userService.canPostInternational()) {
    return true;
   }
-  
-  // Masquer le bouton sur les autres onglets (messaging, settings) ou si les permissions ne correspondent pas.
-  return false;
+    return false;
  }
 
  openCreatePostModal(): void {
-  // On pourrait passer ici l'onglet actif pour pré-sélectionner le type de post
   console.log(`Ouverture de la modale de post pour l'onglet: ${this.activeTab}`);
   this.showCreatePostModal = true;
  }

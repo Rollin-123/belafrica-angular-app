@@ -49,7 +49,7 @@ export class NationalitySelectionComponent implements OnInit {
 
   ngOnInit() {
     // Vérifier que l'utilisateur vient bien de l'étape OTP
-    const tempData = localStorage.getItem('tempPhone');
+    const tempData = localStorage.getItem('belafrica_temp_phone');
     const verifiedPhone = localStorage.getItem('verified_phone');
     
     if (!tempData && !verifiedPhone) {
@@ -65,7 +65,7 @@ export class NationalitySelectionComponent implements OnInit {
     if (tempData) {
       try {
         const phoneData = JSON.parse(tempData);
-        this.detectedCountry = this.getCountryNameFromCode(phoneData.countryCode);
+        this.detectedCountry = phoneData.countryName || this.getCountryNameFromCode(phoneData.countryCode);
         console.log('🌍 Pays détecté:', this.detectedCountry);
       } catch (error) {
         console.error('❌ Erreur parsing tempPhone:', error);
@@ -116,7 +116,7 @@ export class NationalitySelectionComponent implements OnInit {
       this.isLoading = true;
       this.errorMessage = '';
 
-      const tempData = localStorage.getItem('tempPhone');
+      const tempData = localStorage.getItem('belafrica_temp_phone');
       const verifiedPhone = localStorage.getItem('verified_phone');
       
       if (!tempData && !verifiedPhone) {

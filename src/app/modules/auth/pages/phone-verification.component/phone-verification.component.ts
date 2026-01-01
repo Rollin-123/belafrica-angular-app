@@ -88,7 +88,7 @@ export class PhoneVerificationComponent {
       console.log('📱 Demande OTP pour:', fullPhoneNumber);
 
       // Nettoyer les données précédentes
-      localStorage.removeItem('tempPhone');
+      localStorage.removeItem('belafrica_temp_phone');
       localStorage.removeItem('verified_phone');
       localStorage.removeItem('userRegistrationData');
       localStorage.removeItem('geo_validation');
@@ -100,12 +100,15 @@ export class PhoneVerificationComponent {
             console.log('✅ Réponse OTP:', response);
             
             if (response.success) {
+              // Trouver le nom du pays correspondant au code
+              const countryName = this.europeanCountries.find(c => c.code === formValue.countryCode)?.name || '';
               // Sauvegarder les données pour les étapes suivantes
               const phoneData = { 
                 fullPhoneNumber: fullPhoneNumber,
-                countryCode: formValue.countryCode // ✅ AJOUTER CETTE LIGNE
+                countryCode: formValue.countryCode,
+                countryName: countryName // ✅ AJOUTER LE NOM DU PAYS
               };
-              localStorage.setItem('tempPhone', JSON.stringify(phoneData));
+              localStorage.setItem('belafrica_temp_phone', JSON.stringify(phoneData));
               this.successMessage = response.message || 'Un code a été généré. Veuillez consulter notre bot Telegram.';
               setTimeout(() => {
                 this.router.navigate(['/auth/otp']);

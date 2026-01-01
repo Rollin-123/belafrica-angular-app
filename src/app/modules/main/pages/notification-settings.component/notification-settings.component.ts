@@ -7,5 +7,4 @@ import { Component } from '@angular/core';
   styleUrl: './notification-settings.component.scss'
 })
 export class NotificationSettingsComponent {
-
 }

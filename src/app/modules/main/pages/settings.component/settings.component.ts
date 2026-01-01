@@ -1,6 +1,8 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService, User } from '../../../../core/services/user.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
@@ -8,8 +10,9 @@ import { UserService, User } from '../../../../core/services/user.service';
   styleUrls: ['./settings.component.scss'],
   standalone: false
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
   user: User | null = null;
+  private userSubscription: Subscription | undefined;
   
   settingsSections = [
     {
@@ -64,7 +67,6 @@ export class SettingsComponent implements OnInit {
       disabled: true
     }
   ];
-
   criticalActions = [
     {
       id: 'logout',
@@ -75,16 +77,22 @@ export class SettingsComponent implements OnInit {
       color: 'danger'
     }
   ];
-
   constructor(
     public userService: UserService,
-    private router: Router,
-    private cd: ChangeDetectorRef
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    this.user = this.userService.getCurrentUser();
+    this.userSubscription = this.userService.currentUser$.subscribe(user => {
+      this.user = user;
+    });
   }
+
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
+  }
+
 
   navigateToSection(section: any): void {
     if (section.disabled) return;
@@ -102,8 +110,8 @@ export class SettingsComponent implements OnInit {
 
   logout(): void {
     if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-      this.userService.logout();
-      this.router.navigate(['/auth']);
+      this.authService.logout();
+      this.router.navigate(['/auth/phone']);
     }
   }
 
@@ -113,9 +121,9 @@ export class SettingsComponent implements OnInit {
 
   // ✅ FORMATER LA DATE DE CRÉATION
   getMemberSince(): string {
-    if (!this.user?.createdAt) return 'Récemment';
+    if (!this.user?.created_at) return 'Récemment';
     
-    const created = new Date(this.user.createdAt);
+    const created = new Date(this.user.created_at);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - created.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

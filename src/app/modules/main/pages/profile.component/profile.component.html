@@ -16,9 +16,9 @@
     <!-- Avatar et Informations de base -->
     <div class="bel-profile-avatar-section">
       <div class="bel-avatar-container">
-        @if (user.avatar) {
+        @if (user.avatar_url) {
           <img 
-            [src]="user.avatar" 
+            [src]="user.avatar_url" 
             [alt]="user.pseudo || 'Utilisateur'" 
             class="bel-avatar-image">
         } @else {
@@ -56,9 +56,7 @@
         <div class="bel-edit-section">
           <div class="bel-edit-card">
             <h3>Modifier mon profil</h3>
-            
             <form (ngSubmit)="saveProfile()" class="bel-edit-form">
-              
               <!-- Pseudo -->
               <div class="bel-form-group">
                 <label for="pseudo">Pseudonyme *</label>
@@ -159,7 +157,6 @@
                 Modifier
               </button>
             </div>
-            
             <div class="bel-info-grid">
               <div class="bel-info-item">
                 <span class="bel-info-label">Pseudonyme:</span>
@@ -170,11 +167,10 @@
                 <span class="bel-info-label">Email:</span>
                 <span class="bel-info-value">{{ user.email || 'Non spécifié' }}</span>
               </div>
-              
               <div class="bel-info-item">
                 <span class="bel-info-label">Genre:</span>
-                <span class="bel-info-value">
-                  {{ getGenderLabel(user.gender) }}
+                <span class="bel-info-value" *ngIf="user.gender">
+                  {{ getGenderLabel(user.gender) }} 
                 </span>
               </div>
               

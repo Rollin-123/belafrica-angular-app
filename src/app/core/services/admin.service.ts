@@ -12,12 +12,6 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class AdminService {
-  validateAdminCodeWithRedirect(code: string, router: Router) {
-    throw new Error('Method not implemented.');
-  }
-  submitAdminRequest(imageUrl: string, additionalInfo: any) {
-    throw new Error('Method not implemented.');
-  }
   hasPendingRequest(): boolean {
     throw new Error('Method not implemented.');
   }
@@ -28,6 +22,20 @@ export class AdminService {
     private storageService: StorageService,
     private userService: UserService,
   ) {}
+
+  // ✅ NOUVEAU : Soumission de la demande d'admin au backend
+  submitAdminRequest(identityImageUrl: string, motivation: string): Observable<{ success: boolean; message?: string; error?: string; }> {
+    const body = {
+      identityImageUrl,
+      motivation
+    };
+    return this.http.post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/request-promotion`, body).pipe(
+      catchError(err => {
+        console.error('❌ Erreur API submitAdminRequest:', err);
+        return of({ success: false, error: err.error?.error || 'Erreur serveur lors de la soumission' });
+      })
+    );
+  }
 
   // ✅ FORMATER LE NOM DE LA COMMUNAUTÉ
   private formatCommunityName(nationality: string, countryName: string): string {

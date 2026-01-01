@@ -10,12 +10,10 @@ export interface Message {
   encryptedContent: string;
   encryptionKey?: string;
   content?: string;
-  
   // Métadonnées
   timestamp: Date;
   isRead: boolean;
   readBy: string[];
-  
   // Édition/Suppression
   isEdited: boolean;
   isDeleted: boolean;

@@ -11,7 +11,6 @@ export class CreatorGuard implements CanActivate {
     private router: Router,
     private storageService: StorageService // ✅ INJECTION du StorageService
   ) {}
-
   canActivate(): boolean {
     // Vérifier si c'est le créateur (vous)
     const isCreator = this.checkIfCreator();

@@ -1,14 +1,15 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PostsService } from '../../../../core/services/posts.service';
 
 @Component({
   selector: 'app-create-post-modal',
-  standalone: false,
   templateUrl: './create-post-modal.component.html',
-  styleUrls: ['./create-post-modal.component.scss']
+  styleUrls: ['./create-post-modal.component.scss'],
+  standalone: false // ✅ CORRECTION: Ajout du décorateur
 })
-export class CreatePostModalComponent {
+export class CreatePostModalComponent implements OnInit {
+  @Input() visibility: 'national' | 'international' = 'national';
   @Output() closed = new EventEmitter<void>();
   @Output() postCreated = new EventEmitter<void>();
 
@@ -26,12 +27,14 @@ export class CreatePostModalComponent {
       content: ['', [Validators.required, Validators.minLength(1)]]
     });
   }
+  ngOnInit(): void {
+    throw new Error('Method not implemented.');
+  }
 
   onImageSelected(event: any): void {
     const files = Array.from(event.target.files) as File[];
     
     files.forEach(file => {
-      // Validation
       if (!file.type.startsWith('image/')) {
         alert('❌ Veuillez sélectionner uniquement des images');
         return;
@@ -49,7 +52,6 @@ export class CreatePostModalComponent {
 
       this.selectedImages.push(file);
 
-      // Prévisualisation
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreviews.push(e.target.result);

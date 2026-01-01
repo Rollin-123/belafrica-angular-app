@@ -7,10 +7,8 @@ export const environment = {
   
   supabaseUrl: 'https://zaaubhewtugkgsuoxgqi.supabase.co',
   supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphYXViaGV3dHVna2dzdW94Z3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTUyNzYsImV4cCI6MjA4MDI3MTI3Nn0.-MzEVsGnC4QQc0z9wP14IOVi1CWaznF1omft_KZChYo',
-  
   enableAnalytics: true,
   enableLogging: false,
-  
   requestTimeout: 30000,
   otpTimeout: 600000,
   

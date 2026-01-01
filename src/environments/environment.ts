@@ -10,10 +10,8 @@ export const environment = {
   
   enableAnalytics: false,
   enableLogging: true,
-  
   requestTimeout: 30000,
   otpTimeout: 600000, 
-  
   telegramBot: 'https://t.me/Belafrica_bot',
   supportEmail: 'rollinloictianga@gmail.com'
 };

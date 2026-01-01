@@ -117,7 +117,7 @@
                         @if (message.isDeleted) {
                           <span class="bel-deleted-message">Message supprimé</span>
                         } @else {
-                          {{ message.content }}
+                          <span [innerHTML]="formatMessageWithMentions(message)"></span>
                           
                           <!-- Indicateur message édité -->
                           @if (message.isEdited) {
@@ -227,9 +227,7 @@
 
       </div>
     }
-
   </main>
-
   <!-- MENU CONTEXTUEL -->
   @if (contextMenu.visible) {
     <div class="bel-context-menu"

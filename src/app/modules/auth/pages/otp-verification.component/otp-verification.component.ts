@@ -29,7 +29,7 @@ export class OtpVerificationComponent implements OnInit {
 
   ngOnInit() {
     // Récupérer le numéro depuis localStorage
-    const tempData = localStorage.getItem('tempPhone'); // ✅ Utiliser la bonne clé: 'tempPhone'
+    const tempData = localStorage.getItem('belafrica_temp_phone');
     if (tempData) {
       try {
         const data = JSON.parse(tempData);

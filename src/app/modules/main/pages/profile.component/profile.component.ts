@@ -22,7 +22,6 @@ export class ProfileComponent implements OnInit {
     interests: []
   };
 
-  
   genders = [
     { value: 'male', label: 'Homme' },
     { value: 'female', label: 'Femme' },
@@ -49,9 +48,7 @@ export class ProfileComponent implements OnInit {
   }
 
   startEditing(): void {
-    this.isEditing = true;
-    
-    // CORRECTION : Copie sécurisée des données
+    this.isEditing = true;    
     this.editData = {
       pseudo: this.user?.pseudo || '',
       bio: this.user?.bio || '',
@@ -79,10 +76,8 @@ export class ProfileComponent implements OnInit {
     }
 
     this.isLoading = true;
-    
     try {
       await this.userService.updateProfile(this.editData);
-      
       // Recharger les données
       this.loadUserProfile();
       this.isEditing = false;
@@ -151,9 +146,9 @@ export class ProfileComponent implements OnInit {
   }
 
   getMemberSince(): string {
-    if (!this.user?.createdAt) return 'Récemment';
+    if (!this.user?.created_at) return 'Récemment';
     
-    const created = new Date(this.user.createdAt);
+    const created = new Date(this.user.created_at);
     return created.toLocaleDateString('fr-FR');
   }
 

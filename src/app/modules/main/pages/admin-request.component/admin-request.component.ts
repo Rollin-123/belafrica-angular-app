@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
-import { UserService } from '../../../../core/services/user.service';
+import { User, UserService } from '../../../../core/services/user.service';
 import { CloudinaryUploadService } from '../../../../core/services/cloudinary.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-request',
@@ -11,19 +12,20 @@ import { CloudinaryUploadService } from '../../../../core/services/cloudinary.se
   styleUrls: ['./admin-request.component.scss'],
   standalone: false
 })
-export class AdminRequestComponent implements OnInit {
+export class AdminRequestComponent implements OnInit, OnDestroy {
   adminForm: FormGroup;
-  isLoading = false;
+  isLoading = true; // ✅ Démarrer en mode chargement
   validatingCode = false;
   selectedPassportBase64: string | null = null; 
   passportPreview: string | ArrayBuffer | null = null;
   adminCode = '';
-  hasPendingRequest = false;
+  hasPendingRequest = false; // Cette info devrait venir du backend
   isAdmin = false;
   codeError: string | null = '';
-  user: any;
+  user: User | null = null;
   showCreatePostButton = false;
   uploadError: string | null = null;
+  private userSubscription: Subscription | undefined;
 
   constructor(
     private fb: FormBuilder,
@@ -40,37 +42,26 @@ export class AdminRequestComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadUserData();
-    
-    this.userService.currentUser$.subscribe(user => {
+    this.userSubscription = this.userService.currentUser$.subscribe(user => {
       if (user) {
         this.user = user;
-        this.isAdmin = user.isAdmin || false;
-        this.showCreatePostButton = this.adminService.canPostNational();
+        this.isAdmin = user.is_admin; // ✅ Utiliser la bonne propriété
+        this.showCreatePostButton = this.userService.canPostNational(); // ✅ Utiliser UserService directement
         console.log('🔄 Mise à jour réactive du statut admin:', {
           isAdmin: this.isAdmin,
+          hasPendingRequest: this.hasPendingRequest, // Ajouter le statut de la demande
           pseudo: user.pseudo,
           showCreatePostButton: this.showCreatePostButton
         });
-
-        this.cd.detectChanges();
       }
+      this.isLoading = false; // ✅ Fin du chargement initial une fois l'utilisateur traité
+      this.cd.detectChanges();
     });
   }
+  // ... (le reste du fichier est bon)
 
-  private loadUserData(): void {
-    this.user = this.userService.getCurrentUser();
-    this.isAdmin = this.adminService.isUserAdmin();
-    this.showCreatePostButton = this.adminService.canPostNational();
-    
-    console.log('👤 Statut admin initial:', {
-      isAdmin: this.isAdmin,
-      hasPendingRequest: this.hasPendingRequest,
-      user: this.user?.pseudo,
-      showCreatePostButton: this.showCreatePostButton
-    });
-
-    this.cd.detectChanges();
+  ngOnDestroy() {
+    this.userSubscription?.unsubscribe();
   }
 
   onPassportSelected(event: any): void {
@@ -133,21 +124,24 @@ export class AdminRequestComponent implements OnInit {
     this.uploadError = null;
 
     try {
+      // 1. Uploader l'image sur Cloudinary
       const imageUrl = await this.cloudinaryService.uploadImage(this.selectedPassportBase64);
-      const success = false;
+      
+      // 2. Soumettre la demande au backend avec l'URL de l'image
+      const response = await this.adminService.submitAdminRequest(imageUrl, this.adminForm.value.additionalInfo).toPromise();
 
-      if (success !== undefined && success) {
+      if (response?.success) {
         this.hasPendingRequest = true;
-        this.showSuccess('📨 Demande envoyée ! Vous recevrez un code par email sous 24-48h.');
+        this.showSuccess(response.message || '📨 Demande envoyée ! Vous recevrez une notification une fois traitée.');
         this.adminForm.reset();
         this.passportPreview = null;
         this.selectedPassportBase64 = null;
       } else {
-        this.codeError = '❌ Erreur lors de l\'envoi de la demande. Réessayez.';
+        this.codeError = response?.error || '❌ Erreur lors de l\'envoi de la demande. Réessayez.';
       }
     } catch (error: any) {
       console.error("Erreur lors de la soumission de la demande:", error);
-      this.codeError = "❌ Échec de l'envoi de la demande: " + (error.message || 'Erreur inconnue');
+      this.codeError = "❌ Échec de l'envoi: " + (error.error?.error || error.message || 'Erreur inconnue');
     } finally {
       this.isLoading = false;
       this.cd.detectChanges();
@@ -170,7 +164,7 @@ export class AdminRequestComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.codeError = '🎉 Félicitations ! Vous êtes maintenant administrateur. Redirection...';
-          this.isAdmin = true;
+          this.isAdmin = true; // L'état sera mis à jour par le `currentUser$` de toute façon
           this.showCreatePostButton = true;
           this.router.navigate(['/app/settings']); // Rediriger après succès
         } else {
@@ -178,7 +172,7 @@ export class AdminRequestComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.codeError = '❌ Erreur de validation: ' + (error.message || 'Veuillez réessayer.');
+        this.codeError = '❌ Erreur de validation: ' + (error.error?.error || error.message || 'Veuillez réessayer.');
       },
       complete: () => {
         this.validatingCode = false;
@@ -207,8 +201,7 @@ export class AdminRequestComponent implements OnInit {
 
   resetForTesting(): void {
     this.adminService.resetAdminData();
-    this.loadUserData();
-    this.showSuccess('🔄 Données admin réinitialisées pour les tests');
+    this.showSuccess('🔄 Données admin réinitialisées. Le statut sera mis à jour.');
   }
 
   // Nouvelle méthode pour ouvrir le modal de création de post

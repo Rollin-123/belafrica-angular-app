@@ -7,5 +7,4 @@ import { Component } from '@angular/core';
   styleUrl: './privacy-settings.component.scss'
 })
 export class PrivacySettingsComponent {
-
 }

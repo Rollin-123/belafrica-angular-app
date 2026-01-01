@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { LogoComponent } from '../components/logo.component/logo.component';
 import { RouterModule } from '@angular/router';
 
-
-
 @NgModule({
   declarations: [
     LogoComponent,

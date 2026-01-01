@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 import { Observable, of, firstValueFrom, Subscription } from 'rxjs';
 import { map, tap, switchMap, distinctUntilChanged } from 'rxjs/operators';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Message, Conversation, MessageAction, Mention } from '../../../../core/models/message.model';
 import { MessagingService } from '../../../../core/services/messaging.service';
-import { UserService } from '../../../../core/services/user.service';
+import { User, UserService } from '../../../../core/services/user.service';
 
 @Component({
   selector: 'app-messaging',
@@ -15,6 +16,11 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
 
+  // --- Constantes de temps (en millisecondes) ---
+  private readonly EDIT_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+  private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000; // 2 heures
+  currentUser: User | null = null;
+
   activeTab: 'group' | 'private' = 'group';
   newMessage: string = '';
   isSending: boolean = false;
@@ -22,8 +28,6 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   // États pour l'édition
   editingMessageId: string | null = null;
   editMessageContent: string = '';
-
-  // NOUVEAUX ÉTATS POUR LES FONCTIONNALITÉS AVANCÉES
   replyingTo: Message | null = null;
   showEmojiPicker = false;
   showMentionsList = false;
@@ -59,9 +63,11 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private messagingService: MessagingService,
-    private userService: UserService
+    private userService: UserService,
+    private sanitizer: DomSanitizer // ✅ Injection pour la sécurité
   ) {
     const user = this.userService.getCurrentUser();
+    this.currentUser = user;
     this.userCommunity = user?.community || 'Communauté inconnue';
 
     // Charger la conversation de groupe
@@ -264,16 +270,15 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.currentMentionQuery.length === 0) {
       // Afficher tous les participants
       this.mentionCandidates = this.conversationParticipants.filter(p => 
-        p.userId !== this.userService.getCurrentUser()?.userId
+        p.userId !== this.userService.getCurrentUser()?.id
       );
     } else {
       // Filtrer par la query
       this.mentionCandidates = this.conversationParticipants.filter(p => 
         p.pseudo.toLowerCase().includes(this.currentMentionQuery.toLowerCase()) &&
-        p.userId !== this.userService.getCurrentUser()?.userId
+        p.userId !== this.userService.getCurrentUser()?.id
       );
     }
-
     this.showMentionsList = this.mentionCandidates.length > 0;
   }
 
@@ -318,7 +323,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       
       if (participant) {
         mentions.push({
-          userId: participant.userId,
+          userId: participant.userId, // ✅ CORRECTION: Utiliser userId
           userName: participant.pseudo,
           position: match.index,
           length: match[0].length
@@ -356,7 +361,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   // ✅ VÉRIFICATION MESSAGE PERSONNEL
   isMyMessage(message: Message): boolean {
     const user = this.userService.getCurrentUser();
-    return message.fromUserId === user?.userId;
+    return message.fromUserId === user?.id;
   }
 
   // ✅ FORMATAGE HEURE
@@ -380,11 +385,21 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ✅ VÉRIFICATIONS ÉDITION/SUPPRESSION
   canEditMessage(message: Message): boolean {
-    return this.messagingService.canEditMessage(message);
+    if (message.isDeleted || !this.isMyMessage(message)) {
+      return false;
+    }
+    const now = new Date().getTime();
+    const messageTime = new Date(message.timestamp).getTime();
+    return (now - messageTime) <= this.EDIT_TIMEOUT;
   }
 
   canDeleteMessage(message: Message): boolean {
-    return this.messagingService.canDeleteMessage(message);
+    if (message.isDeleted || !this.isMyMessage(message)) {
+      return false;
+    }
+    const now = new Date().getTime();
+    const messageTime = new Date(message.timestamp).getTime();
+    return (now - messageTime) <= this.DELETE_TIMEOUT;
   }
 
   // ✅ TROUVER UN MESSAGE PAR ID
@@ -453,7 +468,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const user = this.userService.getCurrentUser();
     if (!user) return;
 
-    const actions = this.messagingService.getMessageActions(message, user.userId);
+    const actions = this.messagingService.getMessageActions(message, user.id); // ✅ CORRECTION: user.id
     if (actions.length === 0) return;
 
     this.contextMenu = {
@@ -590,26 +605,32 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showEmojiPicker = false;
   }
   // ✅ FORMATER LES MESSAGES AVEC MENTIONS EN SURBRILLANCE
-formatMessageWithMentions(message: Message): string {
-  if (!message.content || !message.mentions || message.mentions.length === 0) {
+formatMessageWithMentions(message: Message): string | SafeHtml {
+  if (!message.content || message.isDeleted) {
     return message.content || '';
   }
 
   let formattedContent = message.content;
   
   // Trier les mentions par position décroissante pour éviter les problèmes d'index
-  const sortedMentions = [...message.mentions].sort((a, b) => b.position - a.position);
+  const sortedMentions = [...(message.mentions || [])].sort((a, b) => b.position - a.position);
+
+  // Si pas de mentions, on retourne le contenu brut
+  if (sortedMentions.length === 0) {
+    return message.content;
+  }
   
   for (const mention of sortedMentions) {
     const before = formattedContent.substring(0, mention.position);
     const mentionText = formattedContent.substring(mention.position, mention.position + mention.length);
     const after = formattedContent.substring(mention.position + mention.length);
     
-    formattedContent = before + 
-      `<span class="mention-highlight">${mentionText}</span>` + 
-      after;
+    // On échappe les caractères HTML pour la sécurité avant de construire la chaîne
+    const safeMention = `<span class="mention-highlight">${mentionText}</span>`;
+    formattedContent = before + safeMention + after;
   }
   
-  return formattedContent;
+  // ✅ Utiliser DomSanitizer pour marquer le HTML comme sûr
+  return this.sanitizer.bypassSecurityTrustHtml(formattedContent);
 }
 }
