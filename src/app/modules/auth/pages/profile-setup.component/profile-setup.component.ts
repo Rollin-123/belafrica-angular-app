@@ -120,14 +120,13 @@ export class ProfileSetupComponent implements OnInit {
       this.isLoading = true;
       this.errorMessage = '';
 
-      // CORRECTION: S'assurer que toutes les données nécessaires sont présentes
       const completeProfileData = {
         phoneNumber: this.userData.phoneNumber,
         countryCode: this.userData.countryCode,
         countryName: this.userData.countryName,
         nationality: this.userData.nationality,
         nationalityName: this.userData.nationalityName,
-        community: this.userData.community, // DOIT ÊTRE PRÉSENT
+        community: this.userData.community, 
         pseudo: this.profileForm.value.pseudo,
         email: this.profileForm.value.email,
         avatar: this.avatarPreview

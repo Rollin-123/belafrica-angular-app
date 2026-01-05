@@ -131,9 +131,7 @@ export class MessagingHttpService extends MessagingService {
     console.warn('MessagingHttpService.deleteMessage() non implémenté.');
     return Promise.reject('Non implémenté');
   }
-
   // ✅ CORRECTION : Implémentation des méthodes manquantes pour satisfaire la classe abstraite
-
   getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     console.warn('[MessagingHttpService] getMessageActions() non implémenté.');
     // En production, cette logique pourrait être en partie sur le backend pour les permissions

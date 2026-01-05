@@ -106,7 +106,6 @@ export class OtpVerificationComponent implements OnInit {
 
   validateOtpInput(event: KeyboardEvent): boolean {
     const charCode = event.which ? event.which : event.keyCode;
-    // Autorise uniquement les chiffres (48-57)
     if (charCode > 31 && (charCode < 48 || charCode > 57)) {
       event.preventDefault();
       return false;

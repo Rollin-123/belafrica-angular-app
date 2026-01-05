@@ -92,27 +92,40 @@ export class PhoneVerificationComponent {
       localStorage.removeItem('verified_phone');
       localStorage.removeItem('userRegistrationData');
       localStorage.removeItem('geo_validation');
+      localStorage.removeItem('telegram_otp_response'); // ✅ Nettoyer la réponse précédente
 
       this.authService.requestOtp(phoneNumber, formValue.countryCode)
         .subscribe({
           next: (response) => {
             this.isLoading = false;
             console.log('✅ Réponse OTP:', response);
-            
+
             if (response.success) {
-              // Trouver le nom du pays correspondant au code
+              // Sauvegarder la réponse complète si elle contient des liens pour le deep linking
+              if (response.links || response.requiresBotStart) {
+                localStorage.setItem('telegram_otp_response', JSON.stringify(response));
+              }
+              
+              // Sauvegarder les informations du téléphone pour les étapes suivantes
               const countryName = this.europeanCountries.find(c => c.code === formValue.countryCode)?.name || '';
-              // Sauvegarder les données pour les étapes suivantes
               const phoneData = { 
                 fullPhoneNumber: fullPhoneNumber,
                 countryCode: formValue.countryCode,
-                countryName: countryName // ✅ AJOUTER LE NOM DU PAYS
+                countryName: countryName
               };
               localStorage.setItem('belafrica_temp_phone', JSON.stringify(phoneData));
-              this.successMessage = response.message || 'Un code a été généré. Veuillez consulter notre bot Telegram.';
-              setTimeout(() => {
-                this.router.navigate(['/auth/otp']);
-              }, 1500);
+              
+              // ✅ LOGIQUE DE REDIRECTION
+              // Si le backend indique que le deep linking est nécessaire, rediriger vers la page d'attente.
+              if (response.requiresBotStart && response.links) {
+                this.router.navigate(['/auth/telegram-redirect']);
+              } else {
+                // Ancien comportement : aller directement à la page de vérification OTP.
+                this.successMessage = response.message || 'Code envoyé !';
+                setTimeout(() => {
+                  this.router.navigate(['/auth/otp']);
+                }, 1500);
+              }
             } else {
               this.errorMessage = response.error || 'Erreur lors de l\'envoi du code';
               this.showError(this.errorMessage);

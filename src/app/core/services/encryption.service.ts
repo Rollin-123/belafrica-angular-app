@@ -29,7 +29,7 @@ export class EncryptionService {
     return await window.crypto.subtle.importKey(
         'jwk', 
         jwk, 
-        { name: 'AES-GCM' }, // Pas besoin de length/extractable ici, ils viennent du JWK
+        { name: 'AES-GCM' }, 
         true, 
         ['encrypt', 'decrypt']
     );

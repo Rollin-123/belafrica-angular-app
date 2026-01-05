@@ -41,7 +41,6 @@ export class CloudinaryUploadService {
       console.error('Erreur Cloudinary:', errorData);
       throw new Error(errorData.error.message || 'Échec du téléchargement Cloudinary.');
     }
-
     const result = await response.json();
     console.log('✅ Téléchargement Cloudinary réussi. URL:', result.secure_url);
     return result.secure_url;

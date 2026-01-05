@@ -13,6 +13,7 @@ export interface AdminVerificationRequest {
   reviewedAt?: Date;
   adminCode?: string;
 }
+
 export interface AdminCode {
   code: string;           
   community: string;      

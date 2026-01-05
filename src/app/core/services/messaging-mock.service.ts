@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { map, switchMap } from 'rxjs/operators';
-
-// 📚 IMPORTS DES SERVICES
+import { MessagingService } from './messaging.service';
 import { StorageService } from './storage.service';
 import { UserService } from './user.service';
 import { EncryptionService } from './encryption.service';
@@ -17,9 +16,7 @@ import {
   MessageAction,
   generateMessageId
 } from '../models/message.model';
-import { MessagingService } from './messaging.service';
 
-// 📦 INTERFACE LOCALE
 interface EncryptedData {
   iv: string;
   encryptedContent: string;
@@ -111,9 +108,9 @@ export class MessagingMockService extends MessagingService {
 
     if (!groupConversation) {
       const currentParticipant: Participant = {
-        userId: user.id,
+        userId: user.id, // ✅ CORRECTION
         pseudo: user.pseudo,
-        avatar: user.avatar_url ?? undefined,
+        avatar: user.avatar_url ?? undefined, // ✅ CORRECTION
         isOnline: true,
         lastSeen: new Date()
       };
@@ -122,12 +119,12 @@ export class MessagingMockService extends MessagingService {
         id: groupConversationId,
         type: 'group',
         name: `Groupe ${user.community}`,
-        participants: [user.id],
+        participants: [user.id], // ✅ CORRECTION
         participantsDetails: [currentParticipant],
         unreadCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        adminIds: [user.id],
+        adminIds: [user.id], // ✅ CORRECTION
         description: `Discussion de la communauté ${user.community}`
       };
       const updatedConversations = [...existingConversations, groupConversation];
@@ -164,14 +161,14 @@ export class MessagingMockService extends MessagingService {
         id: generateMessageId(),
         conversationId,
         type,
-        fromUserId: user.id,
+        fromUserId: user.id, // ✅ CORRECTION
         fromUserName: user.pseudo,
-        fromUserAvatar: user.avatar_url ?? undefined,
+        fromUserAvatar: user.avatar_url ?? undefined, // ✅ CORRECTION
         encryptedContent: encryptedData.encryptedContent,
         encryptionKey: encryptedData.iv,
         timestamp: new Date(),
         isRead: false,
-        readBy: [user.id],
+        readBy: [user.id], // ✅ CORRECTION
         isEdited: false,
         isDeleted: false,
         status: 'sent',
@@ -278,7 +275,7 @@ export class MessagingMockService extends MessagingService {
 
     const originalMessage = currentMessages[messageIndex];
     
-    if (originalMessage.fromUserId !== user.id) throw new Error('Vous ne pouvez modifier que vos propres messages');
+    if (originalMessage.fromUserId !== user.id) throw new Error('Vous ne pouvez modifier que vos propres messages'); // ✅ CORRECTION
     if (new Date().getTime() - new Date(originalMessage.timestamp).getTime() > this.EDIT_TIMEOUT) throw new Error('Le délai de modification (30 minutes) est expiré');
 
     const encryptedData: EncryptedData = await this.encryptionService.encryptAndSerialize(
@@ -318,7 +315,7 @@ export class MessagingMockService extends MessagingService {
 
     const originalMessage = currentMessages[messageIndex];
     
-    if (originalMessage.fromUserId !== user.id) throw new Error('Vous ne pouvez supprimer que vos propres messages');
+    if (originalMessage.fromUserId !== user.id) throw new Error('Vous ne pouvez supprimer que vos propres messages'); // ✅ CORRECTION
     if (new Date().getTime() - new Date(originalMessage.timestamp).getTime() > this.DELETE_TIMEOUT) throw new Error('Le délai de suppression (2 heures) est expiré');
 
     const updatedMessage: Message = {
@@ -561,7 +558,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
           lastMessageTimestamp: message.timestamp,
           updatedAt: new Date(),
           // Incrémenter si ce n'est pas l'utilisateur actuel qui envoie (simulation pour l'instant)
-          unreadCount: (message.fromUserId !== this.userService.getCurrentUser()?.id)
+          unreadCount: (message.fromUserId !== this.userService.getCurrentUser()?.id) // ✅ CORRECTION
                        ? conv.unreadCount + 1 
                        : conv.unreadCount
         };
@@ -593,9 +590,9 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
         // 2. Mettre à jour/Ajouter les détails du participant
         if (!isUserInDetails) {
           const newParticipant: Participant = {
-            userId: user.id, // ✅ CORRECTION
+            userId: user.id,
             pseudo: user.pseudo,
-            avatar: user.avatar_url ?? undefined,
+            avatar: user.avatar_url ?? undefined, // ✅ CORRECTION
             isOnline: true,
             lastSeen: new Date()
           };

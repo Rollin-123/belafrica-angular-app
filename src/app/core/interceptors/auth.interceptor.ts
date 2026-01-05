@@ -24,7 +24,6 @@ export class AuthInterceptor implements HttpInterceptor {
       authToken = this.storageService.getItem('belafrica_token');
     }
 
-    // Si un token existe, on clone la requête pour y ajouter l'en-tête Authorization
     if (authToken) {
       const clonedReq = req.clone({
         headers: req.headers.set('Authorization', `Bearer ${authToken}`),

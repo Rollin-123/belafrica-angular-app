@@ -96,7 +96,6 @@
                     
                     <!-- AFFICHAGE NORMAL -->
                     @if (editingMessageId !== message.id) {
-                      <!-- En-tête du message (uniquement pour les autres) -->
                       @if (!isMyMessage(message) && !message.isDeleted) {
                         <div class="bel-message-header">
                           <div class="bel-message-sender-info">
@@ -111,27 +110,23 @@
                           </div>
                         </div>
                       }
-                      <!-- Contenu du message -->
                       <div class="bel-message-content">
                         @if (message.isDeleted) {
                           <span class="bel-deleted-message">Message supprimé</span>
                         } @else {
                           <span [innerHTML]="formatMessageWithMentions(message)"></span>
                           
-                          <!-- Indicateur message édité -->
                           @if (message.isEdited) {
                             <span class="bel-edited-badge">(modifié)</span>
                           }
                         }
                       </div>
 
-                      <!-- Pied du message -->
                       <div class="bel-message-footer">
                         <span class="bel-message-time">
                           {{ formatMessageTime(message.timestamp) }}
                         </span>
                         
-                        <!-- Indicateurs de statut -->
                         @if (isMyMessage(message) && !message.isDeleted) {
                           <span class="bel-message-status" [title]="message.status">
                             {{ getMessageStatus(message) }}

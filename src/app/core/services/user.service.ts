@@ -48,7 +48,6 @@ export class UserService {
   public currentUser$: Observable<User | null>;
 
   constructor(private storageService: StorageService) {
-    // ✅ Initialize properties here, AFTER `storageService` is available.
     this.currentUserSubject = new BehaviorSubject<User | null>(this.loadUserFromStorage());
     this.currentUser$ = this.currentUserSubject.asObservable();
   }
@@ -147,8 +146,6 @@ export class UserService {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         const imageUrl = e.target.result;
-        // Ici, on devrait uploader sur Cloudinary puis mettre à jour l'URL dans le profil via le backend.
-        // Pour l'instant, on met à jour localement.
         this.updateUser({ avatar_url: imageUrl });
         resolve(imageUrl);
       };

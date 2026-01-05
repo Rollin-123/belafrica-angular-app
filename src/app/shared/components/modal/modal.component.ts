@@ -28,7 +28,6 @@ export class ModalComponent implements OnInit {
   constructor(public modalService: ModalService) {
     this.modalState$ = this.modalService.modalState$;
   }
-
   ngOnInit(): void {}
 
   close() {

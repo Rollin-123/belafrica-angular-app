@@ -16,16 +16,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
 
-  // --- Constantes de temps (en millisecondes) ---
-  private readonly EDIT_TIMEOUT = 30 * 60 * 1000; // 30 minutes
-  private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000; // 2 heures
+  private readonly EDIT_TIMEOUT = 30 * 60 * 1000; 
+  private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000; 
   currentUser: User | null = null;
 
   activeTab: 'group' | 'private' = 'group';
   newMessage: string = '';
   isSending: boolean = false;
-
-  // États pour l'édition
   editingMessageId: string | null = null;
   editMessageContent: string = '';
   replyingTo: Message | null = null;

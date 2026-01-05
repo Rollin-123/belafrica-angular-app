@@ -6,12 +6,10 @@
     <p>Toutes les publications des communautés • Expirent après 72h</p>
   </div>
 
-  <!-- Liste des posts internationaux -->
   <div class="bel-posts-container">
     
     <div class="bel-post-card" *ngFor="let post of posts$ | async">
       
-      <!-- En-tête du post -->
       <div class="bel-post-header">
         <div class="bel-post-author">
           <img 
@@ -31,7 +29,6 @@
           </div>
         </div>
         
-        <!-- Indicateur d'expiration -->
         <div 
           class="bel-expiry-indicator"
           [class.expiring]="isExpiringSoon(post)"
@@ -40,7 +37,6 @@
         </div>
       </div>
 
-      <!-- Contenu du post -->
       <div class="bel-post-content">
         <p>{{ post.content }}</p>
         

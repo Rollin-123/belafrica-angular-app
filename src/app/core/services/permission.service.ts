@@ -11,9 +11,9 @@ export class PermissionService {
   // Vérifier si l'utilisateur peut poster dans un espace
   canPostIn(space: 'national' | 'international'): boolean {
     const user = this.userService.getCurrentUser();
-    if (!user?.isAdmin) return false;
+    if (!user?.is_admin) return false;
 
-    const permissions = user.adminPermissions || [];
+    const permissions = user.admin_permissions || [];
     
     switch(space) {
       case 'national':
@@ -28,9 +28,9 @@ export class PermissionService {
   // Obtenir le niveau admin sous forme lisible
   getAdminLevelLabel(): string {
     const user = this.userService.getCurrentUser();
-    if (!user?.isAdmin) return 'Utilisateur';
+    if (!user?.is_admin) return 'Utilisateur';
 
-    const permissions = user.adminPermissions || [];
+    const permissions = user.admin_permissions || [];
     
     if (permissions.includes('post_national') && permissions.includes('post_international')) {
       return 'Admin Complet';

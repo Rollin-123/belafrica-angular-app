@@ -2,10 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Post } from '../models/post.model';
 
-/**
- * ✅ Classe abstraite définissant le contrat pour le service de posts.
- * Les composants dépendront de cette abstraction, et non d'une implémentation concrète.
- */
 @Injectable({ providedIn: 'root' })
 export abstract class PostsService {
   abstract getNationalPosts(): Observable<Post[]>;

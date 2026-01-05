@@ -88,12 +88,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.user = user;
     });
   }
-
   ngOnDestroy() {
     this.userSubscription?.unsubscribe();
   }
-
-
   navigateToSection(section: any): void {
     if (section.disabled) return;
     
@@ -103,7 +100,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
       section.action();
     }
   }
-
   navigateToAdminRequest(): void {
   this.router.navigate(['/app/admin-request']);
 }
@@ -119,7 +115,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
     return this.user?.pseudo?.charAt(0).toUpperCase() || 'U';
   }
 
-  // ✅ FORMATER LA DATE DE CRÉATION
   getMemberSince(): string {
     if (!this.user?.created_at) return 'Récemment';
     

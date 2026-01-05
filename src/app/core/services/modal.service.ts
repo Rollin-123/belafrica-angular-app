@@ -17,15 +17,12 @@ export class ModalService {
   show(data: ModalData) {
     this.modalState.next(data);
   }
-
   showSuccess(title: string, message: string) {
     this.show({ title, message, type: 'success' });
   }
-
   showError(title: string, message: string) {
     this.show({ title, message, type: 'error' });
   }
-
   hide() {
     this.modalState.next(null);
   }

@@ -11,9 +11,7 @@
     <p>Gérez vos informations personnelles</p>
   </header>
 
-  <!-- Afficher seulement si user existe -->
   @if (user) {
-    <!-- Avatar et Informations de base -->
     <div class="bel-profile-avatar-section">
       <div class="bel-avatar-container">
         @if (user.avatar_url) {
@@ -27,7 +25,6 @@
           </div>
         }
         
-        <!-- Bouton de changement d'avatar -->
         <div class="bel-avatar-actions">
           <input 
             type="file" 

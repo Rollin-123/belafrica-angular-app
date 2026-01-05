@@ -22,7 +22,6 @@ export class ErrorInterceptor implements HttpInterceptor {
           localStorage.clear();
           this.router.navigate(['/auth']);
         }
-
         return throwError(() => error);
       })
     );

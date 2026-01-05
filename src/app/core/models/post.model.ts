@@ -6,11 +6,11 @@ export interface Post {
   content: string;
   imageUrls?: string[];
   visibility: 'national' | 'international';
-  community: string; // Ex: "CamerounaisEnFrance"
-  likes: string[]; // User IDs qui ont liké
+  community: string; 
+  likes: string[]; 
   createdAt: Date;
-  expiresAt: Date; // Date d'expiration automatique
-  isExpired?: boolean; // Calculé
+  expiresAt: Date; 
+  isExpired?: boolean; 
 }
 
 // ✅ CALCULER LA DATE D'EXPIRATION : 48h national, 72h international

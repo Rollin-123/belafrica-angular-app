@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { MessagingService } from '../../../../core/services/messaging.service'; // ✅ Import du service de messagerie
+import { MessagingService } from '../../../../core/services/messaging.service';
 import { User, UserService } from '../../../../core/services/user.service';
 import { Subscription } from 'rxjs';
 
@@ -13,10 +13,10 @@ import { Subscription } from 'rxjs';
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
  activeTab: string = 'national';
- unreadCount: number = 0; // ✅ Initialisation à 0, sera mis à jour par le service
+ unreadCount: number = 0; 
   user: User | null = null;
   private userSubscription: Subscription | undefined;
-  private subscriptions: Subscription = new Subscription(); // ✅ Propriété manquante
+  private subscriptions: Subscription = new Subscription(); 
   private routerSubscription: Subscription | undefined;
 
  constructor(
@@ -26,19 +26,16 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
  ) { }
 
  ngOnInit() {
-    // ✅ S'abonner aux changements de l'utilisateur
     this.userSubscription = this.userService.currentUser$.subscribe(user => {
       this.user = user;
     });
 
-    // Détecter l'onglet actif basé sur la route
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
         this.updateActiveTab(event.urlAfterRedirects);
       });
 
-    // Initialiser l'onglet actif
     this.updateActiveTab(this.router.url);
 
     // ✅ S'abonner au nombre de messages non lus
@@ -48,7 +45,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.unsubscribe(); // ✅ Se désabonner de tous les abonnements
+    this.subscriptions.unsubscribe(); 
  }
 
  // Mettre à jour l'onglet actif selon la route

@@ -19,7 +19,6 @@
   ✏️
 </button>
 
-<!-- Modal de création de post -->
 <app-create-post-modal 
   *ngIf="showCreatePostModal"
   (closed)="closeCreatePostModal()"
@@ -28,15 +27,11 @@
     </div>
   </header>
 
-  <!-- Contenu Principal -->
   <main class="bel-main-content">
     <router-outlet></router-outlet>
-    <!-- Bouton Floating Action (Admin seulement) -->
   </main>
 
-  <!-- Navigation Bottom Style WhatsApp -->
   <nav class="bel-bottom-nav">
-    <!-- Fil National -->
     <button 
       class="bel-nav-item"
       [class.active]="activeTab === 'national'"

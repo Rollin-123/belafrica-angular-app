@@ -12,9 +12,7 @@ export class ProfileComponent implements OnInit {
   user: User | null = null;
   isEditing = false;
   isLoading = false;
-  
-  // CORRECTION : Initialisation avec des valeurs par défaut
-  editData: UserUpdateData = {
+    editData: UserUpdateData = {
     pseudo: '',
     bio: '',
     gender: '',

@@ -13,10 +13,8 @@
       {{ userService.generateDefaultAvatar(user.pseudo) }}
     </div>
   </div>
-  <!-- Sections des Paramètres -->
   <main class="bel-settings-sections">
     
-    <!-- Paramètres Principaux -->
     <section class="bel-settings-group">
       <h3 class="bel-settings-group-title">Préférences du compte</h3>
       
@@ -45,7 +43,6 @@
         </div>
       </div>
     </section>
-    <!-- Section Administration -->
 @if (user && !user.is_admin) {
   <section class="bel-settings-group">
     <h3 class="bel-settings-group-title">👑 Administration</h3>

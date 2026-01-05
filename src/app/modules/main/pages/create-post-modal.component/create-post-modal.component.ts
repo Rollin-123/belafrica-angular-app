@@ -27,7 +27,7 @@ export class CreatePostModalComponent implements OnInit {
       content: ['', [Validators.required, Validators.minLength(1)]]
     });
   }
-  ngOnInit(): void { // ✅ CORRECTION: Laisser la méthode vide
+  ngOnInit(): void { 
     this.postForm.get('visibility')?.setValue(this.visibility);
   }
 
@@ -72,17 +72,13 @@ export class CreatePostModalComponent implements OnInit {
       this.isLoading = true;
 
       try {
-        // Convertir les images en URLs (dans une vraie app, upload vers cloud)
         const imageUrls = this.imagePreviews;
-
-        // Créer le post
         await this.postsService.createPost(
           this.postForm.get('content')?.value,
           imageUrls,
           this.postForm.get('visibility')?.value
         );
 
-        // Émettre l'événement et fermer
         this.postCreated.emit();
         this.closeModal();
         

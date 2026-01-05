@@ -9,10 +9,8 @@
       </button>
     </header>
 
-    <!-- Formulaire de création -->
     <form [formGroup]="postForm" (ngSubmit)="createPost()" class="bel-post-form">
       
-      <!-- Sélection de la visibilité -->
       <div class="bel-form-section">
         <label class="bel-form-label">🌍 Visibilité de la publication</label>
         <div class="bel-visibility-options">
@@ -44,7 +42,6 @@
         </div>
       </div>
 
-      <!-- Contenu du post -->
       <div class="bel-form-section">
         <label for="postContent" class="bel-form-label">
           💬 Contenu de la publication *

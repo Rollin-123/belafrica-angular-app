@@ -9,7 +9,6 @@
       </div>
       
       <div class="bel-header-actions">
-        <!-- Bouton Nouveau Post (visible seulement pour les admins) -->
         <button 
           *ngIf="showCreatePostButton"
           class="bel-create-post-btn"
@@ -23,7 +22,6 @@
     </div>
   </div>
 
-  <!-- Indicateur de chargement -->
   <div *ngIf="isLoading" class="bel-loading-state">
     <div class="bel-loading-spinner"></div>
     <p>Chargement des publications...</p>

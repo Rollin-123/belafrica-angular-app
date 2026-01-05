@@ -22,7 +22,6 @@ export class StorageService {
     }
   }
 
-  // Méthode sécurisée pour getItem
   getItem(key: string): any {
     if (this.isBrowser) {
       try {
@@ -33,7 +32,7 @@ export class StorageService {
         try {
           return JSON.parse(item);
         } catch (e) {
-          return item; // Retourner la chaîne brute si ce n'est pas du JSON
+          return item; 
         }
       } catch (error) {
         console.error(`❌ Erreur localStorage getItem pour la clé "${key}":`, error);

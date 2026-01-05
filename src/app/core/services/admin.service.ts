@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
+
 export class AdminService {
   hasPendingRequest(): boolean {
     throw new Error('Method not implemented.');
@@ -23,7 +24,6 @@ export class AdminService {
     private userService: UserService,
   ) {}
 
-  // ✅ NOUVEAU : Soumission de la demande d'admin au backend
   submitAdminRequest(identityImageUrl: string, motivation: string): Observable<{ success: boolean; message?: string; error?: string; }> {
     const body = {
       identityImageUrl,

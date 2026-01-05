@@ -14,12 +14,12 @@ import { Subscription } from 'rxjs';
 })
 export class AdminRequestComponent implements OnInit, OnDestroy {
   adminForm: FormGroup;
-  isLoading = true; // ✅ Démarrer en mode chargement
+  isLoading = true; 
   validatingCode = false;
   selectedPassportBase64: string | null = null; 
   passportPreview: string | ArrayBuffer | null = null;
   adminCode = '';
-  hasPendingRequest = false; // Cette info devrait venir du backend
+  hasPendingRequest = false; 
   isAdmin = false;
   codeError: string | null = '';
   user: User | null = null;
@@ -45,16 +45,16 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
     this.userSubscription = this.userService.currentUser$.subscribe(user => {
       if (user) {
         this.user = user;
-        this.isAdmin = user.is_admin; // ✅ Utiliser la bonne propriété
-        this.showCreatePostButton = this.userService.canPostNational(); // ✅ Utiliser UserService directement
+        this.isAdmin = user.is_admin; 
+        this.showCreatePostButton = this.userService.canPostNational(); 
         console.log('🔄 Mise à jour réactive du statut admin:', {
           isAdmin: this.isAdmin,
-          hasPendingRequest: this.hasPendingRequest, // Ajouter le statut de la demande
+          hasPendingRequest: this.hasPendingRequest, 
           pseudo: user.pseudo,
           showCreatePostButton: this.showCreatePostButton
         });
       }
-      this.isLoading = false; // ✅ Fin du chargement initial une fois l'utilisateur traité
+      this.isLoading = false;
       this.cd.detectChanges();
     });
   }

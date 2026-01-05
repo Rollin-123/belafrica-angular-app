@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { StorageService } from '../services/storage.service'; // Importation nécessaire
+import { StorageService } from '../services/storage.service'; 
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ export class CreatorGuard implements CanActivate {
   
   constructor(
     private router: Router,
-    private storageService: StorageService // ✅ INJECTION du StorageService
+    private storageService: StorageService 
   ) {}
   canActivate(): boolean {
     // Vérifier si c'est le créateur (vous)

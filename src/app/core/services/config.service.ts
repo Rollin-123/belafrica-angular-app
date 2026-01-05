@@ -23,7 +23,6 @@ export class ConfigService {
 
   get constants() {
     if (!this.appConfig) {
-      // Cette erreur ne devrait jamais se produire grâce à APP_INITIALIZER
       throw new Error('Les constantes de configuration ne sont pas chargées !');
     }
     return this.appConfig;

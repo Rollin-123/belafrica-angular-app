@@ -21,7 +21,6 @@ export class FeedNationalComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private postsService: PostsService
   ) {
-    // On ne charge les posts que lorsque l'utilisateur est connu
     this.posts$ = of([]); 
   }
 

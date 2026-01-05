@@ -12,7 +12,6 @@ export class PostsHttpService extends PostsService {
 
   constructor(private http: HttpClient) {
     super();
-    console.log('⚡️ PostsHttpService initialisé (mode production)');
   }
 
   getNationalPosts(): Observable<Post[]> {
@@ -34,7 +33,6 @@ export class PostsHttpService extends PostsService {
     if (visibility === 'international') {
       return this.getInternationalPosts();
     }
-    // Fallback, bien que non idéal. Le backend devrait avoir une route /all
     return of([]);
   }
 
@@ -58,8 +56,6 @@ export class PostsHttpService extends PostsService {
     return response?.success ?? false;
   }
 
-  // --- Méthodes non implémentées car pas de route backend ---
-
   getStats(): any {
     console.warn('[PostsHttpService] getStats() non implémenté côté backend.');
     return {
@@ -71,7 +67,6 @@ export class PostsHttpService extends PostsService {
 
   getPostsByCommunity(community: string): Observable<Post[]> {
     console.warn('[PostsHttpService] getPostsByCommunity() non implémenté côté backend.');
-    // Idéalement, il faudrait une route comme GET /api/posts/community/:communityName
     return of([]);
   }
 }

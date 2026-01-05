@@ -48,7 +48,6 @@ export class NationalitySelectionComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Vérifier que l'utilisateur vient bien de l'étape OTP
     const tempData = localStorage.getItem('belafrica_temp_phone');
     const verifiedPhone = localStorage.getItem('verified_phone');
     

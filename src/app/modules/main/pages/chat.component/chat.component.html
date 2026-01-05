@@ -1,6 +1,5 @@
 <div class="bel-chat-container">
   
-  <!-- Header du Chat -->
   <header class="bel-chat-header">
     <button class="bel-back-btn" (click)="goBack()">
       ←
@@ -26,7 +25,6 @@
     
   </header>
 
-  <!-- Zone des Messages -->
   <main class="bel-chat-messages" #messagesContainer>
     <div *ngIf="(messages$ | async)?.length === 0" class="bel-no-messages">
       <div class="bel-no-messages-icon">💬</div>
@@ -42,12 +40,10 @@
         [class.other-message]="!isMyMessage(message)">
         
         <div class="bel-message-bubble">
-          <!-- En-tête du message -->
           <div class="bel-message-header" *ngIf="!isMyMessage(message)">
             <strong class="bel-message-sender">{{ message.fromUserName }}</strong>
           </div>
 
-          <!-- Contenu du message -->
           <div class="bel-message-content">
             {{ message.content }}
           </div>

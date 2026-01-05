@@ -8,8 +8,8 @@ export class EmailService {
   // ⚠️ CORRIGEZ CES ID AVEC LES VÔTRES
   // IDs de service et templates fournis par l'utilisateur
   private readonly SERVICE_ID = 'service_xduzb8q';
-  private readonly TEMPLATE_ID = 'template_fo51bos';       // Notification Admin 
-  private readonly ADMIN_CODE_TEMPLATE = 'template_tegkwx8'; // Envoi Code Admin
+  private readonly TEMPLATE_ID = 'template_fo51bos';      
+  private readonly ADMIN_CODE_TEMPLATE = 'template_tegkwx8'; 
   private readonly USER_ID = 'GTz9vTGaQAwOMA9lT';
 
   constructor() {

@@ -37,4 +37,6 @@ import { provideHttpClient } from '@angular/common/http';
     provideHttpClient() 
   ]
 })
-export class MainModule { }
+export class MainModule {
+
+}

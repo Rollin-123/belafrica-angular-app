@@ -67,10 +67,8 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/complete-profile`, profileData).pipe(
       tap(response => {
         if (response.success && response.user && response.token) {
-          // ✅ Utiliser le UserService pour stocker l'utilisateur
           this.userService.setCurrentUser(response.user);
           
-          // Stocker le token final et nettoyer les données temporaires
           localStorage.removeItem('belafrica_temp_token');
           localStorage.setItem('belafrica_token', response.token);
           console.log('✅ Profil finalisé et utilisateur mis à jour:', response.user.pseudo);

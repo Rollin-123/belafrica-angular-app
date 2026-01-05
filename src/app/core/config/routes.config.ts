@@ -24,7 +24,7 @@ export const AppRoutes = {
 };
 
 export const RouteGuards = {
-  PUBLIC_ONLY: [], // Routes accessibles sans auth
-  AUTH_REQUIRED: ['/app', '/app/*'], // Requiert auth
-  ADMIN_REQUIRED: ['/admin', '/admin/*'] // Requiert admin
+  PUBLIC_ONLY: [], 
+  AUTH_REQUIRED: ['/app', '/app/*'], 
+  ADMIN_REQUIRED: ['/admin', '/admin/*'] 
 };

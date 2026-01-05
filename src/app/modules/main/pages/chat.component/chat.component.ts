@@ -82,7 +82,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     const messageContent = this.newMessage.trim();
 
     try {
-      // Utiliser firstValueFrom au lieu de toPromise() qui est déprécié
       const conversation = await firstValueFrom(this.conversation$);
       const messageType = conversation?.type || 'group';
 

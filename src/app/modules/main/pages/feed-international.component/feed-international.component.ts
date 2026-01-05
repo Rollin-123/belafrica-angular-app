@@ -59,7 +59,7 @@ export class FeedInternationalComponent implements OnInit, OnDestroy {
 
   hasLiked(post: Post): boolean {
     const user = this.userService.getCurrentUser();
-    return user ? post.likes.includes(user.id) : false; // ✅ Correction: user.id
+    return user ? post.likes.includes(user.id) : false; 
   }
 
   toggleLike(postId: string): void {
@@ -81,7 +81,6 @@ export class FeedInternationalComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ NOUVEAU: Gérer l'erreur de chargement d'image
   handleImageError(event: Event): void {
     (event.target as HTMLImageElement).src = 'assets/images/default-avatar.png';
   }

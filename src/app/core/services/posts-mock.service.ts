@@ -74,10 +74,6 @@ export class PostsMockService extends PostsService {
   private generateSamplePosts(): any[] {
     const baseDate = new Date();
     return [
-      { content: '🎉 Bienvenue à la communauté Camerounaise de France !', visibility: 'national' as const, community: 'CamerounaisEnFrance', authorName: 'Admin Cameroun' },
-      { content: '📅 Réunion mensuelle ce samedi à Paris.', visibility: 'international' as const, community: 'CamerounaisEnFrance', authorName: 'Admin Cameroun' },
-      { content: '🇸🇳 La communauté Sénégalaise de Belgique vous souhaite la bienvenue !', visibility: 'national' as const, community: 'SenegalaisEnBelgique', authorName: 'Admin Sénégal' },
-      { content: '💼 Offre d\'emploi : Développeur Angular à Berlin', visibility: 'international' as const, community: 'IvoiriensEnAllemagne', authorName: 'Admin Côte d\'Ivoire' }
     ];
   }
 

@@ -16,7 +16,6 @@ export class ApiService {
     this.timeout = environment.requestTimeout;
   }
 
-  // ✅ EN-TÊTES PAR DÉFAUT
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('belafrica_token');
     

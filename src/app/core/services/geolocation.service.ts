@@ -108,7 +108,6 @@ export class GeolocationService {
         region: geoData.regionName,
         isProxy: geoData.proxy || geoData.hosting || false
       };
-
     } catch (error: any) {
       console.error('❌ Erreur détection IP:', error);
       throw new Error('Erreur détection par IP');

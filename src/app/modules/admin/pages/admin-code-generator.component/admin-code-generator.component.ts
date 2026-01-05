@@ -22,7 +22,6 @@ export class AdminCodeGeneratorComponent implements OnInit, OnDestroy {
   europeanCountries: any[] = [];
   africanNationalities: string[] = [];
   
-  // Niveaux de permissions COMPLETS
 permissionLevels = [
   {
     value: 'national',
