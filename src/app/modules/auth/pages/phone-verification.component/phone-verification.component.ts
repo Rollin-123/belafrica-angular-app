@@ -101,6 +101,10 @@ export class PhoneVerificationComponent {
             console.log('✅ Réponse OTP:', response);
 
             if (response.success) {
+              // Sauvegarder la réponse complète pour la page de redirection
+              if (response.links || response.requiresBotStart) {
+                localStorage.setItem('telegram_otp_response', JSON.stringify(response));
+              }
               
               // Sauvegarder les informations du téléphone pour les étapes suivantes
               const countryName = this.europeanCountries.find(c => c.code === formValue.countryCode)?.name || '';
@@ -111,10 +115,17 @@ export class PhoneVerificationComponent {
               };
               localStorage.setItem('belafrica_temp_phone', JSON.stringify(phoneData));
               
-              this.successMessage = response.message || 'Un code a été généré. Veuillez consulter notre bot Telegram.';
-              setTimeout(() => {
-                this.router.navigate(['/auth/otp']);
-              }, 1500);
+              // ✅ LOGIQUE DE REDIRECTION CORRIGÉE
+              // Si le backend demande le deep linking, on redirige vers la page d'attente.
+              if (response.requiresBotStart && response.links) {
+                this.router.navigate(['/auth/telegram-redirect']);
+              } else {
+                // Fallback (ne devrait plus être utilisé mais reste par sécurité)
+                this.successMessage = response.message || 'Code envoyé !';
+                setTimeout(() => {
+                  this.router.navigate(['/auth/otp']);
+                }, 1500);
+              }
             } else {
               this.errorMessage = response.error || 'Erreur lors de l\'envoi du code';
               this.showError(this.errorMessage);
