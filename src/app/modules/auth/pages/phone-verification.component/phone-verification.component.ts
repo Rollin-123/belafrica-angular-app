@@ -88,7 +88,7 @@ export class PhoneVerificationComponent {
       console.log('📱 Demande OTP pour:', fullPhoneNumber);
 
       // Nettoyer les données précédentes
-      localStorage.removeItem('belafrica_temp_phone');
+      localStorage.removeItem('belafrica_temp_phone'); // Assurez-vous que la clé est cohérente
       localStorage.removeItem('verified_phone');
       localStorage.removeItem('userRegistrationData');
       localStorage.removeItem('geo_validation');
@@ -101,10 +101,6 @@ export class PhoneVerificationComponent {
             console.log('✅ Réponse OTP:', response);
 
             if (response.success) {
-              // Sauvegarder la réponse complète si elle contient des liens pour le deep linking
-              if (response.links || response.requiresBotStart) {
-                localStorage.setItem('telegram_otp_response', JSON.stringify(response));
-              }
               
               // Sauvegarder les informations du téléphone pour les étapes suivantes
               const countryName = this.europeanCountries.find(c => c.code === formValue.countryCode)?.name || '';
@@ -115,17 +111,10 @@ export class PhoneVerificationComponent {
               };
               localStorage.setItem('belafrica_temp_phone', JSON.stringify(phoneData));
               
-              // ✅ LOGIQUE DE REDIRECTION
-              // Si le backend indique que le deep linking est nécessaire, rediriger vers la page d'attente.
-              if (response.requiresBotStart && response.links) {
-                this.router.navigate(['/auth/telegram-redirect']);
-              } else {
-                // Ancien comportement : aller directement à la page de vérification OTP.
-                this.successMessage = response.message || 'Code envoyé !';
-                setTimeout(() => {
-                  this.router.navigate(['/auth/otp']);
-                }, 1500);
-              }
+              this.successMessage = response.message || 'Un code a été généré. Veuillez consulter notre bot Telegram.';
+              setTimeout(() => {
+                this.router.navigate(['/auth/otp']);
+              }, 1500);
             } else {
               this.errorMessage = response.error || 'Erreur lors de l\'envoi du code';
               this.showError(this.errorMessage);
