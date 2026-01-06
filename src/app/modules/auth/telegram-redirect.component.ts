@@ -10,11 +10,6 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="telegram-redirect-container">
       <div class="telegram-card">
-        <div class="animation">
-          <div class="icon-phone">📱</div>
-          <div class="arrow">➡️</div>
-          <div class="icon-telegram">✈️</div>
-        </div>
         
         <h1 class="title">Ouvrez Telegram</h1>
         <p class="subtitle">Vous allez recevoir votre code de vérification</p>
@@ -59,11 +54,6 @@ import { CommonModule } from '@angular/common';
           </div>
         </div>
         
-        <div class="link-container" *ngIf="telegramLink">
-          <p>Lien Telegram :</p>
-          <code class="telegram-link">{{ telegramLink }}</code>
-        </div>
-        
         <button class="btn-continue" (click)="continueToOtp()" [disabled]="!canContinue">
           → Continuer vers la vérification du code
         </button>
@@ -88,24 +78,6 @@ import { CommonModule } from '@angular/common';
       width: 100%;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
       text-align: center;
-    }
-    
-    .animation {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 30px;
-      margin: 30px 0;
-    }
-    
-    .icon-phone, .icon-telegram {
-      font-size: 50px;
-      animation: bounce 2s infinite;
-    }
-    
-    .arrow {
-      font-size: 40px;
-      animation: slide 1.5s infinite;
     }
     
     @keyframes bounce {
@@ -236,13 +208,6 @@ import { CommonModule } from '@angular/common';
     .tip {
       margin-bottom: 8px;
       color: #856404;
-    }
-    
-    .link-container {
-      margin: 20px 0;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 10px;
     }
     
     .telegram-link {
