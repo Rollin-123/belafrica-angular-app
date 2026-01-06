@@ -1,3 +1,8 @@
+/* 
+    * BELAFRICA - Plateforme diaspora africaine
+    * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
+    * Code source confidentiel - Usage interdit sans autorisation
+    */
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { PhoneVerificationComponent } from './pages/phone-verification.component/phone-verification.component';
