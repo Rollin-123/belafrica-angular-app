@@ -115,7 +115,7 @@ export class PhoneVerificationComponent {
               };
               localStorage.setItem('belafrica_temp_phone', JSON.stringify(phoneData));
               
-              // ✅ LOGIQUE DE REDIRECTION CORRIGÉE
+              // ✅ LOGIQUE DE REDIRECTION RESTAURÉE
               // Si le backend demande le deep linking, on redirige vers la page d'attente.
               if (response.requiresBotStart && response.links) {
                 this.router.navigate(['/auth/telegram-redirect']);
