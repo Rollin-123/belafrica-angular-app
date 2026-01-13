@@ -42,7 +42,6 @@ export class AdminService {
     );
   }
 
-  // ✅ FORMATER LE NOM DE LA COMMUNAUTÉ
   private formatCommunityName(nationality: string, countryName: string): string {
     const cleanNationality = nationality
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -55,7 +54,6 @@ export class AdminService {
     return `${cleanNationality}En${cleanCountry}`;
   }
 
-  // ✅ NOUVEAU : Génération de code via l'API Backend
   generateAdminCode(
     countryName: string,  
     nationality: string,  
@@ -70,7 +68,6 @@ export class AdminService {
       permissions,
       expiresInHours
     };
-    // Le backend gère maintenant la génération, le stockage et l'envoi d'email.
     return this.http.post<{ success: boolean; code?: string; message?: string; error?: string }>(`${this.apiUrl}/generate-code`, body).pipe(
       catchError(err => {
         console.error('❌ Erreur API generateAdminCode:', err);
@@ -79,7 +76,6 @@ export class AdminService {
     );
   }
 
-  // ✅ NOUVEAU : Validation de code via l'API Backend
   validateAdminCode(code: string): Observable<{ success: boolean; message?: string; permissions?: string[]; error?: string }> {
     console.log('🔑 Validation du code avec redirection:', code);
 
@@ -97,7 +93,6 @@ export class AdminService {
     );
   }
 
-  // ✅ NOUVEAU : Récupérer les codes actifs depuis le backend
   getGeneratedCodes(): Observable<AdminCode[]> {
     return this.http.get<{ success: boolean, codes: AdminCode[] }>(`${this.apiUrl}/codes`).pipe(
       map((response: { codes: any; }) => response.codes || []),
@@ -108,11 +103,9 @@ export class AdminService {
     );
   }
 
-  // ✅ NOUVEAU : Supprimer un code via l'API
   deleteAdminCode(code: string): Observable<{ success: boolean; message?: string; error?: string }> {
     return this.http.delete<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/codes/${code}`);
   }
-  // ✅ VÉRIFICATIONS DE PERMISSIONS EN TEMPS RÉEL
   canPostNational(): boolean {
     return this.userService.canPostNational();
   }

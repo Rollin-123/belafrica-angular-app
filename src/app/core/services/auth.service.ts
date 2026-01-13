@@ -88,13 +88,11 @@ export class AuthService {
     );
   }
 
-  // ✅ MÉTHODE IMPLÉMENTÉE
   saveToken(token: string): void {
     console.log('🔑 Sauvegarde du token permanent...');
     localStorage.setItem(this.tokenKey, token);
   }
 
-  // ✅ MÉTHODE UTILE POUR L'INTERCEPTEUR HTTP
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
@@ -105,13 +103,13 @@ export class AuthService {
 
   logout(): void {
     this.clearStorage();
-    this.userService.setCurrentUser(null); // ✅ Vider l'utilisateur via le service
+    this.userService.setCurrentUser(null);  
     console.log('👋 Déconnexion et nettoyage du stockage.');
   }
 
   private clearStorage(): void {
     const keys = [
-      'belafrica_user', // Clé utilisée par le nouveau UserService
+      'belafrica_user',  
       'belafrica_token',
       'temp_phone',
       'verified_phone',

@@ -4,7 +4,7 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 // src/app/modules/auth/pages/phone-verification.component.ts - CORRIGÉ
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -15,7 +15,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   standalone: false,
   styleUrls: ['./phone-verification.component.scss']
 })
-export class PhoneVerificationComponent {
+export class PhoneVerificationComponent implements OnInit {
   phoneForm: FormGroup;
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -43,6 +43,19 @@ export class PhoneVerificationComponent {
       countryCode: [this.europeanCountries[2].code, Validators.required], // Biélorussie par défaut
       phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9\s]{8,15}$/)]]
     });
+  }
+
+  ngOnInit(): void {
+    // ✅ GESTION DU RETOUR DEPUIS TELEGRAM SUR ANDROID
+    // Si l'application est rechargée et que l'utilisateur était en plein milieu
+    // du flux OTP, on le redirige vers la page de saisie du code.
+    const tempPhoneInfo = localStorage.getItem('belafrica_temp_phone');
+    const telegramResponse = localStorage.getItem('telegram_otp_response');
+
+    if (tempPhoneInfo && telegramResponse) {
+      console.log('📱 Détection d\'un retour depuis Telegram. Redirection vers la page OTP.');
+      this.router.navigate(['/auth/otp']);
+    }
   }
 
   onKeyPress(event: KeyboardEvent): boolean {

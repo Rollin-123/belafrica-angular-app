@@ -4,7 +4,6 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 
-// src/app/core/services/geolocation.service.ts - VERSION CORRIGÉE
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -27,7 +26,6 @@ export class GeolocationService {
 
   constructor(private http: HttpClient) {}
 
-  // ✅ DÉTECTER la géolocalisation AVEC FORCE BLOCAGE
   detectLocation(): Observable<GeolocationData> {
     return new Observable<GeolocationData>(observer => {
       console.log('📍 Début détection géolocalisation...');
@@ -55,7 +53,6 @@ export class GeolocationService {
     });
   }
 
-  // ✅ MÉTHODE NAVIGATEUR (précise mais nécessite permission)
   private async detectWithBrowser(): Promise<GeolocationData> {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -89,15 +86,12 @@ export class GeolocationService {
     });
   }
 
-  // ✅ MÉTHODE IP (fallback)
   private async detectWithIP(): Promise<GeolocationData> {
     try {
-      // 1. Récupérer IP
       const ipResponse = await fetch(this.ipifyUrl);
       const ipData = await ipResponse.json();
       const clientIP = ipData.ip;
 
-      // 2. Géolocaliser IP
       const geoResponse = await fetch(`${this.ipApiUrl}/${clientIP}`);
       const geoData = await geoResponse.json();
 
@@ -119,7 +113,6 @@ export class GeolocationService {
     }
   }
 
-  // ✅ GÉOCODAGE INVERSE
   private async reverseGeocode(lat: number, lng: number): Promise<{country: string, countryCode: string}> {
     try {
       const response = await fetch(
@@ -139,11 +132,9 @@ export class GeolocationService {
     }
   }
 
-  // ✅ VÉRIFICATION STRICTE PAYS/TÉLÉPHONE (CORRIGÉE)
   validateCountryMatch(phoneCountryCode: string, detectedCountryCode: string): { isValid: boolean; error?: string } {
     console.log('🔍 Validation strict pays:', { phoneCountryCode, detectedCountryCode });
 
-    // Mapping EXACT des codes téléphoniques
     const phoneToCountryMap: Record<string, {code: string, name: string}[]> = {
       '+33': [{ code: 'FR', name: 'France' }],
       '+32': [{ code: 'BE', name: 'Belgique' }],
@@ -159,7 +150,6 @@ export class GeolocationService {
 
     const allowedCountries = phoneToCountryMap[phoneCountryCode];
     
-    // 1. Vérifier si le code pays est autorisé
     if (!allowedCountries) {
       return {
         isValid: false,
@@ -167,7 +157,6 @@ export class GeolocationService {
       };
     }
 
-    // 2. Vérifier la correspondance EXACTE
     const cleanDetectedCode = detectedCountryCode.toUpperCase().trim();
     const isValid = allowedCountries.some(country => country.code === cleanDetectedCode);
 
@@ -184,7 +173,6 @@ export class GeolocationService {
     return { isValid: true };
   }
 
-  // ✅ VÉRIFICATION COMPLÈTE AVEC MESSAGES D'ERREUR CLAIRS
   async validateLocationBeforeOTP(phoneCountryCode: string): Promise<{
     isValid: boolean;
     detectedCountry?: string;
@@ -197,7 +185,6 @@ export class GeolocationService {
       const location = await this.detectLocation().toPromise();
       if (!location) throw new Error('Localisation non détectée');
 
-      // 1. Vérifier si le pays est autorisé
       const allowedCountries = ['FR', 'BE', 'DE', 'IT', 'ES', 'CH', 'GB', 'CA', 'RU', 'BY'];
       if (!allowedCountries.includes(location.countryCode.toUpperCase())) {
         return {
@@ -208,7 +195,6 @@ export class GeolocationService {
         };
       }
 
-      // 2. Vérifier la correspondance pays/téléphone
       const validation = this.validateCountryMatch(phoneCountryCode, location.countryCode);
       
       if (!validation.isValid) {
@@ -220,7 +206,6 @@ export class GeolocationService {
         };
       }
 
-      // 3. Vérifier proxy/VPN (avertissement seulement)
       if (location.isProxy) {
         console.warn('⚠️ Proxy/VPN détecté. Localisation potentiellement fausse.');
       }
@@ -241,7 +226,6 @@ export class GeolocationService {
     }
   }
 
-  // ✅ HELPER: Nom du pays depuis code
   private getCountryNameFromCode(code: string): string {
     const countries: Record<string, string> = {
       'FR': 'France',
@@ -259,7 +243,6 @@ export class GeolocationService {
     return countries[code.toUpperCase()] || code;
   }
 
-  // ✅ GETTER pour affichage
   getAllowedCountries(): Array<{code: string, name: string}> {
     return [
       { code: '+33', name: 'France' },

@@ -116,7 +116,7 @@ export class ApiService {
       );
   }
 
-  // ✅ HELPER: Créer les params
+  // ✅ HELPER
   private createParams(params: any): HttpParams {
     let httpParams = new HttpParams();
     
@@ -138,27 +138,20 @@ export class ApiService {
     let errorMessage = 'Une erreur est survenue';
     
     if (error.error instanceof ErrorEvent) {
-      // Erreur côté client
       errorMessage = `Erreur: ${error.error.message}`;
     } else if (error.status === 0) {
-      // Pas de connexion
       errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
     } else if (error.status === 401) {
-      // Non autorisé
       errorMessage = 'Session expirée. Veuillez vous reconnecter.';
       localStorage.removeItem('belafrica_token');
       window.location.reload();
     } else if (error.status === 403) {
-      // Accès refusé
       errorMessage = 'Accès refusé. Permissions insuffisantes.';
     } else if (error.status === 404) {
-      // Non trouvé
       errorMessage = 'Ressource non trouvée.';
     } else if (error.status === 500) {
-      // Erreur serveur
       errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
     } else if (error.error?.error) {
-      // Erreur du backend
       errorMessage = error.error.error;
     }
     

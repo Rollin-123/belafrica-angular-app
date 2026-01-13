@@ -7,7 +7,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Message, Conversation, MessageAction } from '../models/message.model';
 import { MessagingService } from './messaging.service';
@@ -16,20 +16,18 @@ import { StorageService } from './storage.service';
 @Injectable()
 export class MessagingHttpService extends MessagingService {
   private apiUrl = `${environment.apiUrl}/messaging`;
-  private userEncryptionKey: CryptoKey | null = null; // ✅ Nécessaire pour le déchiffrement
+  private userEncryptionKey: CryptoKey | null = null; 
 
-  // Utiliser des BehaviorSubjects pour mettre en cache et partager les données
   private conversations$ = new BehaviorSubject<Conversation[]>([]);
 
   constructor(
     private http: HttpClient,
-    private encryptionService: EncryptionService, // ✅ Injecter pour le déchiffrement
-    private storageService: StorageService // ✅ Injecter pour la clé
+    private encryptionService: EncryptionService,  
+    private storageService: StorageService  
   ) {
     super();
     console.log('⚡️ MessagingHttpService initialisé (mode production)');
     this.initializeEncryption();
-    // TODO: Initialiser la connexion WebSocket/Realtime ici
   }
 
   private async initializeEncryption(): Promise<void> {
@@ -38,9 +36,7 @@ export class MessagingHttpService extends MessagingService {
       if (savedKey) {
         this.userEncryptionKey = await this.encryptionService.importKey(savedKey);
         console.log('⚡️ [HTTP] Clé de chiffrement chargée.');
-      } else {
-        // En production, la clé devrait idéalement être gérée de manière plus sécurisée,
-        // mais pour la cohérence avec le mock, nous la générons si elle n'existe pas.
+      } else { 
         this.userEncryptionKey = await this.encryptionService.generateEncryptionKey();
         const keyString = await this.encryptionService.exportKey(this.userEncryptionKey);
         this.storageService.setItem('belafrica_user_encryption_key', keyString);
@@ -52,21 +48,22 @@ export class MessagingHttpService extends MessagingService {
   }
 
   getConversations(): Observable<Conversation[]> {
-    // ✅ Implémentation réelle avec appel HTTP
     return this.http.get<{ conversations: Conversation[] }>(`${this.apiUrl}/conversations`).pipe(
       map(response => response.conversations || []),
       tap(conversations => {
         console.log(`⚡️ [HTTP] ${conversations.length} conversations chargées.`);
-        this.conversations$.next(conversations); // Mettre en cache
+        this.conversations$.next(conversations);  
+      }),
+      catchError(error => {
+        console.error('❌ [HTTP] Erreur chargement conversations:', error);
+        return of([]); 
       })
     );
   }
 
   getMessages(conversationId: string): Observable<Message[]> {
-    // ✅ Implémentation réelle avec appel HTTP
     return this.http.get<{ messages: Message[] }>(`${this.apiUrl}/conversations/${conversationId}/messages`).pipe(
       map(response => response.messages || []),
-      // ✅ Déchiffrer les messages reçus
       switchMap(async (messages) => {
         if (!this.userEncryptionKey) {
           console.warn('⚠️ [HTTP] Clé de chiffrement non prête, messages non déchiffrés.');
@@ -98,7 +95,6 @@ export class MessagingHttpService extends MessagingService {
       throw new Error('Clé de chiffrement non disponible pour l\'envoi.');
     }
 
-    // ✅ Chiffrer le contenu avant de l'envoyer
     const encryptedData = await this.encryptionService.encryptAndSerialize(
       content,
       this.userEncryptionKey
@@ -137,28 +133,22 @@ export class MessagingHttpService extends MessagingService {
     console.warn('MessagingHttpService.deleteMessage() non implémenté.');
     return Promise.reject('Non implémenté');
   }
-  // ✅ CORRECTION : Implémentation des méthodes manquantes pour satisfaire la classe abstraite
   getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     console.warn('[MessagingHttpService] getMessageActions() non implémenté.');
-    // En production, cette logique pourrait être en partie sur le backend pour les permissions
     return [];
   }
 
   getMentionSuggestions(searchTerm: string, conversationId: string): any[] {
     console.warn('[MessagingHttpService] getMentionSuggestions() non implémenté.');
-    // Nécessitera un appel HTTP vers une route comme /api/conversations/:id/participants
     return [];
   }
 
   markAsRead(conversationId: string): void {
     console.warn('[MessagingHttpService] markAsRead() non implémenté.');
-    // Appel HTTP vers une route comme POST /api/conversations/:id/read
   }
 
   getStats(): any {
     console.warn('[MessagingHttpService] getStats() non implémenté.');
     return {};
-  }
-  // Les autres méthodes (getMessageActions, getMentionSuggestions, etc.) peuvent rester locales
-  // ou nécessiter des appels backend selon votre architecture.
+  } 
 }

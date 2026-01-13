@@ -10,9 +10,7 @@ import emailjs from 'emailjs-com';
 @Injectable({
   providedIn: 'root'
 })
-export class EmailService {
-  // ⚠️ CORRIGEZ CES ID AVEC LES VÔTRES
-  // IDs de service et templates fournis par l'utilisateur
+export class EmailService { 
   private readonly SERVICE_ID = 'service_xduzb8q';
   private readonly TEMPLATE_ID = 'template_fo51bos';      
   private readonly ADMIN_CODE_TEMPLATE = 'template_tegkwx8'; 
@@ -23,7 +21,6 @@ export class EmailService {
     this.testConnection();
   }
 
-  // ✅ TEST DE CONNEXION EMAILJS
   private async testConnection(): Promise<void> {
     try {
       console.log('🔧 Test configuration EmailJS...');
@@ -33,7 +30,6 @@ export class EmailService {
         return;
       }
 
-      // La fonction init est suffisante pour confirmer la configuration User ID
       console.log('✅ Configuration EmailJS chargée:', {
         serviceId: this.SERVICE_ID,
         userId: this.USER_ID.substring(0, 10) + '...'
@@ -44,7 +40,6 @@ export class EmailService {
     }
   }
 
-  // ✅ ENVOI CODE ADMIN À L'UTILISATEUR
   async sendAdminCode(
     userEmail: string,
     adminCode: string,
@@ -57,13 +52,13 @@ export class EmailService {
       const expiryDate = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
 
       const templateParams = {
-        admin_name: userEmail, // <-- L'adresse de l'utilisateur va dans cette variable
+        admin_name: userEmail, 
         
         admin_code: adminCode,
         community: community,
         expiration_date: expiryDate.toLocaleDateString('fr-FR', {
           year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-        }), // Format plus complet pour l'e-mail
+        }),  
         expiration_hours: expiresInHours.toString(),
         from_name: 'BELAFRICA Admin'
       };
@@ -90,9 +85,7 @@ export class EmailService {
       };
     }
   }
-
-  // ✅ NOTIFICATION DEMANDE ADMIN
-  // MODIFIÉ : requestData.passportPhoto est maintenant une URL
+ 
   async sendAdminRequestNotification(requestData: any): Promise<{success: boolean, error?: string}> {
     try {
       console.log('📧 Tentative envoi notification demande admin');
@@ -103,7 +96,6 @@ export class EmailService {
         user_phone: requestData.userPhone,
         submission_date: new Date().toLocaleDateString('fr-FR'),
         additional_info: requestData.additionalInfo,
-        // PassportPhoto est maintenant l'URL Cloudinary
         passport_photo_url: requestData.passportPhoto, 
         request_id: requestData.id,
         to_email: 'rollinloictianga@gmail.com', 
