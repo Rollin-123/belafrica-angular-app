@@ -7,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserService } from '../../../../core/services/user.service';
 
 @Component({
   selector: 'app-otp-verification',
@@ -25,7 +26,8 @@ export class OtpVerificationComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private userService: UserService
   ) {
     this.otpForm = this.fb.group({
       otpCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
@@ -38,7 +40,7 @@ export class OtpVerificationComponent implements OnInit {
     if (tempData) {
       try {
         const data = JSON.parse(tempData);
-        this.phoneNumber = data.fullPhoneNumber; // ✅ Utiliser la bonne propriété
+        this.phoneNumber = data.fullPhoneNumber;  
         console.log('📱 Page de vérification pour:', this.phoneNumber);
       } catch (error) {
         this.router.navigate(['/auth/phone']);
@@ -46,8 +48,6 @@ export class OtpVerificationComponent implements OnInit {
     } else {
       this.router.navigate(['/auth/phone']);
     }
-
-    // Démarrer le compte à rebours
     this.startCountdown();
   }
 
@@ -72,24 +72,34 @@ export class OtpVerificationComponent implements OnInit {
 
       this.authService.verifyOtp(this.phoneNumber, otp).subscribe({
         next: (response) => {
+          this.isLoading = false;
           console.log('✅ OTP validé:', response);
 
-          if (response.success && response.tempToken) {
-            // ✅ CORRECTION DÉFINITIVE: Sauvegarder le token temporaire.
-            // L'intercepteur HTTP l'utilisera pour la prochaine requête.
-            // Assurez-vous que la clé 'belafrica_token' est celle que votre intercepteur recherche.
-            localStorage.setItem('belafrica_token', response.tempToken);
-            
-            // Rediriger vers la sélection de nationalité
-            this.router.navigate(['/auth/nationality']);
+          if (response.success) {
+            if (response.token && response.user) {
+              console.log('🚀 Connexion réussie. Redirection vers l\'application...');
+              this.authService.saveToken(response.token);
+              this.userService.setCurrentUser(response.user); 
+              this.router.navigate(['/app/national']);
+            }
+            else if (response.tempToken) {
+              console.log('✅ OTP validé pour un nouvel utilisateur. Redirection vers la finalisation du profil...');
+              localStorage.setItem('belafrica_temp_token', response.tempToken);
+              this.router.navigate(['/auth/nationality']);
+            }
+            // Cas d'erreur inattendu
+            else {
+              this.errorMessage = response.message || 'Réponse inattendue du serveur.';
+              console.error('❌ Réponse inattendue du serveur après vérification OTP.');
+            }
+
           } else {
-            this.errorMessage = response.error || 'Réponse invalide du serveur après vérification OTP.';
-            this.isLoading = false;
+            this.errorMessage = response.message || 'Une erreur est survenue.';
           }
         },
         error: (error) => {
           console.error('❌ Erreur vérification OTP:', error);
-          this.errorMessage = error.error?.error || 'Code OTP incorrect';
+           this.errorMessage = error.error?.message || 'Code OTP incorrect ou expiré.';
           this.isLoading = false;
         }
       });

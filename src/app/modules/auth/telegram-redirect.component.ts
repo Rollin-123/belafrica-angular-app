@@ -15,9 +15,9 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="telegram-redirect-container">
       <div class="telegram-card">
-        
-        <h1 class="title">Ouvrez Telegram</h1>
-        <p class="subtitle">Vous allez recevoir votre code de vérification</p>
+
+        <h1 class="title">{{ pageTitle }}</h1>
+        <p class="subtitle">{{ pageSubtitle }}</p>
         
         <div class="progress-container">
           <div class="progress-bar">
@@ -247,6 +247,8 @@ export class TelegramRedirectComponent implements OnInit, OnDestroy {
   telegramLink = '';
   isOpening = false;
   canContinue = false;
+  pageTitle = 'Ouvrez Telegram';
+  pageSubtitle = 'Vous allez recevoir votre code de vérification';
   private intervalId: any;
 
   constructor(private router: Router) {}
@@ -256,6 +258,15 @@ export class TelegramRedirectComponent implements OnInit, OnDestroy {
     if (otpResponse) {
       const data = JSON.parse(otpResponse);
       this.telegramLink = data.links?.universal || data.links?.web || '';
+
+      // ✅ NOUVEAU : Personnaliser les messages en fonction du contexte (login ou inscription)
+      if (data.userExists) {
+        this.pageTitle = 'Bon retour !';
+        this.pageSubtitle = 'Veuillez vérifier votre identité via Telegram pour vous connecter en toute sécurité.';
+      } else {
+        this.pageTitle = 'Presque terminé !';
+        this.pageSubtitle = 'Un code vous a été envoyé sur Telegram pour finaliser votre inscription.';
+      }
       
       if (data.token) {
         localStorage.setItem('telegram_token', data.token);

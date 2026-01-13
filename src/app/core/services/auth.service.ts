@@ -28,6 +28,9 @@ interface GenericResponse {
   providedIn: 'root'
 })
 export class AuthService {
+  saveToken(token: any) {
+    throw new Error('Method not implemented.');
+  }
   private apiUrl = `${environment.apiUrl}/auth`;
 
   constructor(
