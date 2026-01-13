@@ -28,10 +28,8 @@ interface GenericResponse {
   providedIn: 'root'
 })
 export class AuthService {
-  saveToken(token: any) {
-    throw new Error('Method not implemented.');
-  }
   private apiUrl = `${environment.apiUrl}/auth`;
+  private readonly tokenKey = 'belafrica_token';
 
   constructor(
     private http: HttpClient,
@@ -90,8 +88,19 @@ export class AuthService {
     );
   }
 
+  // ✅ MÉTHODE IMPLÉMENTÉE
+  saveToken(token: string): void {
+    console.log('🔑 Sauvegarde du token permanent...');
+    localStorage.setItem(this.tokenKey, token);
+  }
+
+  // ✅ MÉTHODE UTILE POUR L'INTERCEPTEUR HTTP
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('belafrica_token');
+    return !!this.getToken();
   }
 
   logout(): void {
