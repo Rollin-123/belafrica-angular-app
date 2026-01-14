@@ -1,0 +1,47 @@
+{
+  "name": "BELAFRICA",
+  "short_name": "BELAFRICA",
+  "description": "Votre communauté africaine en Europe - Communication, entraide et partage",
+  "theme_color": "#F2A900",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "orientation": "portrait",
+  "categories": ["social", "lifestyle", "communication"],
+  "lang": "fr",
+  "dir": "ltr",
+  "id": "/",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/ddcda1blt/image/upload/v1768142208/BelaAfrica/hw9thpkvkpixwteg2ref.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://res.cloudinary.com/ddcda1blt/image/upload/v1768142206/BelaAfrica/vkidtxxcpsd68ihpiaqj.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://res.cloudinary.com/ddcda1blt/image/upload/v1768142182/BelaAfrica/ccmj0oe0klrrf9tabrtl.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://res.cloudinary.com/ddcda1blt/image/upload/v1757857471/BelaAfrica/logo_dcnjrv.jpg",
+      "sizes": "384x384",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "https://res.cloudinary.com/ddcda1blt/image/upload/w_512,h_512,c_fill/BelaAfrica/logo_dcnjrv.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
