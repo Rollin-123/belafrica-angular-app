@@ -48,13 +48,31 @@ export class PhoneVerificationComponent implements OnInit {
   ngOnInit(): void {
     // ✅ GESTION DU RETOUR DEPUIS TELEGRAM SUR ANDROID
     // Si l'application est rechargée et que l'utilisateur était en plein milieu
-    // du flux OTP, on le redirige vers la page de saisie du code.
-    const tempPhoneInfo = localStorage.getItem('belafrica_temp_phone');
+    // du flux OTP, on le redirige vers la page de saisie du code, mais seulement si la session est récente.
+    const tempPhoneInfoString = localStorage.getItem('belafrica_temp_phone');
     const telegramResponse = localStorage.getItem('telegram_otp_response');
 
-    if (tempPhoneInfo && telegramResponse) {
-      console.log('📱 Détection d\'un retour depuis Telegram. Redirection vers la page OTP.');
-      this.router.navigate(['/auth/otp']);
+    if (tempPhoneInfoString && telegramResponse) {
+      try {
+        const tempPhoneInfo = JSON.parse(tempPhoneInfoString);
+        const otpRequestTime = tempPhoneInfo.timestamp;
+        const tenMinutes = 10 * 60 * 1000; // 10 minutes en millisecondes
+
+        // On redirige seulement si la demande de code a moins de 10 minutes
+        if (otpRequestTime && (Date.now() - otpRequestTime < tenMinutes)) {
+          console.log('📱 Détection d\'un retour récent depuis Telegram. Redirection vers la page OTP.');
+          this.router.navigate(['/auth/otp']);
+        } else {
+          // La session est expirée, on nettoie le stockage pour éviter une redirection incorrecte
+          console.log('📱 Détection d\'une session OTP expirée. Nettoyage du localStorage.');
+          localStorage.removeItem('belafrica_temp_phone');
+          localStorage.removeItem('telegram_otp_response');
+        }
+      } catch (e) {
+        // En cas d'erreur de parsing (ancien format de données), on nettoie.
+        localStorage.removeItem('belafrica_temp_phone');
+        localStorage.removeItem('telegram_otp_response');
+      }
     }
   }
 
@@ -129,7 +147,8 @@ export class PhoneVerificationComponent implements OnInit {
               const phoneData = { 
                 fullPhoneNumber: fullPhoneNumber,
                 countryCode: formValue.countryCode,
-                countryName: countryName
+                countryName: countryName,
+                timestamp: Date.now() // On ajoute un timestamp
               };
               localStorage.setItem('belafrica_temp_phone', JSON.stringify(phoneData));
               
