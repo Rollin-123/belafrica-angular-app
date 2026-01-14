@@ -5,6 +5,19 @@
 // Import des polices Google
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap');
 
+.bel-splash {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #1a1a1a;  
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
+        transition: opacity 0.3s ease-out;
+      }
 // =============================================================================
 // VARIABLES COULEURS OFFICIELLES BELAFRICA
 // =============================================================================
