@@ -9,10 +9,9 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-telegram-redirect',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-telegram-redirect',
+    imports: [CommonModule],
+    template: `
     <div class="telegram-redirect-container">
       <div class="telegram-card">
 
@@ -65,7 +64,7 @@ import { CommonModule } from '@angular/common';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .telegram-redirect-container {
       min-height: 100vh;
       display: flex;

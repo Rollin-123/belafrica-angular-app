@@ -16,11 +16,10 @@ import { MessagingService } from '../../../../core/services/messaging.service';
 import { UserService } from '../../../../core/services/user.service';
 
 @Component({
-  selector: 'app-chat',
-  templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.scss'],
-  standalone: true, 
-  imports: [CommonModule, FormsModule] 
+    selector: 'app-chat',
+    templateUrl: './chat.component.html',
+    styleUrls: ['./chat.component.scss'],
+    imports: [CommonModule, FormsModule]
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
