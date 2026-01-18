@@ -4,10 +4,11 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { map, switchMap } from 'rxjs/operators';
 import { MessagingService } from './messaging.service';
+import { mapBackendMessageToFrontend } from '../mappers/message.mapper';
 import { StorageService } from './storage.service';
 import { UserService } from './user.service';
 import { EncryptionService } from './encryption.service';
@@ -16,6 +17,7 @@ import { EncryptionService } from './encryption.service';
 import { 
   Message, 
   Conversation, 
+  BackendMessage,
   Participant,
   Mention,
   MessageAction,
@@ -41,17 +43,26 @@ export class MessagingMockService extends MessagingService {
   private readonly messagesKey = 'belafrica_messages';
   private readonly conversationsKey = 'belafrica_conversations';
   private readonly userKeyStorageKey = 'belafrica_user_encryption_key';
+  private readonly deletedForSelfKey = 'belafrica_deleted_for_self'; // ✅ Pour la suppression locale
   
   // --- Flux de données (BehaviorSubjects) ---
-  private messages = new BehaviorSubject<Message[]>([]);
+  private messages = new BehaviorSubject<BackendMessage[]>([]); // ✅ Stocke les données brutes du backend
   private conversations = new BehaviorSubject<Conversation[]>([]);
   
+  // --- Sujets pour les événements temps réel (simulés) ---
+  private userTypingSubject = new Subject<{ userId: string; pseudo: string; conversationId: string }>();
+  private userStoppedTypingSubject = new Subject<{ userId: string; conversationId: string }>();
+  private messagesReadSubject = new Subject<{ conversationId: string; userId: string; messageIds: string[] }>();
+
   // --- Clé de chiffrement utilisateur ---
   private userEncryptionKey: CryptoKey | null = null;
 
   // --- Constantes de temps (en millisecondes) ---
   private readonly EDIT_TIMEOUT = 30 * 60 * 1000; // 30 minutes
   private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000; // 2 heures
+
+  // --- Stockage local des messages supprimés "pour soi" ---
+  private deletedForSelfIds: Set<string> = new Set();
 
   constructor(
     private storageService: StorageService,
@@ -66,6 +77,8 @@ export class MessagingMockService extends MessagingService {
   private async init(): Promise<void> {
     await this.initializeEncryption();
     this.loadInitialData(); // Charge les données existantes
+    const deletedIds = this.storageService.getItem(this.deletedForSelfKey) || [];
+    this.deletedForSelfIds = new Set(deletedIds);
     if (!environment.production) {
       this.createInitialConversations(); // Crée les données de démo
     }
@@ -149,9 +162,10 @@ export class MessagingMockService extends MessagingService {
   async sendMessage(
     content: string, 
     conversationId: string, 
-    type: 'group' | 'private',
-    replyTo?: any
-  ): Promise<Message> {
+    type: 'group' | 'private',  
+    mentions: Mention[] = [],
+    replyToId?: string
+  ): Promise<void> {  
     const user = this.userService.getCurrentUser();
     if (!user) throw new Error('Utilisateur non connecté');
     if (!this.userEncryptionKey) throw new Error('Clé de chiffrement non disponible');
@@ -162,40 +176,37 @@ export class MessagingMockService extends MessagingService {
         this.userEncryptionKey
       );
       
-      const newMessage: Message = {
+      const newMessage: BackendMessage = {
         id: generateMessageId(),
-        conversationId,
-        type,
-        fromUserId: user.id, // ✅ CORRECTION
-        fromUserName: user.pseudo,
-        fromUserAvatar: user.avatar_url ?? undefined, // ✅ CORRECTION
-        encryptedContent: encryptedData.encryptedContent,
-        encryptionKey: encryptedData.iv,
-        timestamp: new Date(),
-        isRead: false,
-        readBy: [user.id], // ✅ CORRECTION
-        isEdited: false,
-        isDeleted: false,
-        status: 'sent',
-        replyTo: replyTo
+        conversation_id: conversationId,
+        user_id: user.id,
+        encrypted_content: encryptedData.encryptedContent,
+        iv: encryptedData.iv,
+        created_at: new Date().toISOString(),
+        updated_at: null,
+        is_edited: false,
+        is_deleted: false,
+        reply_to_id: replyToId || null,
+        mentions: mentions,
+        user: {
+          id: user.id,
+          pseudo: user.pseudo,
+          avatar_url: user.avatar_url || null
+        }
       };
 
       const updatedMessages = [...this.messages.value, newMessage];
       this.saveMessages(updatedMessages);
 
-      this.updateConversationLastMessage(conversationId, newMessage);
+      // Simule la mise à jour de la conversation
+      const frontendMessage = mapBackendMessageToFrontend(newMessage);
+      this.updateConversationLastMessage(conversationId, frontendMessage);
       this.simulateMessageDelivery(newMessage.id);
 
       console.log('🎭 [MOCK] Message envoyé:', { conversationId, type, from: user.pseudo });
 
-      return {
-        ...newMessage,
-        content: content // Retourne le contenu déchiffré pour l'affichage immédiat
-      };
-
     } catch (error) {
       console.error('❌ Erreur chiffrement message:', error);
-      throw new Error('Erreur lors du chiffrement du message');
     }
   }
 
@@ -204,33 +215,9 @@ export class MessagingMockService extends MessagingService {
     content: string, 
     conversationId: string, 
     type: 'group' | 'private',
-    replyTo?: any
-  ): Promise<Message> {
-    // Détecter les mentions dans le contenu
-    const { content: processedContent, mentions } = this.detectMentions(content);
-    
-    // Réutiliser la logique d'envoi standard
-    const message = await this.sendMessage(processedContent, conversationId, type, replyTo);
-    
-    // Mettre à jour le message avec les mentions si elles existent (simulé dans cet environnement local)
-    if (mentions.length > 0) {
-      const currentMessages = this.messages.value;
-      const messageIndex = currentMessages.findIndex(msg => msg.id === message.id);
-
-      if (messageIndex !== -1) {
-        const updatedMessage = {
-          ...currentMessages[messageIndex],
-          mentions: mentions
-        };
-        const updatedMessages = [...currentMessages];
-        updatedMessages[messageIndex] = updatedMessage;
-        this.saveMessages(updatedMessages);
-        
-        return { ...message, mentions }; // Retourne la version complète
-      }
-    }
-    
-    return message;
+    mentions: Mention[] = []
+  ): Promise<void> { 
+    return this.sendMessage(content, conversationId, type, mentions);
   }
 
   // 6. ✅ RÉPONDRE À UN MESSAGE
@@ -238,28 +225,12 @@ export class MessagingMockService extends MessagingService {
     content: string, 
     conversationId: string, 
     replyToMessageId: string,
-    type: 'group' | 'private'
-  ): Promise<Message> {
-    const originalMessage = this.messages.value.find(msg => msg.id === replyToMessageId);
-    if (!originalMessage) {
-      throw new Error('Message original non trouvé');
-    }
-
-    // Récupérer le contenu déchiffré du message original pour la réponse
-    const decryptedOriginal = (await this.decryptMessages([originalMessage]))[0];
-
-    // Préparer les données de réponse
-    const replyData = {
-      messageId: decryptedOriginal.id,
-      fromUserId: decryptedOriginal.fromUserId,
-      fromUserName: decryptedOriginal.fromUserName,
-      // Afficher un aperçu de 100 caractères du contenu déchiffré
-      content: decryptedOriginal.content?.substring(0, 100) + (decryptedOriginal.content && decryptedOriginal.content.length > 100 ? '...' : '') || 'Message',
-      isDeleted: decryptedOriginal.isDeleted
-    };
-
-    // Envoyer le message avec la référence de réponse
-    return await this.sendMessage(content, conversationId, type, replyData);
+    type: 'group' | 'private',  
+    mentions: Mention[] = []
+  ): Promise<void> {
+    // La logique de création de l'objet `replyTo` est dans le composant.
+    // Le service n'a besoin que de l'ID.
+    return await this.sendMessage(content, conversationId, type, mentions, replyToMessageId);
   }
 
   // =================================================================
@@ -267,7 +238,7 @@ export class MessagingMockService extends MessagingService {
   // =================================================================
 
   // 8. ✅ ÉDITER UN MESSAGE AVEC VÉRIFICATION DE TIMEOUT
-  async editMessage(messageId: string, newContent: string): Promise<Message> {
+  async editMessage(messageId: string, newContent: string): Promise<void> {
     const user = this.userService.getCurrentUser();
     if (!user || !this.userEncryptionKey) {
       throw new Error('Utilisateur non connecté ou clé manquante');
@@ -280,20 +251,20 @@ export class MessagingMockService extends MessagingService {
 
     const originalMessage = currentMessages[messageIndex];
     
-    if (originalMessage.fromUserId !== user.id) throw new Error('Vous ne pouvez modifier que vos propres messages'); // ✅ CORRECTION
-    if (new Date().getTime() - new Date(originalMessage.timestamp).getTime() > this.EDIT_TIMEOUT) throw new Error('Le délai de modification (30 minutes) est expiré');
+    if (originalMessage.user_id !== user.id) throw new Error('Vous ne pouvez modifier que vos propres messages');
+    if (new Date().getTime() - new Date(originalMessage.created_at).getTime() > this.EDIT_TIMEOUT) throw new Error('Le délai de modification (30 minutes) est expiré');
 
     const encryptedData: EncryptedData = await this.encryptionService.encryptAndSerialize(
       newContent, 
       this.userEncryptionKey
     );
 
-    const updatedMessage: Message = {
+    const updatedMessage: BackendMessage = {
       ...originalMessage,
-      encryptedContent: encryptedData.encryptedContent,
-      encryptionKey: encryptedData.iv,
-      isEdited: true,
-      editedAt: new Date()
+      encrypted_content: encryptedData.encryptedContent,
+      iv: encryptedData.iv,
+      is_edited: true,
+      updated_at: new Date().toISOString()
     };
 
     const updatedMessages = [...currentMessages];
@@ -301,15 +272,10 @@ export class MessagingMockService extends MessagingService {
     this.saveMessages(updatedMessages);
 
     console.log('🎭 [MOCK] Message édité:', { messageId, from: user.pseudo });
-
-    return {
-      ...updatedMessage,
-      content: newContent
-    };
   }
 
   // 9. ✅ SUPPRIMER UN MESSAGE AVEC VÉRIFICATION DE TIMEOUT
-  async deleteMessage(messageId: string): Promise<void> {
+  async deleteMessage(messageId: string, forEveryone: boolean): Promise<void> {
     const user = this.userService.getCurrentUser();
     if (!user) throw new Error('Utilisateur non connecté');
 
@@ -320,22 +286,31 @@ export class MessagingMockService extends MessagingService {
 
     const originalMessage = currentMessages[messageIndex];
     
-    if (originalMessage.fromUserId !== user.id) throw new Error('Vous ne pouvez supprimer que vos propres messages'); // ✅ CORRECTION
-    if (new Date().getTime() - new Date(originalMessage.timestamp).getTime() > this.DELETE_TIMEOUT) throw new Error('Le délai de suppression (2 heures) est expiré');
+    if (forEveryone) {
+      if (originalMessage.user_id !== user.id) throw new Error('Vous ne pouvez supprimer que vos propres messages');
+      if (new Date().getTime() - new Date(originalMessage.created_at).getTime() > this.DELETE_TIMEOUT) throw new Error('Le délai de suppression (2 heures) est expiré');
 
-    const updatedMessage: Message = {
-      ...originalMessage,
-      isDeleted: true,
-      deletedAt: new Date(),
-      encryptedContent: '', // Supprimer le contenu chiffré
-      content: ' Message supprimé'
-    };
+      const updatedMessage: BackendMessage = {
+        ...originalMessage,
+        is_deleted: true,
+        updated_at: new Date().toISOString(),
+        encrypted_content: null,
+        iv: null
+      };
 
-    const updatedMessages = [...currentMessages];
-    updatedMessages[messageIndex] = updatedMessage;
-    this.saveMessages(updatedMessages);
+      const updatedMessages = [...currentMessages];
+      updatedMessages[messageIndex] = updatedMessage;
+      this.saveMessages(updatedMessages);
 
-    console.log('🎭 [MOCK] Message supprimé:', { messageId, from: user.pseudo });
+      console.log('🎭 [MOCK] Message supprimé pour tous:', { messageId, from: user.pseudo });
+    } else {
+      // Suppression "pour soi"
+      this.deletedForSelfIds.add(messageId);
+      this.storageService.setItem(this.deletedForSelfKey, Array.from(this.deletedForSelfIds));
+      // Forcer la mise à jour du flux de messages pour que le filtre s'applique
+      this.messages.next(this.messages.value);
+      console.log('🎭 [MOCK] Message supprimé pour soi:', { messageId, from: user.pseudo });
+    }
   }
 
   // ✅ OBTENIR LES ACTIONS DISPONIBLES POUR UN MESSAGE
@@ -347,7 +322,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     actions.push({
       type: 'reply',
       label: 'Répondre',
-      icon: '↩',
+      icon: 'reply', // Nom de l'icône SVG
       condition: (msg, userId) => true
     });
   }
@@ -357,7 +332,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     actions.push({
       type: 'copy',
       label: 'Copier',
-      icon: '🗐',
+      icon: 'copy',
       condition: (msg, userId) => true
     });
   }
@@ -367,7 +342,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     actions.push({
       type: 'edit',
       label: 'Modifier',
-      icon: '🖋',
+      icon: 'edit',
       condition: (msg, userId) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.EDIT_TIMEOUT
     });
   }
@@ -377,10 +352,19 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     actions.push({
       type: 'delete',
       label: 'Supprimer',
-      icon: '🗑️',
+      icon: 'delete',
       condition: (msg, userId) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.DELETE_TIMEOUT
     });
   }
+
+  // Action Supprimer pour soi
+  actions.push({
+    type: 'delete-for-self',
+    label: 'Supprimer pour moi',
+      icon: 'delete', // Using same icon for now, can be different
+    condition: (msg, userId) => true // Toujours possible
+  });
+
 
   // CORRECTION : Passer les deux paramètres à la condition
   return actions.filter(action => action.condition(message, currentUserId));
@@ -404,13 +388,16 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   // 12. ✅ RÉCUPÉRATION DES MESSAGES (Observable, déchiffrement inclus)
   getMessages(conversationId: string): Observable<Message[]> {
     return this.messages.asObservable().pipe(
-      // 1. Filtrer et trier
+      // 1. Mapper les messages backend en messages frontend
+      map(backendMessages => backendMessages.map(mapBackendMessageToFrontend)),
+      // 2. Filtrer par conversation et ceux supprimés "pour soi"
       map(messages => 
         messages
           .filter(msg => msg.conversationId === conversationId)
+          .filter(msg => !this.deletedForSelfIds.has(msg.id)) // ✅ Filtre les messages supprimés localement
           .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
       ),
-      // 2. Déchiffrer
+      // 3. Déchiffrer
       switchMap(async (messages) => {
         return await this.decryptMessages(messages);
       })
@@ -418,29 +405,31 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   }
 
   // 13. ✅ DÉCHIFFREMENT EFFECTIF DES MESSAGES
-  private async decryptMessages(messages: Message[]): Promise<Message[]> {
+  private async decryptMessages(messages: (Message | BackendMessage)[]): Promise<Message[]> {
     if (!this.userEncryptionKey) {
       // Si la clé n'est pas prête, retourner un message d'attente
       console.warn('⚠️ Clé de chiffrement non disponible');
       return messages.map(msg => ({
-        ...msg,
+        ...mapBackendMessageToFrontend(msg as BackendMessage),
         content: 'Veuillez patienter le chargement de ce message'
       }));
     }
 
     const decryptionPromises = messages.map(async (message) => {
+      const frontendMessage = ('fromUserId' in message) ? message as Message : mapBackendMessageToFrontend(message as BackendMessage);
+
       // Cas du message supprimé
-      if (message.isDeleted) {
-        return { ...message, content: ' Message supprimé' };
+      if (frontendMessage.isDeleted) {
+        return { ...frontendMessage, content: ' Message supprimé' };
       }
       // Vérification des données de chiffrement
-      if (!message.encryptionKey || !message.encryptedContent) {
-        return { ...message, content: '🔒 Données de chiffrement incomplètes' };
+      if (!frontendMessage.encryptionKey || !frontendMessage.encryptedContent) {
+        return { ...frontendMessage, content: '🔒 Données de chiffrement incomplètes' };
       }
 
       const encryptedData: EncryptedData = {
-        encryptedContent: message.encryptedContent,
-        iv: message.encryptionKey
+        encryptedContent: frontendMessage.encryptedContent,
+        iv: frontendMessage.encryptionKey
       };
 
       try {
@@ -448,11 +437,11 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
           encryptedData, 
           this.userEncryptionKey!
         );
-        return { ...message, content: decryptedContent };
+        return { ...frontendMessage, content: decryptedContent };
         
       } catch (error) {
-        console.error(`❌ Erreur déchiffrement message ${message.id}:`, error);
-        return { ...message, content: '🔒 Message non déchiffrable' };
+        console.error(`❌ Erreur déchiffrement message ${frontendMessage.id}:`, error);
+        return { ...frontendMessage, content: '🔒 Message non déchiffrable' };
       }
     });
 
@@ -490,15 +479,16 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   // 16. ✅ CRÉATION DU MESSAGE DE BIENVENUE
   private async createWelcomeMessage(conversationId: string): Promise<void> {
     const existingMessages = this.messages.value;
-    const hasWelcomeMessage = existingMessages.some(msg => 
-      msg.conversationId === conversationId && msg.content?.includes('Bienvenue')
+    const hasMessageInConversation = existingMessages.some(
+      msg => msg.conversation_id === conversationId
     );
 
-    if (!hasWelcomeMessage) {
+    if (!hasMessageInConversation) {
       await this.sendMessage(
         `👋 Bienvenue dans le groupe de votre communauté ${this.userService.getCurrentUser()?.community} ! Ici, vous pouvez échanger avec les autres membres.`,
         conversationId,
-        'group'
+        'group',
+        []
       );
     }
   }
@@ -534,20 +524,24 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       const index = current.findIndex(msg => msg.id === id);
       
       if (index !== -1) {
-        const updatedMessages = [...current];
-        updatedMessages[index] = {
-          ...updatedMessages[index],
-          status: newStatus,
-          isRead: isRead
-        };
-        this.saveMessages(updatedMessages);
-      }
+        // Simule l'événement de lecture
+        if (newStatus === 'read') {
+          this.messagesReadSubject.next({
+            conversationId: current[index].conversation_id,
+            userId: 'mock_user_id', // Simule un autre utilisateur qui lit
+            messageIds: [id]
+          });
+        } else {
+          // Pour 'sent' et 'delivered', on pourrait aussi émettre des événements
+          // mais c'est moins crucial pour l'UI que la lecture.
+        }
+      } 
     };
 
     setTimeout(() => {
       updateStatus(messageId, 'delivered');
       setTimeout(() => {
-        updateStatus(messageId, 'read', true);
+        updateStatus(messageId, 'read');
       }, 2000);
     }, 1000);
   }
@@ -577,7 +571,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   // 20. ✅ METTRE À JOUR LES PARTICIPANTS (pour s'assurer que l'utilisateur est bien là)
   private updateConversationParticipants(conversationId: string): void {
     const user = this.userService.getCurrentUser();
-    if (!user) return;
+    if (!user) return; 
 
     const currentConversations = this.conversations.value;
     const updatedConversations = currentConversations.map(conv => {
@@ -646,7 +640,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   }
 
   // 22. ✅ SAUVEGARDE DES MESSAGES (Met à jour le LocalStorage et le Subject)
-  private saveMessages(messages: Message[]): void {
+  private saveMessages(messages: BackendMessage[]): void {
     this.storageService.setItem(this.messagesKey, messages);
     this.messages.next(messages);
   }
@@ -672,4 +666,50 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       userCommunity: user?.community || 'Non connecté'
     };
   }
+
+  // =================================================================
+  // ⚡️ MÉTHODES TEMPS RÉEL (MOCK)
+  // =================================================================
+
+  joinConversation(conversationId: string): void {
+    console.log(`[MOCK] Rejoint la conversation ${conversationId}`);
+  }
+
+  leaveConversation(conversationId: string): void {
+    console.log(`[MOCK] Quitté la conversation ${conversationId}`);
+  }
+
+  getRealTimeMessages(): Observable<Message> {
+    // Simule la réception d'un nouveau message en le mappant
+    return this.messages.pipe(
+      map(messages => messages[messages.length - 1]), // Prend le dernier
+      switchMap(async backendMessage => mapBackendMessageToFrontend(backendMessage as BackendMessage))
+    );
+  }
+
+  emitStartTyping(conversationId: string): void {
+    const user = this.userService.getCurrentUser();
+    if (user) {
+      console.log(`[MOCK] Événement "startTyping" émis pour ${conversationId}`);
+      this.userTypingSubject.next({ userId: user.id, pseudo: user.pseudo, conversationId });
+    }
+  }
+
+  emitStopTyping(conversationId: string): void {
+    const user = this.userService.getCurrentUser();
+    if (user) {
+      console.log(`[MOCK] Événement "stopTyping" émis pour ${conversationId}`);
+      this.userStoppedTypingSubject.next({ userId: user.id, conversationId });
+    }
+  }
+
+  onUserTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> { return this.userTypingSubject.asObservable(); }
+  onUserStoppedTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> {
+    // This needs to be adapted to match the base class if it expects a pseudo
+    return this.userStoppedTypingSubject.pipe(map(data => ({
+      ...data,
+      pseudo: this.userService.getCurrentUser()?.pseudo || 'unknown'
+    })));
+  }
+  onMessagesRead(): Observable<{ conversationId: string; userId: string; messageIds: string[] }> { return this.messagesReadSubject.asObservable(); }
 }

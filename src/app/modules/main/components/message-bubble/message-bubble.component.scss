@@ -1,0 +1,317 @@
+.bel-message-wrapper {
+  display: flex;
+
+  &.my-message {
+    justify-content: flex-end;
+    .bel-message-bubble {
+      background: var(--bel-primary);
+      color: var(--bel-white);
+      border-bottom-right-radius: 4px;
+
+      .bel-message-time {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .bel-message-sender {
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .bel-reply-indicator {
+        background: rgba(255, 255, 255, 0.1);
+        border-left-color: rgba(255, 255, 255, 0.5);
+        .bel-reply-content {
+          strong {
+            color: rgba(255, 255, 255, 0.9);
+          }
+          p {
+            color: rgba(255, 255, 255, 0.7);
+          }
+        }
+      }
+    }
+  }
+
+  &.other-message {
+    justify-content: flex-start;
+    .bel-message-bubble {
+      background: var(--bel-secondary-light);
+      color: var(--bel-light);
+      border-bottom-left-radius: 4px;
+
+      .bel-message-time {
+        color: var(--bel-gray);
+      }
+      .bel-reply-indicator {
+        background: rgba(0, 0, 0, 0.05);
+        border-left-color: var(--bel-secondary);
+        .bel-reply-content {
+          strong {
+            color: var(--bel-secondary-dark);
+          }
+          p {
+            color: var(--bel-gray);
+          }
+        }
+      }
+    }
+  }
+
+  // Animation de surbrillance
+  &.bel-message-highlight {
+    animation: highlightMessage 2s ease;
+  }
+}
+
+@keyframes highlightMessage {
+  0% {
+    background: transparent;
+  }
+  10% {
+    background: rgba(242, 169, 0, 0.1);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.bel-message-bubble {
+  width: 85%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: messageAppear 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// INDICATEUR DE RÉPONSE ==============================
+.bel-reply-indicator {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: -8px -12px 8px -12px;
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-left: 3px solid;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.bel-reply-line {
+  width: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.6;
+}
+
+.bel-reply-content {
+  flex: 1;
+
+  strong {
+    font-size: 12px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+    font-family: var(--bel-font-body);
+  }
+  p {
+    margin: 0;
+    font-size: 11px;
+    opacity: 0.8;
+    line-height: 1.3;
+    font-family: var(--bel-font-body);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
+
+// EN-TÊTE DU MESSAGE ================================
+.bel-message-header {
+  margin-bottom: 4px;
+}
+
+.bel-message-sender-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bel-user-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.bel-user-avatar-placeholder {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bel-primary);
+  color: var(--bel-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.bel-message-sender {
+  font-size: 13px;
+  color: var(--bel-secondary);
+  font-weight: 600;
+  font-family: var(--bel-font-body);
+}
+
+// CONTENU DU MESSAGE ================================
+.bel-message-content {
+  font-size: 15px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-family: var(--bel-font-body);
+}
+
+// MENTIONS DANS LE MESSAGE ==========================
+.mention-highlight {
+  background: rgba(242, 169, 0, 0.2);
+  color: var(--bel-primary-dark);
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin: 0 1px;
+}
+
+// PIED DU MESSAGE ===================================
+.bel-message-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.bel-message-time {
+  font-size: 11px;
+  opacity: 0.8;
+  font-family: var(--bel-font-body);
+}
+
+.bel-message-status {
+  display: flex;
+  align-items: center;
+  color: var(--bel-gray);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  &.status-read {
+    color: var(--bel-secondary);
+  }
+  &.status-delivered {
+    color: var(--bel-primary);
+  }
+}
+
+.sending-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--bel-white);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 1px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// MESSAGE SUPPRIMÉ ==================================
+.bel-deleted-message {
+  color: var(--bel-gray);
+  font-style: italic;
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.bel-edited-badge {
+  font-size: 11px;
+  color: var(--bel-gray);
+  font-style: italic;
+  margin-left: 4px;
+  font-family: var(--bel-font-body);
+}
+
+// ÉDITION DE MESSAGE ================================
+.bel-message-edit {
+  .bel-edit-input {
+    width: 100%;
+    border: 2px solid var(--bel-primary);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    background: var(--bel-white);
+    color: var(--bel-dark);
+    &:focus {
+      outline: none;
+      border-color: var(--bel-primary-dark);
+    }
+  }
+  .bel-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: flex-end;
+  }
+}
+
+.bel-btn-cancel,
+.bel-btn-save {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--bel-font-body);
+  transition: all 0.2s ease;
+}
+.bel-btn-cancel {
+  background: var(--bel-light);
+  color: var(--bel-gray);
+  &:hover {
+    background: var(--bel-border);
+  }
+}
+.bel-btn-save {
+  background: var(--bel-secondary);
+  color: var(--bel-white);
+  &:hover {
+    background: var(--bel-secondary-dark);
+  }
+}

@@ -39,6 +39,6 @@ export class CreatorGuard implements CanActivate {
     
     return creatorEmails.includes(currentUser.email) || 
            currentUser.userId?.includes('creator') ||
-           window.location.hostname === 'localhost'; // Autoriser en développement
+           window.location.hostname === 'localhost'; 
   }
 }

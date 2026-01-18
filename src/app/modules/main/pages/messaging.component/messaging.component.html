@@ -53,91 +53,27 @@
           } @else {
             <div class="bel-messages-list">
               @for (message of messages$ | async; track message.id) {
-                <div 
-                  [id]="'message-' + message.id"
-                  class="bel-message-wrapper"
-                  [class.my-message]="isMyMessage(message)"
-                  [class.other-message]="!isMyMessage(message)"
-                  (contextmenu)="showContextMenu($event, message)"
-                  (touchstart)="onTouchStart($event, message)"
-                  (touchend)="onTouchEnd($event, message)">
-                  
-                  <div class="bel-message-bubble">
-                    
-                    <!-- INDICATEUR DE RÉPONSE -->
-                    @if (message.replyTo) {
-                      <div class="bel-reply-indicator" 
-                           (click)="scrollToMessage(message.replyTo!.messageId)">
-                        <div class="bel-reply-line"></div>
-                        <div class="bel-reply-content">
-                          <strong>{{ message.replyTo.fromUserName }}</strong>
-                          <p>{{ getReplyPreview(message) }}</p>
-                        </div>
-                      </div>
-                    }
-
-                    <!-- MODE ÉDITION -->
-                    @if (editingMessageId === message.id) {
-                      <div class="bel-message-edit">
-                        <textarea 
-                          class="bel-edit-input"
-                          [value]="editMessageContent"
-                          (input)="editMessageContent = ($any($event.target).value)"
-                          (keydown)="onEditKeyPress($event, message)"
-                          rows="3"
-                          placeholder="Modifier votre message...">
-                        </textarea>
-                        <div class="bel-edit-actions">
-                          <button class="bel-btn-cancel" (click)="cancelEditing()">Annuler</button>
-                          <button class="bel-btn-save" (click)="saveEditedMessage()">Enregistrer</button>
-                        </div>
-                      </div>
-                    }
-                    
-                    <!-- AFFICHAGE NORMAL -->
-                    @if (editingMessageId !== message.id) {
-                      @if (!isMyMessage(message) && !message.isDeleted) {
-                        <div class="bel-message-header">
-                          <div class="bel-message-sender-info">
-                            @if (message.fromUserAvatar) {
-                              <img [src]="message.fromUserAvatar" class="bel-user-avatar" alt="Avatar">
-                            } @else {
-                              <div class="bel-user-avatar-placeholder">
-                                {{ message.fromUserName.charAt(0).toUpperCase() }}
-                              </div>
-                            }
-                            <strong class="bel-message-sender">{{ message.fromUserName }}</strong>
-                          </div>
-                        </div>
-                      }
-                      <div class="bel-message-content">
-                        @if (message.isDeleted) {
-                          <span class="bel-deleted-message">Message supprimé</span>
-                        } @else {
-                          <span [innerHTML]="formatMessageWithMentions(message)"></span>
-                          
-                          @if (message.isEdited) {
-                            <span class="bel-edited-badge">(modifié)</span>
-                          }
-                        }
-                      </div>
-
-                      <div class="bel-message-footer">
-                        <span class="bel-message-time">
-                          {{ formatMessageTime(message.timestamp) }}
-                        </span>
-                        
-                        @if (isMyMessage(message) && !message.isDeleted) {
-                          <span class="bel-message-status" [title]="message.status">
-                            {{ getMessageStatus(message) }}
-                          </span>
-                        }
-                      </div>
-                    }
-                  </div>
-                </div>
+                <app-message-bubble
+                  [message]="message"
+                  [currentUser]="currentUser"
+                  [editingMessageId]="editingMessageId"
+                  [editMessageContent]="editMessageContent"
+                  (contextMenuRequest)="showContextMenu($event.event, $event.message)"
+                  (scrollToRequest)="scrollToMessage($event)"
+                  (editKeydown)="onEditKeyPress($event.event, $event.message)"
+                  (editInput)="editMessageContent = $event"
+                  (cancelEditRequest)="cancelEditing()"
+                  (saveEditRequest)="saveEditedMessage()">
+                </app-message-bubble>
               }
             </div>
+          }
+        </div>
+
+        <!-- ✅ INDICATEUR "EN TRAIN D'ÉCRIRE" -->
+        <div class="bel-typing-indicator-container">
+          @if (typingUsers.size > 0) {
+            <span class="bel-typing-indicator">{{ Array.from(typingUsers.values())[0].pseudo }} est en train d'écrire...</span>
           }
         </div>
 
@@ -164,7 +100,9 @@
               (click)="toggleEmojiPicker($event)"
               type="button"
               title="Émojis">
-              😊
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2.5-6.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm5 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm-2.5-4c-1.76 0-3.22 1.03-3.88 2.5h7.76c-.66-1.47-2.12-2.5-3.88-2.5z"/>
+              </svg>
             </button>
             
             <textarea
@@ -182,7 +120,8 @@
               (click)="replyingTo ? sendMessageWithReply() : sendMessage()"
               [disabled]="!newMessage.trim() || isSending"
               [class.sending]="isSending">
-              {{ isSending ? '⏳' : '➤' }}
+              <div *ngIf="isSending" class="sending-spinner"></div>
+              <svg *ngIf="!isSending" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
             </button>
           </div>
 
@@ -190,16 +129,17 @@
           @if (showEmojiPicker) {
             <div class="bel-emoji-picker">
               <div class="bel-emoji-grid">
-                <span *ngFor="let emoji of ['😀', '😂', '🥰', '😎', '🤔', '👏', '🎉', '❤️', '🔥', '👍', '😢', '😡', '🤯', '👀', '🙏', '💯', '✨', '🌟', '💪', '🎯']"
+                @for (emoji of ['😀', '😂', '🥰', '😎', '🤔', '👏', '🎉', '❤️', '🔥', '👍', '😢', '😡', '🤯', '👀', '🙏', '💯', '✨', '🌟', '💪', '🎯']; track emoji) {
+                  <span
                       class="bel-emoji"
                       (click)="addEmoji(emoji)">
-                  {{ emoji }}
-                </span>
-              </div>
+                    {{ emoji }}
+                  </span>
+                }
+              </div>  
             </div>
           }
         </footer>
-
       </div>
     }
 
@@ -229,11 +169,16 @@
          [style.top.px]="contextMenu.y">
       @for (action of contextMenu.actions; track action.type) {
         <button class="bel-context-menu-item" (click)="executeContextAction(action)">
-          <span class="bel-context-icon">{{ action.icon }}</span>
+          <span class="bel-context-icon">
+            <!-- Icônes SVG pour le menu contextuel -->
+            <svg *ngIf="action.icon === 'reply'" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+            <svg *ngIf="action.icon === 'edit'" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <svg *ngIf="action.icon === 'copy'" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            <svg *ngIf="action.icon === 'delete' || action.icon === 'delete_outline'" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          </span>
           <span class="bel-context-label">{{ action.label }}</span>
         </button>
       }
     </div>
   }
-
 </div>

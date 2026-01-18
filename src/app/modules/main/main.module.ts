@@ -18,6 +18,7 @@ import { ProfileComponent } from './pages/profile.component/profile.component';
 import { AdminRequestComponent } from './pages/admin-request.component/admin-request.component';
 import { CreatePostModalComponent } from './pages/create-post-modal.component/create-post-modal.component';
 import { provideHttpClient } from '@angular/common/http';
+import { MessageBubbleComponent } from './components/message-bubble/message-bubble.component';
 
 
 @NgModule({
@@ -30,6 +31,7 @@ import { provideHttpClient } from '@angular/common/http';
     ProfileComponent,
     AdminRequestComponent,
     CreatePostModalComponent,
+    MessageBubbleComponent
   ],
   imports: [
     CommonModule,

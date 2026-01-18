@@ -13,7 +13,11 @@ import { Message, Conversation, MessageAction } from '../models/message.model';
 import { MessagingService } from './messaging.service';
 import { EncryptionService } from './encryption.service';
 import { StorageService } from './storage.service';
-@Injectable()
+import { SocketService } from './socket.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class MessagingHttpService extends MessagingService {
   private apiUrl = `${environment.apiUrl}/messaging`;
   private userEncryptionKey: CryptoKey | null = null; 
@@ -23,7 +27,8 @@ export class MessagingHttpService extends MessagingService {
   constructor(
     private http: HttpClient,
     private encryptionService: EncryptionService,  
-    private storageService: StorageService  
+    private storageService: StorageService,
+    private socketService: SocketService
   ) {
     super();
     console.log('⚡️ MessagingHttpService initialisé (mode production)');
@@ -90,48 +95,68 @@ export class MessagingHttpService extends MessagingService {
     );
   }
 
-  async sendMessage(content: string, conversationId: string, type: 'group' | 'private', replyTo?: any): Promise<Message> {
+  async sendMessage(
+    content: string,
+    conversationId: string,
+    type: 'group' | 'private',
+    mentions: import("../models/message.model").Mention[],
+    replyToId?: string
+  ): Promise<void> {
     if (!this.userEncryptionKey) {
       throw new Error('Clé de chiffrement non disponible pour l\'envoi.');
     }
-
+  
     const encryptedData = await this.encryptionService.encryptAndSerialize(
       content,
       this.userEncryptionKey
     );
-
-    const response = await this.http.post<{ message: Message }>(
+  
+    // Le backend gère la diffusion via WebSocket, donc la réponse HTTP est moins critique.
+    await this.http.post(
       `${this.apiUrl}/conversations/${conversationId}/messages`,
       { 
         encryptedContent: encryptedData.encryptedContent,
         iv: encryptedData.iv,
-        replyToId: replyTo?.messageId || null
+        replyToId: replyToId || null,
+        mentions: mentions
       }
     ).toPromise();
+  }
 
-    if (!response?.message) {
-      throw new Error("L'envoi du message a échoué.");
+  async sendMessageWithMentions(
+    content: string,
+    conversationId: string,
+    type: 'group' | 'private',
+    mentions: import("../models/message.model").Mention[]
+  ): Promise<void> {
+    return this.sendMessage(content, conversationId, type, mentions);
+  }
+
+  async replyToMessage(
+    content: string,
+    conversationId: string,
+    replyToMessageId: string,
+    type: 'group' | 'private',
+    mentions: import("../models/message.model").Mention[]
+  ): Promise<void> {
+    return this.sendMessage(content, conversationId, type, mentions, replyToMessageId);
+  }
+
+  async editMessage(messageId: string, newContent: string): Promise<void> {
+    if (!this.userEncryptionKey) throw new Error('Clé de chiffrement non disponible.');
+    const encryptedData = await this.encryptionService.encryptAndSerialize(newContent, this.userEncryptionKey);
+    await this.http.put(`${this.apiUrl}/messages/${messageId}`, {
+      encryptedContent: encryptedData.encryptedContent,
+      iv: encryptedData.iv
+    }).toPromise();
+  }
+
+  async deleteMessage(messageId: string, forEveryone: boolean): Promise<void> {
+    if (forEveryone) {
+      await this.http.delete(`${this.apiUrl}/messages/${messageId}`).toPromise();
+    } else {
+      console.warn('[HTTP] La suppression "pour soi" est une opération locale et ne nécessite pas d\'appel API.');
     }
-    return response.message;
-  }
-
-  async sendMessageWithMentions(content: string, conversationId: string, type: 'group' | 'private', replyTo?: any): Promise<Message> {
-    return this.sendMessage(content, conversationId, type, replyTo);
-  }
-
-  async replyToMessage(content: string, conversationId: string, replyToMessageId: string, type: 'group' | 'private'): Promise<Message> {
-    console.warn('MessagingHttpService.replyToMessage() non implémenté.');
-    throw new Error('Non implémenté');
-  }
-
-  async editMessage(messageId: string, newContent: string): Promise<Message> {
-    console.warn('MessagingHttpService.editMessage() non implémenté.');
-    throw new Error('Non implémenté');
-  }
-
-  async deleteMessage(messageId: string): Promise<void> {
-    console.warn('MessagingHttpService.deleteMessage() non implémenté.');
-    return Promise.reject('Non implémenté');
   }
   getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     console.warn('[MessagingHttpService] getMessageActions() non implémenté.');
@@ -150,5 +175,44 @@ export class MessagingHttpService extends MessagingService {
   getStats(): any {
     console.warn('[MessagingHttpService] getStats() non implémenté.');
     return {};
-  } 
+  }
+
+  // =================================================================
+  // ⚡️ MÉTHODES TEMPS RÉEL (via Socket.IO)
+  // =================================================================
+
+  joinConversation(conversationId: string): void {
+    this.socketService.joinConversation(conversationId);
+  }
+
+  leaveConversation(conversationId: string): void {
+    this.socketService.leaveConversation(conversationId);
+  }
+
+  getRealTimeMessages(): Observable<Message> {
+    return this.socketService.onNewMessage().pipe(
+      switchMap(async (message: Message) => {
+        if (!this.userEncryptionKey) {
+          return { ...message, content: 'Déchiffrement en attente...' };
+        }
+        if (message.isDeleted || !message.encryptedContent || !message.encryptionKey) {
+          return { ...message, content: message.isDeleted ? 'Message supprimé' : '🔒 Message non déchiffrable' };
+        }
+        const decryptedContent = await this.encryptionService.deserializeAndDecrypt(
+          { iv: message.encryptionKey, encryptedContent: message.encryptedContent },
+          this.userEncryptionKey
+        );
+        return { ...message, content: decryptedContent };
+      })
+    );
+  }
+
+  emitStartTyping(conversationId: string): void { this.socketService.emitStartTyping(conversationId); }
+  emitStopTyping(conversationId: string): void { this.socketService.emitStopTyping(conversationId); }
+  onUserTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> { return this.socketService.onUserTyping(); }
+  onUserStoppedTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> { return this.socketService.onUserStoppedTyping(); }
+
+  onMessagesRead(): Observable<{ conversationId: string; userId: string; messageIds: string[]; }> {
+    return this.socketService.onMessagesRead();
+  }
 }

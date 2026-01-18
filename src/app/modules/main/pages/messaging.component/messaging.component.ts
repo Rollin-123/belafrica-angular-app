@@ -41,6 +41,12 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     actions: [] as MessageAction[]
   };
 
+  // ✅ Indicateur "en train d'écrire"
+  typingUsers = new Map<string, { pseudo: string, timeout: any }>();
+  isTyping = false;
+  private typingTimeout: any;
+  readonly TYPING_TIMER_LENGTH = 3000; // 3 secondes
+
   // Gestion du touch pour mobile
   private touchStart = {
     time: 0,
@@ -51,6 +57,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   // Gestion des @mentions
   currentMentionQuery: string = '';
   mentionCandidates: any[] = [];
+  public Array = Array;
   mentionStartPosition: number = -1;
 
   // Observables
@@ -66,7 +73,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private messagingService: MessagingService,
     private userService: UserService,
-    private sanitizer: DomSanitizer // ✅ Injection pour la sécurité
+    private sanitizer: DomSanitizer  
   ) {
     const user = this.userService.getCurrentUser();
     this.currentUser = user;
@@ -109,6 +116,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscription.add(
       this.messages$.subscribe(messages => {
         this.currentMessages = messages;
+        this.updateReadStatus(messages);
       })
     );
   }
@@ -119,6 +127,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    // Quitter la conversation pour arrêter les écouteurs
   }
 
   @HostListener('document:click')
@@ -153,12 +162,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // Détecter les mentions avant l'envoi
-      const mentions = this.detectMentions(messageContent);
+      const mentions = this.detectMentions(messageContent, conversation.id);
 
       await this.messagingService.sendMessage(
         messageContent,
         conversation.id,
-        'group'
+        'group',
+        mentions
       );
 
       this.newMessage = '';
@@ -176,6 +186,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+
   // ✅ ENVOI DE MESSAGE AVEC RÉPONSE
   async sendMessageWithReply(): Promise<void> {
     if (!this.newMessage.trim() || this.isSending || !this.replyingTo) return;
@@ -189,11 +200,15 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
         throw new Error('Conversation de groupe non trouvée');
       }
 
+      // Détecter les mentions avant l'envoi
+      const mentions = this.detectMentions(messageContent, conversation.id);
+
       await this.messagingService.replyToMessage(
         messageContent,
         conversation.id,
-        this.replyingTo.id,
-        'group'
+        this.replyingTo.id, 
+        'group',
+        mentions
       );
 
       this.newMessage = '';
@@ -214,6 +229,12 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ✅ GESTION DES TOUCHES AVEC @MENTIONS
   onKeyPress(event: KeyboardEvent): void {
+    // Gestion de l'indicateur "en train d'écrire"
+    if (!this.isTyping) {
+      this.isTyping = true;
+      // this.messagingService.emitStartTyping(this.activeConversationId);
+    }
+    clearTimeout(this.typingTimeout);
     // Gestion des @mentions
     if (event.key === '@') {
       this.handleMentionStart();
@@ -243,6 +264,11 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   onMessageInput(event: Event): void {
     const input = event.target as HTMLTextAreaElement;
     this.newMessage = input.value;
+
+    this.typingTimeout = setTimeout(() => {
+      this.isTyping = false;
+      // this.messagingService.emitStopTyping(this.activeConversationId);
+    }, this.TYPING_TIMER_LENGTH);
     
     // Vérifier si on est en train de taper une mention
     if (this.showMentionsList) {
@@ -313,17 +339,17 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ✅ DÉTECTER LES MENTIONS DANS LE TEXTE
-  detectMentions(text: string): Mention[] {
+  detectMentions(text: string, conversationId: string): Mention[] {
     const mentions: Mention[] = [];
     const mentionRegex = /@(\w+)/g;
     let match;
 
     while ((match = mentionRegex.exec(text)) !== null) {
       const userName = match[1];
-      const participant = this.conversationParticipants.find(p => 
-        p.pseudo === userName
+      const participant = this.conversationParticipants.find(p =>
+        p.users.pseudo === userName // ✅ Correction: la structure est conversation_participants -> users -> pseudo
       );
-      
+
       if (participant) {
         mentions.push({
           userId: participant.userId, // ✅ CORRECTION: Utiliser userId
@@ -367,25 +393,6 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     return message.fromUserId === user?.id;
   }
 
-  // ✅ FORMATAGE HEURE
-  formatMessageTime(timestamp: Date): string {
-    return new Date(timestamp).toLocaleTimeString('fr-FR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  }
-
-  // ✅ STATUT DU MESSAGE
-  getMessageStatus(message: Message): string {
-    switch (message.status) {
-      case 'sending': return '⏳';
-      case 'sent': return '✓';
-      case 'delivered': return '✓✓';
-      case 'read': return '👁️';
-      default: return '✓';
-    }
-  }
-
   // ✅ VÉRIFICATIONS ÉDITION/SUPPRESSION
   canEditMessage(message: Message): boolean {
     if (message.isDeleted || !this.isMyMessage(message)) {
@@ -404,6 +411,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const messageTime = new Date(message.timestamp).getTime();
     return (now - messageTime) <= this.DELETE_TIMEOUT;
   }
+
 
   // ✅ TROUVER UN MESSAGE PAR ID
   private findMessageById(messageId: string): Message | undefined {
@@ -442,25 +450,31 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  async deleteMessage(messageId: string): Promise<void> {
+  async deleteMessage(messageId: string, forEveryone: boolean): Promise<void> {
     try {
       const message = this.findMessageById(messageId);
-      if (!message) {
-        alert('Message non trouvé');
-        return;
+      if (!message) return alert('Message non trouvé');
+
+      const confirmationText = forEveryone 
+        ? 'Êtes-vous sûr de vouloir supprimer ce message pour tout le monde ?'
+        : 'Supprimer ce message uniquement pour vous ?';
+
+      if (forEveryone) {
+        if (!this.canDeleteMessage(message)) {
+          return alert('Le délai de suppression (2 heures) est expiré');
+        }
       }
 
-      if (!this.canDeleteMessage(message)) {
-        alert('Le délai de suppression (2 heures) est expiré');
-        return;
-      }
+      if (!confirm(confirmationText)) return;
 
-      if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) return;
+      await this.messagingService.deleteMessage(messageId, forEveryone);
 
-      await this.messagingService.deleteMessage(messageId);
     } catch (error: any) {
       console.error('❌ Erreur suppression message:', error);
       alert(error.message || 'Erreur lors de la suppression du message');
+    }
+    finally {
+      this.closeContextMenu();
     }
   }
 
@@ -483,41 +497,6 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
-  // ✅ GESTION TOUCH MOBILE
-  onTouchStart(event: TouchEvent, message: Message): void {
-    this.touchStart = {
-      time: Date.now(),
-      x: event.touches[0].clientX,
-      y: event.touches[0].clientY
-    };
-  }
-
-  onTouchEnd(event: TouchEvent, message: Message): void {
-    const touchEnd = {
-      time: Date.now(),
-      x: event.changedTouches[0].clientX,
-      y: event.changedTouches[0].clientY
-    };
-
-    // Vérifier si c'est un tap long (plus de 500ms)
-    const isLongPress = (touchEnd.time - this.touchStart.time) > 500;
-    // Vérifier si le mouvement est faible (pas un swipe)
-    const isStationary = 
-      Math.abs(touchEnd.x - this.touchStart.x) < 10 && 
-      Math.abs(touchEnd.y - this.touchStart.y) < 10;
-
-    if (isLongPress && isStationary) {
-      event.preventDefault();
-      this.showContextMenu(
-        new MouseEvent('contextmenu', {
-          clientX: touchEnd.x,
-          clientY: touchEnd.y
-        }),
-        message
-      );
-    }
-  }
-
   closeContextMenu(): void {
     this.contextMenu.visible = false;
   }
@@ -535,7 +514,10 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.startEditing(message);
         break;
       case 'delete':
-        this.deleteMessage(message.id);
+        this.deleteMessage(message.id, true); // Supprimer pour tout le monde
+        break;
+      case 'delete-for-self':
+        this.deleteMessage(message.id, false); // Supprimer pour soi
         break;
       case 'copy':
         this.copyMessage(message);
@@ -558,16 +540,6 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cancelReply(): void {
     this.replyingTo = null;
-  }
-
-  getReplyPreview(message: Message): string {
-    if (!message.replyTo) return '';
-    
-    if (message.replyTo.isDeleted) {
-      return '🗑️ Message supprimé';
-    }
-    
-    return message.replyTo.content || 'Message';
   }
 
   // ✅ FONCTIONNALITÉS DIVERSES
@@ -607,33 +579,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newMessage += emoji;
     this.showEmojiPicker = false;
   }
-  // ✅ FORMATER LES MESSAGES AVEC MENTIONS EN SURBRILLANCE
-formatMessageWithMentions(message: Message): string | SafeHtml {
-  if (!message.content || message.isDeleted) {
-    return message.content || '';
-  }
 
-  let formattedContent = message.content;
-  
-  // Trier les mentions par position décroissante pour éviter les problèmes d'index
-  const sortedMentions = [...(message.mentions || [])].sort((a, b) => b.position - a.position);
-
-  // Si pas de mentions, on retourne le contenu brut
-  if (sortedMentions.length === 0) {
-    return message.content;
+  // ✅ GESTION DES ACCUSÉS DE LECTURE
+  private updateReadStatus(messages: Message[]): void {
+    const unreadMessages = messages.filter(m => !this.isMyMessage(m) && m.status !== 'read');
+    if (unreadMessages.length > 0) {
+      const messageIds = unreadMessages.map(m => m.id);
+      const conversationId = unreadMessages[0].conversationId;
+    }
   }
-  
-  for (const mention of sortedMentions) {
-    const before = formattedContent.substring(0, mention.position);
-    const mentionText = formattedContent.substring(mention.position, mention.position + mention.length);
-    const after = formattedContent.substring(mention.position + mention.length);
-    
-    // On échappe les caractères HTML pour la sécurité avant de construire la chaîne
-    const safeMention = `<span class="mention-highlight">${mentionText}</span>`;
-    formattedContent = before + safeMention + after;
-  }
-  
-  // ✅ Utiliser DomSanitizer pour marquer le HTML comme sûr
-  return this.sanitizer.bypassSecurityTrustHtml(formattedContent);
-}
 }

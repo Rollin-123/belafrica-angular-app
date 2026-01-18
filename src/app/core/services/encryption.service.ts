@@ -63,7 +63,6 @@ async deserializeAndDecrypt(encryptedData: { iv: string; encryptedContent: strin
 
     const iv = Uint8Array.from(atob(encryptedData.iv), c => c.charCodeAt(0));
     const encrypted = Uint8Array.from(atob(encryptedData.encryptedContent), c => c.charCodeAt(0));
-    
     const decrypted = await window.crypto.subtle.decrypt(
       { name: 'AES-GCM', iv }, 
       key, 

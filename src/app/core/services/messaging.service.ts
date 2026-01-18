@@ -8,7 +8,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { 
   Message, 
-  Conversation, 
+  Conversation,
+  Mention, 
   MessageAction
 } from '../models/message.model';
 
@@ -26,26 +27,36 @@ export abstract class MessagingService {
   abstract getMessages(conversationId: string): Observable<Message[]>;
   abstract sendMessage(
     content: string, 
-    conversationId: string, 
+    conversationId: string,
     type: 'group' | 'private',
-    replyTo?: any
-  ): Promise<Message>;
+    mentions: Mention[],
+    replyToId?: string
+  ): Promise<void>;
   abstract sendMessageWithMentions(
     content: string, 
     conversationId: string, 
     type: 'group' | 'private',
-    replyTo?: any
-  ): Promise<Message>;
+    mentions: Mention[]
+  ): Promise<void>;
   abstract replyToMessage(
     content: string, 
     conversationId: string, 
     replyToMessageId: string,
-    type: 'group' | 'private'
-  ): Promise<Message>;
-  abstract editMessage(messageId: string, newContent: string): Promise<Message>;
-  abstract deleteMessage(messageId: string): Promise<void>;
+    type: 'group' | 'private',
+    mentions: Mention[]
+  ): Promise<void>;
+  abstract editMessage(messageId: string, newContent: string): Promise<void>;
+  abstract deleteMessage(messageId: string, forEveryone: boolean): Promise<void>;
   abstract getMessageActions(message: Message, currentUserId: string): MessageAction[];
   abstract getMentionSuggestions(searchTerm: string, conversationId: string): any[];
   abstract markAsRead(conversationId: string): void;
   abstract getStats(): any;
+  abstract joinConversation(conversationId: string): void;
+  abstract leaveConversation(conversationId: string): void;
+  abstract getRealTimeMessages(): Observable<Message>;
+  abstract emitStartTyping(conversationId: string): void;
+  abstract emitStopTyping(conversationId: string): void;
+  abstract onUserTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }>;
+  abstract onUserStoppedTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }>;
+  abstract onMessagesRead(): Observable<{ conversationId: string; userId: string; messageIds: string[] }>;
 }

@@ -4,6 +4,28 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 
+/**
+ * Représente la structure d'un message tel qu'il vient du backend (snake_case).
+ */
+export interface BackendMessage {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  encrypted_content: string | null;
+  iv: string | null;
+  created_at: string;
+  updated_at: string | null;
+  is_edited: boolean;
+  is_deleted: boolean;
+  reply_to_id: string | null;
+  mentions: Mention[] | null;
+  user: { // Objet utilisateur joint
+    id: string;
+    pseudo: string;
+    avatar_url: string | null;
+  };
+}
+
 export interface Message {
   id: string;
   conversationId: string;
@@ -13,23 +35,24 @@ export interface Message {
   fromUserAvatar?: string;
   
   // Chiffrement
-  encryptedContent: string;
+  encryptedContent: string | null;
   encryptionKey?: string;
   content?: string;
 
   // Métadonnées
   timestamp: Date;
-  isRead: boolean;
-  readBy: string[];
+  isRead?: boolean;
+  readBy?: string[];
   
   // Édition/Suppression
   isEdited: boolean;
   isDeleted: boolean;
+  deletedForSelf?: boolean; // Pour la suppression "pour soi"
   editedAt?: Date;
   deletedAt?: Date;
   
   // Statut d'envoi
-  status: 'sending' | 'sent' | 'delivered' | 'read';
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   
   // NOUVEAU : RÉPONSE À UN MESSAGE
   replyTo?: {
@@ -40,7 +63,6 @@ export interface Message {
     isDeleted?: boolean;
   };
   
-  // NOUVEAU : MENTIONS
   mentions?: Mention[];
 }
 
@@ -54,14 +76,13 @@ export interface Mention {
 
 // INTERFACE POUR LE MENU CONTEXTUEL
 export interface MessageAction {
-  type: 'reply' | 'edit' | 'delete' | 'copy' | 'forward';
+  type: 'reply' | 'edit' | 'delete' | 'copy' | 'forward' | 'delete-for-self';
   label: string;
   icon: string;
   condition: (message: Message, currentUserId: string) => boolean;
 }
 
 // INTERFACE POUR LES CONVERSATIONS
-
 export interface Conversation {
   id: string;
   type: 'group' | 'private';
