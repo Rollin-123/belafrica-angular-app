@@ -1,6 +1,6 @@
 <!-- Layout Principal Style WhatsApp -->
 <div class="bel-main-layout">
-  
+
   <!-- Header Fixe -->
   <header class="bel-header">
     <div class="bel-header-content">
@@ -8,22 +8,24 @@
       <div class="bel-header-logo">
         <app-logo size="small"></app-logo>
       </div>
-      
+
       <!-- Titre dynamique -->
       <h1 class="bel-header-title">{{ getCurrentTitle() }}</h1>
-      <button 
-  *ngIf="showFabButton"
-  class="bel-fab"
-  (click)="openCreatePostModal()"
-  title="Créer une publication">
-  ✏️
-</button>
+      @if (showFabButton) {
+        <button
+          class="bel-fab"
+          (click)="openCreatePostModal()"
+          title="Créer une publication">
+          ✏️
+        </button>
+      }
 
-<app-create-post-modal 
-  *ngIf="showCreatePostModal"
-  (closed)="closeCreatePostModal()"
-  (postCreated)="onPostCreated()">
-</app-create-post-modal>
+      @if (showCreatePostModal) {
+        <app-create-post-modal
+          (closed)="closeCreatePostModal()"
+          (postCreated)="onPostCreated()">
+        </app-create-post-modal>
+      }
     </div>
   </header>
 
@@ -32,7 +34,7 @@
   </main>
 
   <nav class="bel-bottom-nav">
-    <button 
+    <button
       class="bel-nav-item"
       [class.active]="activeTab === 'national'"
       (click)="navigateTo('national')">
@@ -41,29 +43,31 @@
     </button>
 
     <!-- Fil International -->
-    <button 
+    <button
       class="bel-nav-item"
-      [class.active]="activeTab === 'international'"  
+      [class.active]="activeTab === 'international'"
       (click)="navigateTo('international')">
       <span class="bel-nav-icon">🌍</span>
       <span class="bel-nav-label">International</span>
     </button>
 
     <!-- Messagerie -->
-    <button 
+    <button
       class="bel-nav-item"
       [class.active]="activeTab === 'messaging'"
       (click)="navigateTo('messaging')">
       <span class="bel-nav-icon">💬</span>
       <span class="bel-nav-label">Messages</span>
       <!-- Badge notifications -->
-      <span *ngIf="unreadCount > 0" class="bel-nav-badge">{{ unreadCount }}</span>
+      @if (unreadCount > 0) {
+        <span class="bel-nav-badge">{{ unreadCount }}</span>
+      }
     </button>
 
     <!-- Paramètres -->
-    <button 
+    <button
       class="bel-nav-item"
-      [class.active]="activeTab === 'settings'"  
+      [class.active]="activeTab === 'settings'"
       (click)="navigateTo('settings')">
       <span class="bel-nav-icon">⚙️</span>
       <span class="bel-nav-label">Paramètres</span>

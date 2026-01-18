@@ -1,81 +1,91 @@
 <div class="bel-container">
-    <div class="bel-card">
+  <div class="bel-card">
 
-        <div class="bel-auth-header">
-            <app-logo size="medium"></app-logo>
-        </div>
-
-        <div style="margin-bottom: var(--bel-spacing-xl);">
-            <h2 class="bel-title" style="text-align: left; font-size: 28px; margin-bottom: var(--bel-spacing-sm);">
-                Dans quel pays résidez-vous ?
-            </h2>
-            <p class="bel-subtitle" style="text-align: left; margin-bottom: 0;">
-                Votre numéro de téléphone nous permet de valider votre pays de résidence et d'assigner la communauté correspondante.
-            </p>
-        </div>
-        
-        <div *ngIf="successMessage" class="bel-alert-success" style="margin-bottom: 20px;">
-            ✅ {{ successMessage }}
-        </div>
-        
-        <form [formGroup]="phoneForm" (ngSubmit)="onSubmit()">
-            
-            <div style="margin-bottom: var(--bel-spacing-lg);">
-                <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
-                    Pays de résidence
-                </label>
-                <select 
-                    formControlName="countryCode" 
-                    class="form-field-bel"
-                    style="width: 100%; padding: 12px; border: 2px solid var(--bel-border); border-radius: var(--bel-radius-md); font-size: 16px; color: var(--bel-text-primary);"
-                >
-                    <option *ngFor="let country of europeanCountries" [value]="country.code">
-                        {{ country.name }} ({{ country.code }})
-                    </option>
-                </select>
-            </div>
-
-            <div style="margin-bottom: var(--bel-spacing-lg);">
-                <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
-                    Numéro de téléphone
-                </label>
-                <input 
-                    type="tel" 
-                    formControlName="phoneNumber"
-                    placeholder="Ex: 12 34 56 789"
-                    (keypress)="onKeyPress($event)"
-                    (input)="formatPhone($event)"
-                    inputmode="numeric"
-                    class="form-field-bel"
-                    style="width: 100%; padding: 12px; border: 2px solid var(--bel-border); border-radius: var(--bel-radius-md); font-size: 16px;"
-                >
-                <small *ngIf="phoneForm.get('phoneNumber')?.invalid && phoneForm.get('phoneNumber')?.touched" 
-                       style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
-                    Veuillez entrer un numéro de téléphone valide.
-                </small>
-                <small style="color: var(--bel-gray); margin-top: 4px; display: block;">
-                    ⚠️ Ce numéro et votre pays de résidence seront <strong>immuables</strong> après validation.
-                </small>
-            </div>
-
-            <button 
-                type="submit" 
-                class="bel-btn-primary" 
-                [disabled]="!phoneForm.valid || isLoading"
-                style="width: 100%; padding: 14px; font-size: 16px;"
-            >
-                <span *ngIf="!isLoading">Recevoir le code par SMS</span>
-                <span *ngIf="isLoading">
-                    <span style="display: inline-block; animation: spin 1s linear infinite; margin-right: 8px;">⏳</span>
-                    Envoi en cours...
-                </span>
-            </button>
-            
-            <!-- <div style="margin-top: 20px; text-align: center; color: var(--bel-gray); font-size: 14px;">
-                <p>💡 Pour les tests, utilisez le code : <strong>123456</strong></p>
-                <p>🔗 Backend : http://localhost:3000</p>
-            </div> -->
-            
-        </form>
+    <div class="bel-auth-header">
+      <app-logo size="medium"></app-logo>
     </div>
+
+    <div style="margin-bottom: var(--bel-spacing-xl);">
+      <h2 class="bel-title" style="text-align: left; font-size: 28px; margin-bottom: var(--bel-spacing-sm);">
+        Dans quel pays résidez-vous ?
+      </h2>
+      <p class="bel-subtitle" style="text-align: left; margin-bottom: 0;">
+        Votre numéro de téléphone nous permet de valider votre pays de résidence et d'assigner la communauté correspondante.
+      </p>
+    </div>
+
+    @if (successMessage) {
+      <div class="bel-alert-success" style="margin-bottom: 20px;">
+        ✅ {{ successMessage }}
+      </div>
+    }
+
+    <form [formGroup]="phoneForm" (ngSubmit)="onSubmit()">
+
+      <div style="margin-bottom: var(--bel-spacing-lg);">
+        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
+          Pays de résidence
+        </label>
+        <select
+          formControlName="countryCode"
+          class="form-field-bel"
+          style="width: 100%; padding: 12px; border: 2px solid var(--bel-border); border-radius: var(--bel-radius-md); font-size: 16px; color: var(--bel-text-primary);"
+          >
+          @for (country of europeanCountries; track country) {
+            <option [value]="country.code">
+              {{ country.name }} ({{ country.code }})
+            </option>
+          }
+        </select>
+      </div>
+
+      <div style="margin-bottom: var(--bel-spacing-lg);">
+        <label style="display: block; margin-bottom: var(--bel-spacing-sm); font-weight: 600;">
+          Numéro de téléphone
+        </label>
+        <input
+          type="tel"
+          formControlName="phoneNumber"
+          placeholder="Ex: 12 34 56 789"
+          (keypress)="onKeyPress($event)"
+          (input)="formatPhone($event)"
+          inputmode="numeric"
+          class="form-field-bel"
+          style="width: 100%; padding: 12px; border: 2px solid var(--bel-border); border-radius: var(--bel-radius-md); font-size: 16px;"
+          >
+          @if (phoneForm.get('phoneNumber')?.invalid && phoneForm.get('phoneNumber')?.touched) {
+            <small
+              style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
+              Veuillez entrer un numéro de téléphone valide.
+            </small>
+          }
+          <small style="color: var(--bel-gray); margin-top: 4px; display: block;">
+            ⚠️ Ce numéro et votre pays de résidence seront <strong>immuables</strong> après validation.
+          </small>
+        </div>
+
+        <button
+          type="submit"
+          class="bel-btn-primary"
+          [disabled]="!phoneForm.valid || isLoading"
+          style="width: 100%; padding: 14px; font-size: 16px;"
+          >
+          @if (!isLoading) {
+            <span>Recevoir le code par SMS</span>
+          }
+          @if (isLoading) {
+            <span>
+              <span style="display: inline-block; animation: spin 1s linear infinite; margin-right: 8px;">⏳</span>
+              Envoi en cours...
+            </span>
+          }
+        </button>
+
+        <!-- <div style="margin-top: 20px; text-align: center; color: var(--bel-gray); font-size: 14px;">
+        <p>💡 Pour les tests, utilisez le code : <strong>123456</strong></p>
+        <p>🔗 Backend : http://localhost:3000</p>
+      </div> -->
+
+    </form>
+  </div>
 </div>

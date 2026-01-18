@@ -1,13 +1,19 @@
-<div *ngIf="modalState$ | async as state" class="modal-overlay" (click)="close()" @fade>
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-icon" [ngClass]="state.type">
-      <span *ngIf="state.type === 'success'">✅</span>
-      <span *ngIf="state.type === 'error'">⚠️</span>
+@if (modalState$ | async; as state) {
+  <div class="modal-overlay" (click)="close()" @fade>
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-icon" [ngClass]="state.type">
+        @if (state.type === 'success') {
+          <span>✅</span>
+        }
+        @if (state.type === 'error') {
+          <span>⚠️</span>
+        }
+      </div>
+      <h2 class="modal-title">{{ state.title }}</h2>
+      <div class="modal-message" [innerHTML]="state.message"></div>
+      <button class="modal-close-btn" [ngClass]="state.type" (click)="close()">
+        {{ state.type === 'success' ? 'Continuer' : 'Compris' }}
+      </button>
     </div>
-    <h2 class="modal-title">{{ state.title }}</h2>
-    <div class="modal-message" [innerHTML]="state.message"></div>
-    <button class="modal-close-btn" [ngClass]="state.type" (click)="close()">
-      {{ state.type === 'success' ? 'Continuer' : 'Compris' }}
-    </button>
   </div>
-</div>
+}

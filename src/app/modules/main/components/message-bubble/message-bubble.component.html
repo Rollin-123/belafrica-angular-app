@@ -1,4 +1,4 @@
-<div 
+<div
   [id]="'message-' + message.id"
   class="bel-message-wrapper"
   [class.my-message]="isMyMessage()"
@@ -6,13 +6,13 @@
   (contextmenu)="onContextMenu($event)"
   (touchstart)="onTouchStart($event)"
   (touchend)="onTouchEnd($event)">
-  
+
   <div class="bel-message-bubble">
-    
+
     <!-- INDICATEUR DE RÉPONSE -->
     @if (message.replyTo) {
-      <div class="bel-reply-indicator" 
-           (click)="onScrollToClick(message.replyTo.messageId)">
+      <div class="bel-reply-indicator"
+        (click)="onScrollToClick(message.replyTo.messageId)">
         <div class="bel-reply-line"></div>
         <div class="bel-reply-content">
           <strong>{{ message.replyTo.fromUserName }}</strong>
@@ -24,7 +24,7 @@
     <!-- MODE ÉDITION -->
     @if (editingMessageId === message.id) {
       <div class="bel-message-edit">
-        <textarea 
+        <textarea
           class="bel-edit-input"
           [value]="editMessageContent"
           (input)="onEditInput($event)"
@@ -38,7 +38,7 @@
         </div>
       </div>
     }
-    
+
     <!-- AFFICHAGE NORMAL -->
     @if (editingMessageId !== message.id) {
       @if (!isMyMessage() && !message.isDeleted) {
@@ -55,13 +55,13 @@
           </div>
         </div>
       }
-      
+
       <div class="bel-message-content">
         @if (message.isDeleted) {
           <span class="bel-deleted-message">Message supprimé</span>
         } @else {
           <span [innerHTML]="formatMessageWithMentions(message)"></span>
-          
+
           @if (message.isEdited) {
             <span class="bel-edited-badge">(modifié)</span>
           }
@@ -72,12 +72,18 @@
         <span class="bel-message-time">
           {{ formatMessageTime(message.timestamp) }}
         </span>
-        
+
         @if (isMyMessage() && !message.isDeleted) {
           <div class="bel-message-status" [ngClass]="getMessageStatus(message)">
-            <svg *ngIf="getMessageStatus(message) === 'status-sent'" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
-            <svg *ngIf="getMessageStatus(message) === 'status-delivered' || getMessageStatus(message) === 'status-read'" viewBox="0 0 24 24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.62 16.2l-3.54-3.54-1.41 1.41 4.95 4.95L23.66 7.02l-1.42-1.43zM4.41 12.41L3 13.82l4.95 4.95 1.41-1.41L4.41 12.41z"/></svg>
-            <div *ngIf="getMessageStatus(message) === 'status-sending'" class="sending-spinner"></div>
+            @if (getMessageStatus(message) === 'status-sent') {
+              <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            }
+            @if (getMessageStatus(message) === 'status-delivered' || getMessageStatus(message) === 'status-read') {
+              <svg viewBox="0 0 24 24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.62 16.2l-3.54-3.54-1.41 1.41 4.95 4.95L23.66 7.02l-1.42-1.43zM4.41 12.41L3 13.82l4.95 4.95 1.41-1.41L4.41 12.41z"/></svg>
+            }
+            @if (getMessageStatus(message) === 'status-sending') {
+              <div class="sending-spinner"></div>
+            }
           </div>
         }
       </div>

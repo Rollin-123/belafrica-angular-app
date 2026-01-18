@@ -6,25 +6,25 @@
     */
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
     selector: 'app-telegram-redirect',
-    imports: [CommonModule],
+    imports: [],
     template: `
     <div class="telegram-redirect-container">
       <div class="telegram-card">
-
+    
         <h1 class="title">{{ pageTitle }}</h1>
         <p class="subtitle">{{ pageSubtitle }}</p>
-        
+    
         <div class="progress-container">
           <div class="progress-bar">
             <div class="progress-fill" [style.width.%]="progress"></div>
           </div>
           <div class="progress-text">{{ progress }}%</div>
         </div>
-        
+    
         <div class="instructions">
           <h3>📋 Instructions :</h3>
           <ol>
@@ -33,37 +33,41 @@ import { CommonModule } from '@angular/common';
             <li>Revenez ici après avoir reçu le code</li>
           </ol>
         </div>
-        
+    
         <div class="actions">
           <button class="btn-telegram" (click)="openTelegram()" [disabled]="isOpening">
-            <span *ngIf="!isOpening">📲 Ouvrir Telegram</span>
-            <span *ngIf="isOpening">⏳ Ouverture en cours...</span>
+            @if (!isOpening) {
+              <span>📲 Ouvrir Telegram</span>
+            }
+            @if (isOpening) {
+              <span>⏳ Ouverture en cours...</span>
+            }
           </button>
-          
+    
           <!-- <button class="btn-sms" (click)="showSmsOption()">
-            📱 Recevoir par SMS (alternatif)
-          </button> -->
-          
-          <button class="btn-copy" (click)="copyLink()">
-            📋 Copier le lien Telegram
-          </button>
-        </div>
-        
-        <div class="tips">
-          <div class="tip">
-            💡 <strong>Conseil :</strong> Revenez sur cette page après avoir reçu le code
-          </div>
-          <div class="tip">
-            ⏱️ Code valable pendant <strong>10 minutes</strong>
-          </div>
-        </div>
-        
-        <button class="btn-continue" (click)="continueToOtp()" [disabled]="!canContinue">
-          → Continuer vers la vérification du code
+          📱 Recevoir par SMS (alternatif)
+        </button> -->
+    
+        <button class="btn-copy" (click)="copyLink()">
+          📋 Copier le lien Telegram
         </button>
       </div>
+    
+      <div class="tips">
+        <div class="tip">
+          💡 <strong>Conseil :</strong> Revenez sur cette page après avoir reçu le code
+        </div>
+        <div class="tip">
+          ⏱️ Code valable pendant <strong>10 minutes</strong>
+        </div>
+      </div>
+    
+      <button class="btn-continue" (click)="continueToOtp()" [disabled]="!canContinue">
+        → Continuer vers la vérification du code
+      </button>
     </div>
-  `,
+    </div>
+    `,
     styles: [`
     .telegram-redirect-container {
       min-height: 100vh;

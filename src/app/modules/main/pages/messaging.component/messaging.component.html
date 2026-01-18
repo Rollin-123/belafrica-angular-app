@@ -1,8 +1,8 @@
 <div class="bel-messaging-container">
-  
-   <div class="bel-emoji-overlay" 
-       [class.active]="showEmojiPicker"
-       (click)="showEmojiPicker = false">
+
+  <div class="bel-emoji-overlay"
+    [class.active]="showEmojiPicker"
+    (click)="showEmojiPicker = false">
   </div>
   <!-- Header Principal -->
   <header class="bel-messaging-header">
@@ -11,14 +11,14 @@
 
   <!-- Navigation par Onglets -->
   <nav class="bel-messaging-tabs">
-    <button 
-      class="bel-tab-button" 
+    <button
+      class="bel-tab-button"
       [class.active]="activeTab === 'group'"
       (click)="setActiveTab('group')">
       💬 Chat de Groupe
     </button>
-    <button 
-      class="bel-tab-button" 
+    <button
+      class="bel-tab-button"
       [class.active]="activeTab === 'private'"
       (click)="setActiveTab('private')">
       👤 Messages Privés
@@ -27,11 +27,11 @@
 
   <!-- Contenu des Onglets -->
   <main class="bel-messaging-content">
-    
+
     <!-- ONGLET CHAT DE GROUPE -->
     @if (activeTab === 'group') {
       <div class="bel-group-chat-container">
-        
+
         <!-- Header du Groupe -->
         <div class="bel-group-header">
           <div class="bel-group-info">
@@ -93,9 +93,9 @@
         <!-- Input d'envoi -->
         <footer class="bel-chat-input">
           <div class="bel-input-container">
-            
+
             <!-- BOUTON ÉMOJI -->
-            <button 
+            <button
               class="bel-emoji-btn"
               (click)="toggleEmojiPicker($event)"
               type="button"
@@ -104,7 +104,7 @@
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2.5-6.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm5 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm-2.5-4c-1.76 0-3.22 1.03-3.88 2.5h7.76c-.66-1.47-2.12-2.5-3.88-2.5z"/>
               </svg>
             </button>
-            
+
             <textarea
               #messageInput
               [(ngModel)]="newMessage"
@@ -115,13 +115,17 @@
               [disabled]="isSending">
             </textarea>
 
-            <button 
+            <button
               class="bel-send-btn"
               (click)="replyingTo ? sendMessageWithReply() : sendMessage()"
               [disabled]="!newMessage.trim() || isSending"
               [class.sending]="isSending">
-              <div *ngIf="isSending" class="sending-spinner"></div>
-              <svg *ngIf="!isSending" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              @if (isSending) {
+                <div class="sending-spinner"></div>
+              }
+              @if (!isSending) {
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              }
             </button>
           </div>
 
@@ -131,12 +135,12 @@
               <div class="bel-emoji-grid">
                 @for (emoji of ['😀', '😂', '🥰', '😎', '🤔', '👏', '🎉', '❤️', '🔥', '👍', '😢', '😡', '🤯', '👀', '🙏', '💯', '✨', '🌟', '💪', '🎯']; track emoji) {
                   <span
-                      class="bel-emoji"
-                      (click)="addEmoji(emoji)">
+                    class="bel-emoji"
+                    (click)="addEmoji(emoji)">
                     {{ emoji }}
                   </span>
                 }
-              </div>  
+              </div>
             </div>
           }
         </footer>
@@ -146,7 +150,7 @@
     <!-- ONGLET MESSAGES PRIVÉS -->
     @if (activeTab === 'private') {
       <div class="bel-private-chat-container">
-        
+
         <!-- État de développement -->
         <div class="bel-feature-development">
           <div class="bel-development-icon">🚧</div>
@@ -165,16 +169,24 @@
   <!-- MENU CONTEXTUEL -->
   @if (contextMenu.visible) {
     <div class="bel-context-menu"
-         [style.left.px]="contextMenu.x"
-         [style.top.px]="contextMenu.y">
+      [style.left.px]="contextMenu.x"
+      [style.top.px]="contextMenu.y">
       @for (action of contextMenu.actions; track action.type) {
         <button class="bel-context-menu-item" (click)="executeContextAction(action)">
           <span class="bel-context-icon">
             <!-- Icônes SVG pour le menu contextuel -->
-            <svg *ngIf="action.icon === 'reply'" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
-            <svg *ngIf="action.icon === 'edit'" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-            <svg *ngIf="action.icon === 'copy'" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-            <svg *ngIf="action.icon === 'delete' || action.icon === 'delete_outline'" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            @if (action.icon === 'reply') {
+              <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+            }
+            @if (action.icon === 'edit') {
+              <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            }
+            @if (action.icon === 'copy') {
+              <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            }
+            @if (action.icon === 'delete' || action.icon === 'delete_outline') {
+              <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            }
           </span>
           <span class="bel-context-label">{{ action.label }}</span>
         </button>

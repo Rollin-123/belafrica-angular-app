@@ -1,7 +1,7 @@
 <!-- otp-verification.component.html - MODIFIEZ LA SECTION COMPTE À REBOURS -->
 <div class="bel-container">
   <div class="bel-card">
-    
+
     <!-- Header -->
     <div class="bel-auth-header">
       <app-logo size="medium"></app-logo>
@@ -13,49 +13,55 @@
         Vérification du code
       </h2>
       <p class="bel-subtitle" style="text-align: left; margin-bottom: 0;">
-        Nous avons envoyé un code à 6 chiffres au 
+        Nous avons envoyé un code à 6 chiffres au
         <strong>{{ phoneNumber }}</strong> sur Telegram.
       </p>
     </div>
 
     <form [formGroup]="otpForm" (ngSubmit)="onSubmit()">
-      
+
       <!-- Champ OTP -->
       <div style="margin-bottom: var(--bel-spacing-lg);">
-        <input 
+        <input
           #otpInput
-          type="text" 
+          type="text"
           formControlName="otpCode"
           placeholder="Entrez le code à 6 chiffres"
           class="form-field-bel"
-          (keypress)="validateOtpInput($event)" 
+          (keypress)="validateOtpInput($event)"
           inputmode="numeric"
           pattern="[0-9]*"
           maxlength="6"
           style="text-align: center; font-size: 18px; font-weight: 600;"
-        >
-        <small *ngIf="otpForm.get('otpCode')?.invalid && otpForm.get('otpCode')?.touched" 
-               style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
-        </small>
-      </div>
+          >
+          @if (otpForm.get('otpCode')?.invalid && otpForm.get('otpCode')?.touched) {
+            <small
+              style="color: var(--bel-color-accent); margin-top: 4px; display: block;">
+            </small>
+          }
+        </div>
 
-      <!-- Boutons -->
-      <button 
-        type="submit" 
-        class="bel-btn-primary"
-        [disabled]="!otpForm.valid || isLoading"
-        style="margin-bottom: var(--bel-spacing-md);">
-        <span *ngIf="!isLoading">Vérifier le code</span>
-        <span *ngIf="isLoading">Vérification...</span>
-      </button>
+        <!-- Boutons -->
+        <button
+          type="submit"
+          class="bel-btn-primary"
+          [disabled]="!otpForm.valid || isLoading"
+          style="margin-bottom: var(--bel-spacing-md);">
+          @if (!isLoading) {
+            <span>Vérifier le code</span>
+          }
+          @if (isLoading) {
+            <span>Vérification...</span>
+          }
+        </button>
 
-      <button 
-        type="button" 
-        class="bel-btn-secondary"
-        (click)="goBack()"
-        [disabled]="isLoading">
-        ← Retour
-      </button>
-    </form>
+        <button
+          type="button"
+          class="bel-btn-secondary"
+          (click)="goBack()"
+          [disabled]="isLoading">
+          ← Retour
+        </button>
+      </form>
+    </div>
   </div>
-</div>

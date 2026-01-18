@@ -1,3 +1,4 @@
+import { provideZoneChangeDetection } from "@angular/core";
 /* 
     * BELAFRICA - Plateforme diaspora africaine
     * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
@@ -6,6 +7,6 @@
 import { bootstrapApplication, BootstrapContext } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config'; 
-const bootstrap = (context: BootstrapContext) => bootstrapApplication(AppComponent, appConfig, context);
+const bootstrap = (context: BootstrapContext) => bootstrapApplication(AppComponent, {...appConfig, providers: [provideZoneChangeDetection(), ...appConfig.providers]}, context);
 
 export default bootstrap;
