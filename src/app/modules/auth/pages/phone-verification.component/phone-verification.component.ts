@@ -56,7 +56,7 @@ export class PhoneVerificationComponent implements OnInit {
       try {
         const tempPhoneInfo = JSON.parse(tempPhoneInfoString);
         const otpRequestTime = tempPhoneInfo.timestamp;
-        const tenMinutes = 10 * 60 * 1000; // 10 minutes en millisecondes
+        const tenMinutes = 10 * 60 * 1000;  
 
         // On redirige seulement si la demande de code a moins de 10 minutes
         if (otpRequestTime && (Date.now() - otpRequestTime < tenMinutes)) {
