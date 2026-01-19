@@ -63,13 +63,11 @@ export class ProfileSetupComponent implements OnInit {
         const suggestedPseudo = this.generateSuggestedPseudo();
         this.profileForm.patchValue({
           pseudo: suggestedPseudo
-        });
-        
+        });        
       } catch (error) {
         console.error('❌ Erreur parsing user data:', error);
         this.router.navigate(['/auth/phone']);
       }
-      
     } else {
       console.error('❌ Aucune donnée trouvée');
       this.router.navigate(['/auth/phone']);
@@ -86,10 +84,8 @@ export class ProfileSetupComponent implements OnInit {
 
   private generateSuggestedPseudo(): string {
     if (!this.userData?.nationalityName) return 'utilisateur';
-    
     const country = this.userData.nationalityName.toLowerCase();
     const randomNum = Math.floor(Math.random() * 1000);
-    
     return `${country}${randomNum}`;
   }
 
@@ -153,9 +149,7 @@ export class ProfileSetupComponent implements OnInit {
               
               alert('🎉 Compte créé avec succès ! Bienvenue sur BELAFRICA.');
               
-              setTimeout(() => {
-                this.router.navigate(['/app']);
-              }, 1000);
+              this.router.navigate(['/app']);
             } else {
               this.errorMessage = response.error || 'Erreur lors de la création du compte';
               alert(`❌ ${this.errorMessage}`);
