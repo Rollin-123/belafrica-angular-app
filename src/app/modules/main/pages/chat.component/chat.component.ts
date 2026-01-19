@@ -103,7 +103,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.messages = messages;
       this.cdr.detectChanges();
       setTimeout(() => this.scrollToBottom(), 100);
-      this.messagingService.markAsRead(this.conversationId);
+      // Marquer les messages non lus comme lus lors du chargement initial
+      const unreadMessageIds = messages
+        .filter(m => !this.isMyMessage(m) && m.status !== 'read')
+        .map(m => m.id);
+      if (unreadMessageIds.length > 0) {
+        this.messagingService.markAsRead(this.conversationId, unreadMessageIds);
+      }
     });
     this.subscriptions.add(messagesSub);
   }
@@ -115,7 +121,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         this.messages.push(message);
         this.cdr.detectChanges();
         setTimeout(() => this.scrollToBottom(), 100);
-        this.messagingService.markAsRead(this.conversationId); // Marquer comme lu dès réception si la fenêtre est ouverte
+        // Marquer le nouveau message comme lu s'il ne vient pas de moi
+        if (!this.isMyMessage(message)) {
+          this.messagingService.markAsRead(this.conversationId, [message.id]);
+        }
       }
     });
 

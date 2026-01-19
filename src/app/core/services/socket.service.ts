@@ -71,8 +71,8 @@ export class SocketService implements OnDestroy {
   }
 
   // --- Statut "lu" ---
-  emitMarkAsRead(conversationId: string) {
-    this.socket?.emit('markAsRead', { conversationId });
+  emitMarkAsRead(conversationId: string, messageIds: string[]) {
+    this.socket?.emit('markAsRead', { conversationId, messageIds });
   }
 
   onMessagesRead(): Observable<{ conversationId: string, userId: string, messageIds: string[] }> {

@@ -5,10 +5,11 @@
     */
 import { ApplicationConfig, importProvidersFrom, APP_INITIALIZER, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClientModule, provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { routes } from '../app-routing.module'; 
 import { ConfigService } from './core/services/config.service';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { CredentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { environment } from '../environments/environment';
 import { PostsService } from './core/services/posts.service';
@@ -27,15 +28,17 @@ export function initializeApp(configService: ConfigService): () => Observable<an
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes), 
-    provideHttpClient(withInterceptors([
-      (req, next) => new CredentialsInterceptor().intercept(req, next)
-    ])), 
+    importProvidersFrom(HttpClientModule),
+    provideHttpClient(withInterceptorsFromDi()), 
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       deps: [ConfigService],
       multi: true,
     },
+    // ✅ Revenir à la méthode de déclaration stable
+    { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, // Nécessaire pour le tempToken
     {
       provide: PostsService, 
       useClass: environment.production ? PostsHttpService : PostsMockService

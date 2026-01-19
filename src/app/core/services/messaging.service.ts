@@ -49,7 +49,7 @@ export abstract class MessagingService {
   abstract deleteMessage(messageId: string, forEveryone: boolean): Promise<void>;
   abstract getMessageActions(message: Message, currentUserId: string): MessageAction[];
   abstract getMentionSuggestions(searchTerm: string, conversationId: string): any[];
-  abstract markAsRead(conversationId: string): void;
+  abstract markAsRead(conversationId: string, messageIds: string[]): void;
   abstract getStats(): any;
   abstract joinConversation(conversationId: string): void;
   abstract leaveConversation(conversationId: string): void;

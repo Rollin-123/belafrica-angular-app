@@ -111,7 +111,6 @@ export class MessagingHttpService extends MessagingService {
       this.userEncryptionKey
     );
   
-    // Le backend gère la diffusion via WebSocket, donc la réponse HTTP est moins critique.
     await this.http.post(
       `${this.apiUrl}/conversations/${conversationId}/messages`,
       { 
@@ -168,8 +167,8 @@ export class MessagingHttpService extends MessagingService {
     return [];
   }
 
-  markAsRead(conversationId: string): void {
-    console.warn('[MessagingHttpService] markAsRead() non implémenté.');
+  markAsRead(conversationId: string, messageIds: string[]): void {
+    this.socketService.emitMarkAsRead(conversationId, messageIds);
   }
 
   getStats(): any {

@@ -45,9 +45,8 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   typingUsers = new Map<string, { pseudo: string, timeout: any }>();
   isTyping = false;
   private typingTimeout: any;
-  readonly TYPING_TIMER_LENGTH = 3000; // 3 secondes
+  readonly TYPING_TIMER_LENGTH = 3000; 
 
-  // Gestion du touch pour mobile
   private touchStart = {
     time: 0,
     x: 0,
@@ -80,10 +79,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userCommunity = user?.community || 'Communauté inconnue';
 
     // Charger la conversation de groupe
-    this.groupConversation$ = this.messagingService.getConversations().pipe(
-      // ✅ Logique plus robuste: Le backend ne retourne que les conversations de l'utilisateur.
-      // On cherche simplement la première de type 'group'.
-      // Pour une app plus complexe, on pourrait avoir un identifiant spécifique pour le groupe principal.
+    this.groupConversation$ = this.messagingService.getConversations().pipe( 
       map(conversations => conversations.find(c => c.type === 'group')),
       tap(conversation => {
         if (conversation) {
@@ -99,8 +95,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       distinctUntilChanged(),
       switchMap(conversationId => {
         if (conversationId) {
-          this.messagingService.markAsRead(conversationId);
-          // La logique de markAsRead est maintenant dans updateReadStatus
+ this.messagingService.markAsRead(conversationId, []);
           return this.messagingService.getMessages(conversationId);
         } else {
           return of([]);
@@ -128,7 +123,6 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-    // Quitter la conversation pour arrêter les écouteurs
   }
 
   @HostListener('document:click')
@@ -298,15 +292,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentMentionQuery = text.substring(atPosition + 1);
     
     if (this.currentMentionQuery.length === 0) {
-      // Afficher tous les participants
       this.mentionCandidates = this.conversationParticipants.filter(p => 
-        p.userId !== this.userService.getCurrentUser()?.id
+        p.users.id !== this.userService.getCurrentUser()?.id
       );
     } else {
-      // Filtrer par la query
       this.mentionCandidates = this.conversationParticipants.filter(p => 
-        p.pseudo.toLowerCase().includes(this.currentMentionQuery.toLowerCase()) &&
-        p.userId !== this.userService.getCurrentUser()?.id
+        p.users.pseudo.toLowerCase().includes(this.currentMentionQuery.toLowerCase()) &&
+        p.users.id !== this.userService.getCurrentUser()?.id
       );
     }
     this.showMentionsList = this.mentionCandidates.length > 0;
@@ -314,7 +306,6 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ✅ NAVIGATION DANS LES MENTIONS
   handleMentionNavigation(event: KeyboardEvent): void {
-    // Implémentation simple - pour l'instant on sélectionne le premier
     if (event.key === 'Enter' && this.mentionCandidates.length > 0) {
       this.selectMention(this.mentionCandidates[0]);
     }
@@ -325,15 +316,14 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const textBefore = this.newMessage.substring(0, this.mentionStartPosition);
     const textAfter = this.newMessage.substring(this.mentionStartPosition + this.currentMentionQuery.length + 1);
     
-    this.newMessage = textBefore + '@' + user.pseudo + ' ' + textAfter;
+    this.newMessage = textBefore + '@' + user.users.pseudo + ' ' + textAfter;
     this.showMentionsList = false;
     this.currentMentionQuery = '';
     
-    // Remettre le focus et positionner le curseur
     setTimeout(() => {
       if (this.messageInput?.nativeElement) {
         this.messageInput.nativeElement.focus();
-        const newPosition = this.mentionStartPosition + user.pseudo.length + 2;
+        const newPosition = this.mentionStartPosition + user.users.pseudo.length + 2;
         this.messageInput.nativeElement.setSelectionRange(newPosition, newPosition);
       }
     }, 0);
@@ -348,13 +338,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     while ((match = mentionRegex.exec(text)) !== null) {
       const userName = match[1];
       const participant = this.conversationParticipants.find(p =>
-        p.users.pseudo === userName // ✅ Correction: la structure est conversation_participants -> users -> pseudo
+        p.users.pseudo === userName
       );
 
       if (participant) {
         mentions.push({
-          userId: participant.userId, // ✅ CORRECTION: Utiliser userId
-          userName: participant.pseudo,
+          userId: participant.users.id,
+          userName: participant.users.pseudo,
           position: match.index,
           length: match[0].length
         });
@@ -486,7 +476,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const user = this.userService.getCurrentUser();
     if (!user) return;
 
-    const actions = this.messagingService.getMessageActions(message, user.id); // ✅ CORRECTION: user.id
+    const actions = this.messagingService.getMessageActions(message, user.id); 
     if (actions.length === 0) return;
 
     this.contextMenu = {
@@ -515,10 +505,10 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.startEditing(message);
         break;
       case 'delete':
-        this.deleteMessage(message.id, true); // Supprimer pour tout le monde
+        this.deleteMessage(message.id, true); 
         break;
       case 'delete-for-self':
-        this.deleteMessage(message.id, false); // Supprimer pour soi
+        this.deleteMessage(message.id, false); 
         break;
       case 'copy':
         this.copyMessage(message);
@@ -585,11 +575,8 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   private updateReadStatus(messages: Message[]): void {
     const unreadMessages = messages.filter(m => !this.isMyMessage(m) && m.status !== 'read');
     if (unreadMessages.length > 0) {
-      const messageIds = unreadMessages.map(m => m.id);
       const conversationId = unreadMessages[0].conversationId;
-      const messageIds = unreadMessages.map(m => m.id); // Collecter tous les IDs de messages non lus
-      const conversationId = unreadMessages[0].conversationId; // Supposer que tous proviennent de la même conversation
-      this.messagingService.markAsRead(conversationId, messageIds); // Passer messageIds à markAsRead
+      this.messagingService.markAsRead(conversationId, unreadMessages.map(m => m.id));
     }
   }
 }

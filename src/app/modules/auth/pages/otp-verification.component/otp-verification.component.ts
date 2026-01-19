@@ -76,12 +76,13 @@ export class OtpVerificationComponent implements OnInit {
           console.log('✅ OTP validé:', response);
 
           if (response.success) {
-            if (response.token && response.user) {
+            // Cas 1: L'utilisateur existe déjà, le backend a mis le cookie et renvoyé l'utilisateur
+            if (response.user) {
               console.log('🚀 Connexion réussie. Redirection vers l\'application...');
-              this.authService.saveToken(response.token);
               this.userService.setCurrentUser(response.user); 
               this.router.navigate(['/app/national']);
             }
+            // Cas 2: Nouvel utilisateur, le backend renvoie un token temporaire pour finaliser le profil
             else if (response.tempToken) {
               console.log('✅ OTP validé pour un nouvel utilisateur. Redirection vers la finalisation du profil...');
               localStorage.setItem('belafrica_temp_token', response.tempToken);

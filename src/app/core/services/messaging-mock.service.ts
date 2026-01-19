@@ -622,7 +622,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   // =================================================================
 
   // 21. ✅ MARQUER UNE CONVERSATION COMME LUE (Réinitialiser le compteur)
-  markAsRead(conversationId: string): void {
+  markAsRead(conversationId: string, messageIds: string[] = []): void {
     const currentConversations = this.conversations.value;
     let needsUpdate = false;
     

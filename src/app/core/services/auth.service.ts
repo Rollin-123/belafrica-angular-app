@@ -86,7 +86,6 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    // We can no longer read the cookie's value, but we can check for its presence.
     return document.cookie.includes('access_token=') ? 'cookie_present' : null;
   }
 
