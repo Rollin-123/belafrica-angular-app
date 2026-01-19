@@ -24,7 +24,7 @@
         </div>
 
         <div class="bel-form-group">
-          <label class="bel-form-label">🌍 Nationalité africaine *</label>
+          <label class="bel-form-label">🌍 Nationalité africaine *</label> 
           <select formControlName="nationality" class="bel-form-select">
             <option value="">Choisissez une nationalité</option>
             @for (nationality of africanNationalities; track nationality) {
@@ -35,7 +35,6 @@
           </select>
         </div>
 
-        <!-- Prévisualisation communauté -->
         @if (codeForm.get('countryName')?.value && codeForm.get('nationality')?.value) {
           <div class="bel-form-group">
             <label class="bel-form-label">🏠 Communauté générée</label>

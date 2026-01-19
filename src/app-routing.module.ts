@@ -41,4 +41,4 @@ export const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule { } // Le nom de la classe est déjà bon, c'est parfait.
+export class AppRoutingModule { }  

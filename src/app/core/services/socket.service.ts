@@ -21,15 +21,8 @@ export class SocketService implements OnDestroy {
   }
 
   private connect(): void {
-    const token = this.authService.getToken();
-    if (!token) {
-      console.warn('⚠️ Socket.IO: Pas de token, connexion différée.');
-      return;
-    }
-
     this.socket = io(environment.apiUrl, {
-      // Envoyer le token JWT pour l'authentification du socket
-      auth: { token }
+      withCredentials: true
     });
 
     this.socket.on('connect', () => {

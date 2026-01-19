@@ -24,7 +24,6 @@ export class AdminCodeGeneratorComponent implements OnInit, OnDestroy {
   showCode = false;
   private adminSub: Subscription = new Subscription();
 
-  // ✅ Listes qui seront initialisées depuis le ConfigService
   europeanCountries: any[] = [];
   africanNationalities: string[] = [];
   

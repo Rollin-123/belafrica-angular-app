@@ -100,6 +100,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       switchMap(conversationId => {
         if (conversationId) {
           this.messagingService.markAsRead(conversationId);
+          // La logique de markAsRead est maintenant dans updateReadStatus
           return this.messagingService.getMessages(conversationId);
         } else {
           return of([]);
@@ -586,6 +587,9 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     if (unreadMessages.length > 0) {
       const messageIds = unreadMessages.map(m => m.id);
       const conversationId = unreadMessages[0].conversationId;
+      const messageIds = unreadMessages.map(m => m.id); // Collecter tous les IDs de messages non lus
+      const conversationId = unreadMessages[0].conversationId; // Supposer que tous proviennent de la même conversation
+      this.messagingService.markAsRead(conversationId, messageIds); // Passer messageIds à markAsRead
     }
   }
 }

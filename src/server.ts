@@ -4,10 +4,11 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 import { AngularNodeAppEngine, createNodeRequestHandler, isMainModule, writeResponseToNodeResponse } from '@angular/ssr';
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { join } from 'node:path';
 
-const browserDistFolder = join(import.meta.dirname, '../browser');
+
+const browserDistFolder = join();
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();

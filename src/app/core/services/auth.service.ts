@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
 
 interface AuthResponse {
   success: boolean;
-  user: User;
+  user?: User;
   token: string;
   error?: string;
 }
@@ -29,7 +29,6 @@ interface GenericResponse {
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
-  private readonly tokenKey = 'belafrica_token';
 
   constructor(
     private http: HttpClient,
@@ -73,11 +72,9 @@ export class AuthService {
   completeProfile(profileData: any): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/complete-profile`, profileData).pipe(
       tap(response => {
-        if (response.success && response.user && response.token) {
+        if (response.success && response.user) {
           this.userService.setCurrentUser(response.user);
-          
           localStorage.removeItem('belafrica_temp_token');
-          localStorage.setItem('belafrica_token', response.token);
           console.log('✅ Profil finalisé et utilisateur mis à jour:', response.user.pseudo);
         }
       }),
@@ -88,13 +85,9 @@ export class AuthService {
     );
   }
 
-  saveToken(token: string): void {
-    console.log('🔑 Sauvegarde du token permanent...');
-    localStorage.setItem(this.tokenKey, token);
-  }
-
   getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    // We can no longer read the cookie's value, but we can check for its presence.
+    return document.cookie.includes('access_token=') ? 'cookie_present' : null;
   }
 
   isAuthenticated(): boolean {
@@ -110,7 +103,6 @@ export class AuthService {
   private clearStorage(): void {
     const keys = [
       'belafrica_user',  
-      'belafrica_token',
       'temp_phone',
       'verified_phone',
       'userRegistrationData',

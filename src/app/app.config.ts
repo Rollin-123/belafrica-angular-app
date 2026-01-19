@@ -5,12 +5,11 @@
     */
 import { ApplicationConfig, importProvidersFrom, APP_INITIALIZER, isDevMode } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { routes } from '../app-routing.module'; 
 import { ConfigService } from './core/services/config.service';
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { CredentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { environment } from '../environments/environment';
 import { PostsService } from './core/services/posts.service';
 import { PostsMockService } from './core/services/posts-mock.service';
@@ -24,18 +23,19 @@ export function initializeApp(configService: ConfigService): () => Observable<an
   return () => configService.loadAppConfig();
 }
 
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes), 
-    importProvidersFrom(HttpClientModule),
-    provideHttpClient(withInterceptorsFromDi()), 
+    provideHttpClient(withInterceptors([
+      (req, next) => new CredentialsInterceptor().intercept(req, next)
+    ])), 
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       deps: [ConfigService],
       multi: true,
     },
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     {
       provide: PostsService, 
       useClass: environment.production ? PostsHttpService : PostsMockService
