@@ -1,12 +1,31 @@
+# =================================================================
+# Configuration de Build pour Netlify
+# =================================================================
 [build]
-  publish = "dist/belafrica"
-  command = "npm run build"
+  # Commande pour compiler le projet en mode production
+  command = "npm run build --configuration=production"
+  
+  # ✅ CORRECTION : Le dossier de publication doit pointer vers le sous-dossier 'browser'
+  # C'est là qu'Angular place les fichiers finaux de l'application.
+  publish = "dist/belafrica/browser"
 
+[build.environment]
+  # Forcer Netlify à utiliser une version de Node.js compatible avec Angular 21
+  NODE_VERSION = "20"
+
+# =================================================================
+# Règles de Redirection et d'En-têtes
+# =================================================================
+
+# Règle de redirection pour les Single Page Applications (SPA)
+# Toutes les routes (ex: /app/feed) sont redirigées vers index.html 
+# pour que le routeur Angular puisse prendre le relais.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+# En-têtes de sécurité pour toutes les pages
 [[headers]]
   for = "/*"
   [headers.values]
@@ -14,7 +33,3 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-
-# Variables d'environnement Netlify (sécurisées)
-[build.environment]
-  NODE_VERSION = "20.19.0"
