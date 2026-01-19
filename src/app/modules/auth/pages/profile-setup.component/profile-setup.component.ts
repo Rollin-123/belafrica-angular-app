@@ -69,6 +69,7 @@ export class ProfileSetupComponent implements OnInit {
         console.error('❌ Erreur parsing user data:', error);
         this.router.navigate(['/auth/phone']);
       }
+      
     } else {
       console.error('❌ Aucune donnée trouvée');
       this.router.navigate(['/auth/phone']);
@@ -145,15 +146,13 @@ export class ProfileSetupComponent implements OnInit {
             this.isLoading = false;
             console.log('✅ Réponse création profil:', response);
             
-            if (response.success && response.token) {
-              // Nettoyer les données temporaires
-              localStorage.removeItem('tempPhone');
+            if (response.success && response.user) {
+              localStorage.removeItem('belafrica_temp_phone');
               localStorage.removeItem('userRegistrationData');
+              localStorage.removeItem('belafrica_temp_token');
               
-              // Afficher message de succès
               alert('🎉 Compte créé avec succès ! Bienvenue sur BELAFRICA.');
               
-              // Rediriger vers l'application principale
               setTimeout(() => {
                 this.router.navigate(['/app']);
               }, 1000);
