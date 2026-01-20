@@ -16,11 +16,12 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler
-  ): Observable<HttpEvent<any>> {
+  ): Observable<HttpEvent<any>> {  
     let clonedReq = req.clone({
       withCredentials: true,
     });
 
+    
     if (req.url.includes('/complete-profile')) {
       const tempToken = this.storageService.getItem('belafrica_temp_token');
       if (tempToken) {
