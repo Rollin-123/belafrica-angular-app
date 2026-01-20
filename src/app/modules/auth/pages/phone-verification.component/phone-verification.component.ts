@@ -54,11 +54,12 @@ export class PhoneVerificationComponent implements OnInit {
     const tempPhoneInfoString = localStorage.getItem('belafrica_temp_phone');
     const telegramResponse = localStorage.getItem('telegram_otp_response');
 
-    if (this.authService.isAuthenticated()) {
+    // Si un utilisateur est chargé en mémoire, c'est la preuve la plus forte d'une connexion/inscription réussie.
+    // Cela casse la boucle de redirection.
+    if (this.userService.getCurrentUser()) {
       console.log('📱 Utilisateur déjà authentifié, redirection vers /app.');
       this.router.navigate(['/app']);
-    }
-    else if (tempPhoneInfoString && telegramResponse) {
+    } else if (tempPhoneInfoString && telegramResponse) {
       try {
         const tempPhoneInfo = JSON.parse(tempPhoneInfoString);
         const otpRequestTime = tempPhoneInfo.timestamp;
