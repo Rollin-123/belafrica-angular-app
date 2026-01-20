@@ -95,7 +95,6 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       distinctUntilChanged(),
       switchMap(conversationId => {
         if (conversationId) {
- this.messagingService.markAsRead(conversationId, []);
           return this.messagingService.getMessages(conversationId);
         } else {
           return of([]);
