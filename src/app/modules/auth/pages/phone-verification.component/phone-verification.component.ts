@@ -54,11 +54,7 @@ export class PhoneVerificationComponent implements OnInit {
     const tempPhoneInfoString = localStorage.getItem('belafrica_temp_phone');
     const telegramResponse = localStorage.getItem('telegram_otp_response');
 
-    // ✅ CORRECTION : On ne redirige que si l'utilisateur n'est PAS déjà authentifié.
-    // Cela évite la boucle après une connexion réussie.
-    // On vérifie le cookie ET l'utilisateur en mémoire pour être sûr.
-    // Si un utilisateur est chargé en mémoire, c'est la preuve la plus forte d'une connexion réussie.
-    if (this.userService.getCurrentUser()) {
+    if (this.authService.isAuthenticated()) {
       console.log('📱 Utilisateur déjà authentifié, redirection vers /app.');
       this.router.navigate(['/app']);
     }
@@ -149,22 +145,19 @@ export class PhoneVerificationComponent implements OnInit {
                 localStorage.setItem('telegram_otp_response', JSON.stringify(response));
               }
               
-              // Sauvegarder les informations du téléphone pour les étapes suivantes
               const countryName = this.europeanCountries.find(c => c.code === formValue.countryCode)?.name || '';
               const phoneData = { 
                 fullPhoneNumber: fullPhoneNumber,
                 countryCode: formValue.countryCode,
                 countryName: countryName,
-                timestamp: Date.now() // On ajoute un timestamp
+                timestamp: Date.now()  
               };
               localStorage.setItem('belafrica_temp_phone', JSON.stringify(phoneData));
               
               // ✅ LOGIQUE DE REDIRECTION RESTAURÉE
-              // Si le backend demande le deep linking, on redirige vers la page d'attente.
               if (response.requiresBotStart && response.links) {
                 this.router.navigate(['/auth/telegram-redirect']);
               } else {
-                // Fallback (ne devrait plus être utilisé mais reste par sécurité)
                 this.successMessage = response.message || 'Code envoyé !';
                 setTimeout(() => {
                   this.router.navigate(['/auth/otp']);
