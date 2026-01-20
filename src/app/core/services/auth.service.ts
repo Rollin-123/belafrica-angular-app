@@ -86,11 +86,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return document.cookie.includes('access_token=') ? 'cookie_present' : null;
+    return this.userService.getCurrentUser() ? 'user_present' : null;
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return !!this.userService.getCurrentUser();
   }
 
   logout(): void {
