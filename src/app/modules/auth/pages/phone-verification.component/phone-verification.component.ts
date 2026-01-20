@@ -54,18 +54,17 @@ export class PhoneVerificationComponent implements OnInit {
 
     // ✅ CORRECTION : On ne redirige que si l'utilisateur n'est PAS déjà authentifié.
     // Cela évite la boucle après une connexion réussie.
-    if (tempPhoneInfoString && telegramResponse && !this.authService.isAuthenticated()) {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/app']); 
+    } else if (tempPhoneInfoString && telegramResponse) {
       try {
         const tempPhoneInfo = JSON.parse(tempPhoneInfoString);
         const otpRequestTime = tempPhoneInfo.timestamp;
         const tenMinutes = 10 * 60 * 1000;  
-
-        // On redirige seulement si la demande de code a moins de 10 minutes
         if (otpRequestTime && (Date.now() - otpRequestTime < tenMinutes)) {
           console.log('📱 Détection d\'un retour récent depuis Telegram. Redirection vers la page OTP.');
           this.router.navigate(['/auth/otp']);
         } else {
-          // La session est expirée, on nettoie le stockage pour éviter une redirection incorrecte
           console.log('📱 Détection d\'une session OTP expirée. Nettoyage du localStorage.');
           localStorage.removeItem('belafrica_temp_phone');
           localStorage.removeItem('telegram_otp_response');

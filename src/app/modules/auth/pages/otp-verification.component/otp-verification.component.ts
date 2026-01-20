@@ -82,7 +82,7 @@ export class OtpVerificationComponent implements OnInit {
               // ✅ Nettoyer les données temporaires pour éviter la boucle
               localStorage.removeItem('belafrica_temp_phone');
               localStorage.removeItem('telegram_otp_response');
-              this.userService.setCurrentUser(response.user); 
+              this.userService.setCurrentUser(response.user);
               this.router.navigate(['/app/national']);
             }
             // Cas 2: Nouvel utilisateur, le backend renvoie un token temporaire pour finaliser le profil
