@@ -8,6 +8,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserService } from '../../../../core/services/user.service';  
 
 interface UserRegistrationData {
   phoneNumber: string;
@@ -35,7 +36,8 @@ export class ProfileSetupComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService,
+    private authService: AuthService, // Keep AuthService for API calls
+    private userService: UserService, // Inject UserService
     private cd: ChangeDetectorRef
   ) {
     this.profileForm = this.fb.group({
@@ -143,6 +145,7 @@ export class ProfileSetupComponent implements OnInit {
             console.log('✅ Réponse création profil:', response);
             
             if (response.success && response.user) {
+              this.userService.setCurrentUser(response.user);  
               localStorage.removeItem('belafrica_temp_phone');
               localStorage.removeItem('userRegistrationData');
               localStorage.removeItem('belafrica_temp_token');

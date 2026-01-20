@@ -17,19 +17,18 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    // Cet intercepteur ne gère plus que le token temporaire pour la finalisation du profil.
-    // Le token de session principal est géré par un cookie HttpOnly.
+    let clonedReq = req.clone({
+      withCredentials: true,
+    });
+
     if (req.url.includes('/complete-profile')) {
       const tempToken = this.storageService.getItem('belafrica_temp_token');
       if (tempToken) {
-        const clonedReq = req.clone({
-          headers: req.headers.set('Authorization', `Bearer ${tempToken}`),
+        clonedReq = clonedReq.clone({
+          headers: clonedReq.headers.set('Authorization', `Bearer ${tempToken}`),
         });
-        return next.handle(clonedReq);
       }
     }
-
-    // Si pas de token, on laisse passer la requête telle quelle
-    return next.handle(req);
+    return next.handle(clonedReq);
   }
 }
