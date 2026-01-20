@@ -8,6 +8,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserService } from '../../../../core/services/user.service';
 
 @Component({
   selector: 'app-phone-verification',
@@ -37,7 +38,8 @@ export class PhoneVerificationComponent implements OnInit {
   constructor(
     private fb: FormBuilder, 
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private userService: UserService // Injecter UserService
   ) {
     this.phoneForm = this.fb.group({
       countryCode: [this.europeanCountries[2].code, Validators.required], // Biélorussie par défaut
@@ -54,8 +56,10 @@ export class PhoneVerificationComponent implements OnInit {
 
     // ✅ CORRECTION : On ne redirige que si l'utilisateur n'est PAS déjà authentifié.
     // Cela évite la boucle après une connexion réussie.
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/app']); 
+    // On vérifie le cookie ET l'utilisateur en mémoire pour être sûr.
+    if (this.authService.isAuthenticated() || this.userService.getCurrentUser()) {
+      console.log('📱 Utilisateur déjà authentifié, redirection vers /app.');
+      this.router.navigate(['/app']);
     } else if (tempPhoneInfoString && telegramResponse) {
       try {
         const tempPhoneInfo = JSON.parse(tempPhoneInfoString);
@@ -80,12 +84,12 @@ export class PhoneVerificationComponent implements OnInit {
     const charCode = event.which ? event.which : event.keyCode;
     
     if (
-      (charCode >= 48 && charCode <= 57) || // Chiffres 0-9
-      charCode === 8 || // Backspace
-      charCode === 9 || // Tab
-      charCode === 37 || // Flèche gauche
-      charCode === 39 || // Flèche droite
-      charCode === 46 // Delete
+      (charCode >= 48 && charCode <= 57) ||  
+      charCode === 8 ||  
+      charCode === 9 ||  
+      charCode === 37 ||  
+      charCode === 39 ||  
+      charCode === 46  
     ) {
       return true;
     }
