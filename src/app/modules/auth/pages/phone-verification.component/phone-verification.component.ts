@@ -52,7 +52,9 @@ export class PhoneVerificationComponent implements OnInit {
     const tempPhoneInfoString = localStorage.getItem('belafrica_temp_phone');
     const telegramResponse = localStorage.getItem('telegram_otp_response');
 
-    if (tempPhoneInfoString && telegramResponse) {
+    // ✅ CORRECTION : On ne redirige que si l'utilisateur n'est PAS déjà authentifié.
+    // Cela évite la boucle après une connexion réussie.
+    if (tempPhoneInfoString && telegramResponse && !this.authService.isAuthenticated()) {
       try {
         const tempPhoneInfo = JSON.parse(tempPhoneInfoString);
         const otpRequestTime = tempPhoneInfo.timestamp;
@@ -69,7 +71,6 @@ export class PhoneVerificationComponent implements OnInit {
           localStorage.removeItem('telegram_otp_response');
         }
       } catch (e) {
-        // En cas d'erreur de parsing (ancien format de données), on nettoie.
         localStorage.removeItem('belafrica_temp_phone');
         localStorage.removeItem('telegram_otp_response');
       }
