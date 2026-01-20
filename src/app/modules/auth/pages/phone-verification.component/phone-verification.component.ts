@@ -57,10 +57,12 @@ export class PhoneVerificationComponent implements OnInit {
     // ✅ CORRECTION : On ne redirige que si l'utilisateur n'est PAS déjà authentifié.
     // Cela évite la boucle après une connexion réussie.
     // On vérifie le cookie ET l'utilisateur en mémoire pour être sûr.
-    if (this.authService.isAuthenticated() || this.userService.getCurrentUser()) {
+    // Si un utilisateur est chargé en mémoire, c'est la preuve la plus forte d'une connexion réussie.
+    if (this.userService.getCurrentUser()) {
       console.log('📱 Utilisateur déjà authentifié, redirection vers /app.');
       this.router.navigate(['/app']);
-    } else if (tempPhoneInfoString && telegramResponse) {
+    }
+    else if (tempPhoneInfoString && telegramResponse) {
       try {
         const tempPhoneInfo = JSON.parse(tempPhoneInfoString);
         const otpRequestTime = tempPhoneInfo.timestamp;
@@ -93,6 +95,7 @@ export class PhoneVerificationComponent implements OnInit {
     ) {
       return true;
     }
+    
     
     event.preventDefault();
     return false;

@@ -79,7 +79,6 @@ export class OtpVerificationComponent implements OnInit {
             // Cas 1: L'utilisateur existe déjà, le backend a mis le cookie et renvoyé l'utilisateur
             if (response.user) {
               console.log('🚀 Connexion réussie. Redirection vers l\'application...');
-              // ✅ Nettoyer les données temporaires pour éviter la boucle
               localStorage.removeItem('belafrica_temp_phone');
               localStorage.removeItem('telegram_otp_response');
               this.userService.setCurrentUser(response.user);
