@@ -146,7 +146,6 @@ export class ProfileSetupComponent implements OnInit {
               localStorage.removeItem('belafrica_temp_phone');
               localStorage.removeItem('userRegistrationData');
               localStorage.removeItem('belafrica_temp_token');
-              
               alert('🎉 Compte créé avec succès ! Bienvenue sur BELAFRICA.');
               
               this.router.navigate(['/app']);
