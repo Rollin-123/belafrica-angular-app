@@ -1,12 +1,12 @@
-/* 
+/*
  * BELAFRICA - Plateforme diaspora africaine
  * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
  * Code source confidentiel - Usage interdit sans autorisation
  */
-import { createNodeRequestHandler, isMainModule, AngularNodeAppEngine, writeResponseToNodeResponse } from '@angular/ssr/express';   
+import { createNodeRequestHandler, isMainModule, AngularNodeAppEngine, writeResponseToNodeResponse } from '@angular/ssr/express';
 import express, { Request, Response, NextFunction } from 'express';
 import { join } from 'node:path';
-
+ 
 // Le chemin vers le build du navigateur, basé sur votre angular.json
 const browserDistFolder = join(process.cwd(), 'dist/belafrica/browser');
 const app = express();
@@ -37,7 +37,6 @@ if (isMainModule(import.meta.url)) {
     if (error) {
       throw error;
     }
-
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }

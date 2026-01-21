@@ -7,6 +7,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable, Subscription, of } from 'rxjs';
 import { PostsService } from '../../../../core/services/posts.service';
 import { UserService, User } from '../../../../core/services/user.service';
+import { ModalService } from '../../../../core/services/modal.service';
 import { Post, isExpiringSoon, getTimeRemaining } from '../../../../core/models/post.model'; 
 
 @Component({
@@ -17,6 +18,7 @@ import { Post, isExpiringSoon, getTimeRemaining } from '../../../../core/models/
     './feed-international.component.scss', 
   ]
 })
+
 export class FeedInternationalComponent implements OnInit, OnDestroy {
   posts$: Observable<Post[]>;
   showCreatePostButton = false;
@@ -25,7 +27,8 @@ export class FeedInternationalComponent implements OnInit, OnDestroy {
 
   constructor(
     private postsService: PostsService,
-    private userService: UserService
+    private userService: UserService,
+    private modalService: ModalService
   ) {
     this.posts$ = of([]);
   }
@@ -82,7 +85,7 @@ export class FeedInternationalComponent implements OnInit, OnDestroy {
   openCreatePostModal(): void {
     if (this.showCreatePostButton) {
       console.log('📝 Ouverture du modal de création de post international');
-      alert('Fonctionnalité de création de post bientôt disponible !');
+      this.modalService.showSuccess('Fonctionnalité à venir', 'Fonctionnalité de création de post bientôt disponible !');
     }
   }
 

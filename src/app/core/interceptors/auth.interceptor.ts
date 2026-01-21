@@ -20,7 +20,6 @@ export class AuthInterceptor implements HttpInterceptor {
     let clonedReq = req.clone({
       withCredentials: true,
     });
-
     
     if (req.url.includes('/complete-profile')) {
       const tempToken = this.storageService.getItem('belafrica_temp_token');

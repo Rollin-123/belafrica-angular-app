@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { UserService, User } from '../../../../core/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Subscription } from 'rxjs';
+import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-settings',
@@ -18,6 +19,8 @@ import { Subscription } from 'rxjs';
 export class SettingsComponent implements OnInit, OnDestroy {
   user: User | null = null;
   private userSubscription: Subscription | undefined;
+  // private modalService!: ModalService;  
+  
   
   settingsSections = [
     {
@@ -85,7 +88,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
   constructor(
     public userService: UserService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private modalService: ModalService // Injectez le ModalService ici
   ) {}
 
   ngOnInit() {
@@ -110,10 +114,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
 }
 
   logout(): void {
-    if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+    this.modalService.showConfirm('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?').then((confirmed) => {
+      if (confirmed) {
       this.authService.logout();
       this.router.navigate(['/auth/phone']);
     }
+    });
   }
 
   getUserInitials(): string {

@@ -9,5 +9,5 @@
   ],
   "include": [
     "src/**/*.d.ts"
-  ]
+, "../belafrica-backend/src/controllers/user.d.ts"  ]
 }

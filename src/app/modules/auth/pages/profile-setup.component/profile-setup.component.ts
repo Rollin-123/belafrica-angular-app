@@ -9,6 +9,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserService } from '../../../../core/services/user.service';  
+import { ModalService } from '../../../../core/services/modal.service';
 
 interface UserRegistrationData {
   phoneNumber: string;
@@ -16,7 +17,7 @@ interface UserRegistrationData {
   countryName: string;
   nationality: string;
   nationalityName: string;
-  community: string; // AJOUTEZ CE CHAMP
+  community: string; 
 }
 
 @Component({
@@ -36,8 +37,9 @@ export class ProfileSetupComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService, // Keep AuthService for API calls
-    private userService: UserService, // Inject UserService
+    private authService: AuthService,  
+    private userService: UserService,
+    private modalService: ModalService,
     private cd: ChangeDetectorRef
   ) {
     this.profileForm = this.fb.group({
@@ -149,19 +151,19 @@ export class ProfileSetupComponent implements OnInit {
               localStorage.removeItem('belafrica_temp_phone');
               localStorage.removeItem('userRegistrationData');
               localStorage.removeItem('belafrica_temp_token');
-              alert('🎉 Compte créé avec succès ! Bienvenue sur BELAFRICA.');
+              this.modalService.showSuccess('Succès', '🎉 Compte créé avec succès ! Bienvenue sur BELAFRICA.');
               
               this.router.navigate(['/app']);
             } else {
               this.errorMessage = response.error || 'Erreur lors de la création du compte';
-              alert(`❌ ${this.errorMessage}`);
+              this.modalService.showError('Erreur', `❌ ${this.errorMessage}`);
             }
           },
           error: (error) => {
             this.isLoading = false;
             console.error('❌ Erreur création profil:', error);
             this.errorMessage = error.message || 'Erreur de connexion au serveur';
-            alert(`❌ ${this.errorMessage}`);
+            this.modalService.showError('Erreur', `❌ ${this.errorMessage}`);
           }
         });
     }

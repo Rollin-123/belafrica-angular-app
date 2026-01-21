@@ -85,10 +85,6 @@ export class AuthService {
     );
   }
 
-  getToken(): string | null {
-    return this.userService.getCurrentUser() ? 'user_present' : null;
-  }
-
   isAuthenticated(): boolean {
     return !!this.userService.getCurrentUser();
   }
@@ -107,7 +103,6 @@ export class AuthService {
       'userRegistrationData',
       'belafrica_temp_token'
     ];
-    
     keys.forEach(key => localStorage.removeItem(key));
   }
 }

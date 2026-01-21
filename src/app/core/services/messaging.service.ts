@@ -45,6 +45,8 @@ export abstract class MessagingService {
     type: 'group' | 'private',
     mentions: Mention[]
   ): Promise<void>;
+
+  
   abstract editMessage(messageId: string, newContent: string): Promise<void>;
   abstract deleteMessage(messageId: string, forEveryone: boolean): Promise<void>;
   abstract getMessageActions(message: Message, currentUserId: string): MessageAction[];

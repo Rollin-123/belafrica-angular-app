@@ -18,6 +18,7 @@ import { ProfileComponent } from './pages/profile.component/profile.component';
 import { AdminRequestComponent } from './pages/admin-request.component/admin-request.component';
 import { CreatePostModalComponent } from './pages/create-post-modal.component/create-post-modal.component';
 import { provideHttpClient } from '@angular/common/http';
+import { ModalService } from '../../core/services/modal.service';
 import { MessageBubbleComponent } from './components/message-bubble/message-bubble.component';
 
 
@@ -41,9 +42,8 @@ import { MessageBubbleComponent } from './components/message-bubble/message-bubb
     SharedModule
   ],
    providers: [
-    provideHttpClient() 
+    provideHttpClient(),
+    ModalService
   ]
 })
-export class MainModule {
-
-}
+export class MainModule {}

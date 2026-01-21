@@ -25,7 +25,6 @@
     </button>
   </nav>
 
-  <!-- Contenu des Onglets -->
   <main class="bel-messaging-content">
 
     <!-- ONGLET CHAT DE GROUPE -->
@@ -73,7 +72,7 @@
         <!-- ✅ INDICATEUR "EN TRAIN D'ÉCRIRE" -->
         <div class="bel-typing-indicator-container">
           @if (typingUsers.size > 0) {
-            <span class="bel-typing-indicator">{{ Array.from(typingUsers.values())[0].pseudo }} est en train d'écrire...</span>
+            <span class="bel-typing-indicator">{{ getTypingIndicator() }}</span>
           }
         </div>
 

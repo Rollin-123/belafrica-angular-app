@@ -10,13 +10,11 @@ import { User } from '../../../../core/services/user.service';
     standalone: false
 })
 export class MessageBubbleComponent {
-  // --- INPUTS (Données reçues du parent) ---
   @Input() message!: Message;
   @Input() currentUser!: User | null;
   @Input() editingMessageId: string | null = null;
   @Input() editMessageContent: string = '';
 
-  // --- OUTPUTS (Événements envoyés au parent) ---
   @Output() contextMenuRequest = new EventEmitter<{ event: MouseEvent, message: Message }>();
   @Output() scrollToRequest = new EventEmitter<string>();
   @Output() editKeydown = new EventEmitter<{ event: KeyboardEvent, message: Message }>();
@@ -24,12 +22,10 @@ export class MessageBubbleComponent {
   @Output() cancelEditRequest = new EventEmitter<void>();
   @Output() saveEditRequest = new EventEmitter<void>();
 
-  // --- GESTION DU TOUCH ---
   private touchStart = { time: 0, x: 0, y: 0 };
 
   constructor(private sanitizer: DomSanitizer) {}
 
-  // --- LOGIQUE DÉPLACÉE DU PARENT VERS L'ENFANT ---
 
   isMyMessage(): boolean {
     return this.message.fromUserId === this.currentUser?.id;
@@ -47,7 +43,7 @@ export class MessageBubbleComponent {
     if (message.status === 'delivered') return 'status-delivered';
     if (message.status === 'sent') return 'status-sent';
     if (message.status === 'sending') return 'status-sending';
-    return 'status-sent'; // Par défaut
+    return 'status-sent';  
   }
 
   getReplyPreview(message: Message): string {

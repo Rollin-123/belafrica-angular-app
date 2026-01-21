@@ -49,7 +49,6 @@ export function getTimeRemaining(post: Post): string {
     return `${days}j`;
   }
 }
-
 // ✅ VÉRIFIER SI LE POST EXPIRE BIENTÔT (moins de 12h)
 export function isExpiringSoon(post: Post): boolean {
   const now = new Date();

@@ -28,14 +28,7 @@ export class ApiService {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'X-App-Version': '1.0.0',
-      'X-App-Platform': 'web'
     });
-
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
     return headers;
   }
 
@@ -131,7 +124,6 @@ export class ApiService {
     return httpParams;
   }
 
-  // ✅ GESTION D'ERREURS
   private handleError(error: any) {
     console.error('API Error:', error);
     

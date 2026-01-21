@@ -10,5 +10,5 @@
   },
   "include": [
     "src/**/*.ts"
-, "src/app/core/services/socket.service.ts"  ]
+, "src/app/core/services/socket.service.ts", "../belafrica-backend/src/controllers/user.d.ts"  ]
 }

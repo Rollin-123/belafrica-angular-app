@@ -8,7 +8,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AdminCodeGeneratorComponent } from './pages/admin-code-generator.component/admin-code-generator.component';
 
 const routes: Routes = [
-   {
+  {
     path: 'generator', 
     component: AdminCodeGeneratorComponent
   },

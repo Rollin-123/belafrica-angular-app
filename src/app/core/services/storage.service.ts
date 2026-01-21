@@ -17,7 +17,6 @@ export class StorageService {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  // Méthode sécurisée pour setItem
   setItem(key: string, value: any): void {
     if (this.isBrowser) {
       try {
@@ -48,7 +47,6 @@ export class StorageService {
     return null;
   }
 
-  // Méthode sécurisée pour removeItem
   removeItem(key: string): void {
     if (this.isBrowser) {
       try {
@@ -59,7 +57,6 @@ export class StorageService {
     }
   }
 
-  // Méthode sécurisée pour clear
   clear(): void {
     if (this.isBrowser) {
       try {

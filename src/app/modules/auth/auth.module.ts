@@ -6,11 +6,10 @@
     */
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms'; // Gardez ReactiveFormsModule
+import { ReactiveFormsModule } from '@angular/forms';  
 
 import { AuthRoutingModule } from './auth-routing.module';
 
-// Composants
 import { PhoneVerificationComponent } from './pages/phone-verification.component/phone-verification.component';
 import { OtpVerificationComponent } from './pages/otp-verification.component/otp-verification.component';
 import { NationalitySelectionComponent } from './pages/nationality-selection.component/nationality-selection.component';
@@ -26,7 +25,7 @@ import { SharedModule } from "../../shared/shared/shared.module";
   ],
   imports: [
     CommonModule,
-    ReactiveFormsModule, // Gardez ReactiveFormsModule
+    ReactiveFormsModule,  
     AuthRoutingModule,
     SharedModule
 ]

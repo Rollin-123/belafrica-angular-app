@@ -14,22 +14,21 @@ export interface User {
   pseudo: string;
   email: string;
   phone_number: string;
-  community: string; // ex: "CamerounEnFrance"
-  country_code: string; // ✅ Ajouté
-  country_name: string; // ex: "France"
-  nationality: string; // ✅ Ajouté
-  nationality_name: string; // ex: "Cameroun"
+  community: string;  
+  country_code: string;  
+  country_name: string;  
+  nationality: string;  
+  nationality_name: string;  
   avatar_url?: string | null;
-  is_admin: boolean; // Vrai si l'utilisateur a des droits admin
-  admin_permissions?: string[]; // ex: ['post_national', 'post_international']
+  is_admin: boolean;  
+  admin_permissions?: string[];  
   admin_level?: 'national' | 'international' | 'super';
-  created_at: string; // ✅ Renommé et type string pour ISO date
-  updated_at: string; // ✅ Ajouté
-  is_verified: boolean; // ✅ Ajouté
-  last_login?: string | null; // ✅ Ajouté
-  login_attempts: number; // ✅ Ajouté
-  ip_address?: string | null; // ✅ Ajouté
-  // ✅ Ajout des champs optionnels du profil
+  created_at: string;  
+  updated_at: string;  
+  is_verified: boolean; 
+  last_login?: string | null; 
+  login_attempts: number; 
+  ip_address?: string | null; 
   bio?: string;
   gender?: string;
   profession?: string;

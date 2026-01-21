@@ -17,11 +17,12 @@ const routes: Routes = [
   {path:'otp', component:OtpVerificationComponent, data: { title: 'Vérification OTP' }},
   {path:'nationality', component:NationalitySelectionComponent, data: { title: 'Sélection Nationalité' }},
   {path:'profile', component:ProfileSetupComponent,data: { title: 'Création Profil' }},
-  { path: 'telegram-redirect', component: TelegramRedirectComponent }
+  {path: 'telegram-redirect', component: TelegramRedirectComponent }
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
+
 export class AuthRoutingModule { }

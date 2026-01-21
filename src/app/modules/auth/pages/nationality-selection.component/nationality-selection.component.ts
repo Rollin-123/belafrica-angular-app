@@ -106,7 +106,6 @@ export class NationalitySelectionComponent implements OnInit {
     if (selectedCode && this.detectedCountry) {
       const country = this.africanCountries.find(c => c.code === selectedCode);
       if (country) {
-        // Format: "TunisieEnFrance"
         this.communityPreview = `${country.name}En${this.detectedCountry.replace(/\s/g, '')}`;
         console.log('🏠 Prévisualisation communauté:', this.communityPreview);
       }
@@ -126,7 +125,7 @@ export class NationalitySelectionComponent implements OnInit {
       if (!tempData && !verifiedPhone) {
         this.errorMessage = 'Veuillez d\'abord vérifier votre numéro de téléphone';
         this.isLoading = false;
-        this.modalService.showError('Données manquantes', this.errorMessage); // ✅ UTILISER LE SERVICE
+        this.modalService.showError('Données manquantes', this.errorMessage);  
         return;
       }
 
@@ -138,7 +137,7 @@ export class NationalitySelectionComponent implements OnInit {
           // Récupérer les infos depuis le backend si nécessaire
           phoneData = {
             fullPhoneNumber: verifiedPhone,
-            countryCode: '+375', // Valeur par défaut, à ajuster
+            countryCode: '+375',  
             detectedCountry: this.detectedCountry || 'Biélorussie'
           };
         }
@@ -150,7 +149,7 @@ export class NationalitySelectionComponent implements OnInit {
         if (!selectedCountry) {
           this.errorMessage = 'Veuillez sélectionner un pays valide';
           this.isLoading = false;
-          this.modalService.showError('Sélection invalide', this.errorMessage); // ✅ UTILISER LE SERVICE
+          this.modalService.showError('Sélection invalide', this.errorMessage); 
           return;
         }
 
@@ -172,7 +171,7 @@ export class NationalitySelectionComponent implements OnInit {
         localStorage.setItem('userRegistrationData', JSON.stringify(profileData));
 
         // Afficher confirmation
-        this.modalService.showSuccess( // ✅ UTILISER LE SERVICE
+        this.modalService.showSuccess( 
           'Nationalité sélectionnée',
           `Vous rejoindrez la communauté :<br><strong>${selectedCountry.name} en ${this.detectedCountry}</strong>`
         );
@@ -187,11 +186,11 @@ export class NationalitySelectionComponent implements OnInit {
         console.error('❌ Erreur:', error);
         this.errorMessage = error.message || 'Erreur lors du traitement';
         this.isLoading = false;
-        this.modalService.showError('Erreur', this.errorMessage); // ✅ UTILISER LE SERVICE
+        this.modalService.showError('Erreur', this.errorMessage); 
       }
     } else {
       this.errorMessage = 'Veuillez sélectionner votre nationalité';
-      this.modalService.showError('Champ requis', this.errorMessage); // ✅ UTILISER LE SERVICE
+      this.modalService.showError('Champ requis', this.errorMessage); 
     }
   }
 
@@ -200,9 +199,6 @@ export class NationalitySelectionComponent implements OnInit {
   }
 
   private getCountryNameFromCode(code: string): string {
-    // ✅ UTILISER LES CONSTANTES CHARGÉES
     return this.countryNames[code as keyof typeof this.countryNames] || 'Pays inconnu';
   }
-
-  // ❌ SUPPRIMER LES FONCTIONS showErrorModal et showSuccessModal
 }

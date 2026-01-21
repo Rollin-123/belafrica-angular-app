@@ -7,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ModalService } from '../../../../core/services/modal.service';
 import { UserService } from '../../../../core/services/user.service';
 
 @Component({
@@ -27,7 +28,8 @@ export class OtpVerificationComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private modalService: ModalService
   ) {
     this.otpForm = this.fb.group({
       otpCode: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
@@ -93,7 +95,7 @@ export class OtpVerificationComponent implements OnInit {
             // Cas d'erreur inattendu
             else {
               this.errorMessage = response.message || 'Réponse inattendue du serveur.';
-              console.error('❌ Réponse inattendue du serveur après vérification OTP.');
+              this.modalService.showError('Erreur', '❌ Réponse inattendue du serveur après vérification OTP.');
             }
 
           } else {
@@ -103,7 +105,7 @@ export class OtpVerificationComponent implements OnInit {
         error: (error) => {
           console.error('❌ Erreur vérification OTP:', error);
            this.errorMessage = error.error?.message || 'Code OTP incorrect ou expiré.';
-          this.isLoading = false;
+          this.modalService.showError('Erreur', this.errorMessage);
         }
       });
     }
@@ -111,14 +113,9 @@ export class OtpVerificationComponent implements OnInit {
 
   resendOtp() {
     if (this.canResend) {
-      // Réinitialiser
       this.countdown = 60;
       this.canResend = false;
       this.startCountdown();
-      
-      // Simuler renvoi
-      console.log('🔄 Renvoi OTP demandé pour', this.phoneNumber);
-      // Ici vous pourriez rappeler requestOtp
     }
   }
 

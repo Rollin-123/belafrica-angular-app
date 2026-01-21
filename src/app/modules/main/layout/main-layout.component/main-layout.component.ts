@@ -8,6 +8,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { MessagingService } from '../../../../core/services/messaging.service';
 import { User, UserService } from '../../../../core/services/user.service';
+import { ModalService } from '../../../../core/services/modal.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -27,7 +28,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
  constructor(
   private router: Router,
   private userService: UserService, 
-  private messagingService: MessagingService,
+  private messagingService: MessagingService, 
+  private modalService: ModalService,
  ) { }
 
  ngOnInit() {
@@ -64,7 +66,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   } else if (url.includes('/settings')) {
    this.activeTab = 'settings';
   } else {
-   this.activeTab = 'national'; // Par défaut
+   this.activeTab = 'national';  
   }
  }
 
@@ -131,16 +133,17 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
  }
 
  openCreatePostModal(): void {
-  console.log(`Ouverture de la modale de post pour l'onglet: ${this.activeTab}`);
-  this.showCreatePostModal = true;
+    if (this.showFabButton) { // S'assurer que le bouton est visible
+      console.log(`Ouverture de la modale de post pour l'onglet: ${this.activeTab}`);
+      this.showCreatePostModal = true;
+    }
  }
-
+ 
  closeCreatePostModal(): void {
   this.showCreatePostModal = false;
  }
 
  onPostCreated(): void {
-  // Logique de rechargement/mise à jour du fil
   this.closeCreatePostModal();
  }
 }

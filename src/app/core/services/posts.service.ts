@@ -10,6 +10,7 @@ import { Post } from '../models/post.model';
 
 @Injectable({ providedIn: 'root' })
 export abstract class PostsService {
+  
   abstract getNationalPosts(): Observable<Post[]>;
   abstract getInternationalPosts(): Observable<Post[]>;
   abstract getPosts(visibility?: 'national' | 'international'): Observable<Post[]>;

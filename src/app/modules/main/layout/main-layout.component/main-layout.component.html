@@ -1,15 +1,12 @@
 <!-- Layout Principal Style WhatsApp -->
 <div class="bel-main-layout">
 
-  <!-- Header Fixe -->
   <header class="bel-header">
     <div class="bel-header-content">
-      <!-- Logo -->
       <div class="bel-header-logo">
         <app-logo size="small"></app-logo>
       </div>
 
-      <!-- Titre dynamique -->
       <h1 class="bel-header-title">{{ getCurrentTitle() }}</h1>
       @if (showFabButton) {
         <button
