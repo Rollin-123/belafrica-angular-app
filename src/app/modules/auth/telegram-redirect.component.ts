@@ -262,7 +262,6 @@ export class TelegramRedirectComponent implements OnInit, OnDestroy {
       const data = JSON.parse(otpResponse);
       this.telegramLink = data.links?.universal || data.links?.web || '';
 
-      // ✅ NOUVEAU : Personnaliser les messages en fonction du contexte (login ou inscription)
       if (data.userExists) {
         this.pageTitle = 'Bon retour !';
         this.pageSubtitle = 'Veuillez vérifier votre identité via Telegram pour vous connecter en toute sécurité.';

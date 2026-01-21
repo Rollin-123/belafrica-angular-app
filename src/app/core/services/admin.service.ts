@@ -6,7 +6,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http'; 
-import { Observable, of } from 'rxjs'; 
+import { Observable, of, throwError } from 'rxjs'; 
 import { catchError, map, tap } from 'rxjs/operators'; 
 import { StorageService } from './storage.service';
 import { UserService } from './user.service';
@@ -34,10 +34,11 @@ export class AdminService {
       identityImageUrl,
       motivation
     };
+    
     return this.http.post<{ success: boolean; message?: string; error?: string }>(`${this.apiUrl}/request-promotion`, body).pipe(
       catchError(err => {
         console.error('❌ Erreur API submitAdminRequest:', err);
-        return of({ success: false, error: err.error?.error || 'Erreur serveur lors de la soumission' });
+        return throwError(() => new Error(err.error?.error || 'Erreur serveur lors de la soumission'));
       })
     );
   }
@@ -71,7 +72,7 @@ export class AdminService {
     return this.http.post<{ success: boolean; code?: string; message?: string; error?: string }>(`${this.apiUrl}/generate-code`, body).pipe(
       catchError(err => {
         console.error('❌ Erreur API generateAdminCode:', err);
-        return of({ success: false, error: err.error?.error || 'Erreur serveur' });
+        return throwError(() => new Error(err.error?.error || 'Erreur serveur'));
       })
     );
   }
@@ -88,7 +89,7 @@ export class AdminService {
       }),
       catchError(err => {
         console.error('❌ Erreur API validateAdminCode:', err);
-        return of({ success: false, error: err.error?.error || 'Code invalide ou expiré' });
+        return throwError(() => new Error(err.error?.error || 'Code invalide ou expiré'));
       })
     );
   }
@@ -97,7 +98,7 @@ export class AdminService {
     return this.http.get<{ success: boolean, codes: AdminCode[] }>(`${this.apiUrl}/codes`).pipe(
       map((response: { codes: any; }) => response.codes || []),
       catchError(err => {
-        console.error('❌ Erreur API getGeneratedCodes:', err);
+        console.error('❌ Erreur API getGeneratedCodes:', err); // Ne pas throw ici pour ne pas bloquer l'affichage
         return of([]); 
       })
     );

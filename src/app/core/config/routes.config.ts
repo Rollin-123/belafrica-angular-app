@@ -34,4 +34,3 @@ export const RouteGuards = {
   AUTH_REQUIRED: ['/app', '/app/*'], 
   ADMIN_REQUIRED: ['/admin', '/admin/*'] 
 };
-// src/app/core/config/routes.config.ts

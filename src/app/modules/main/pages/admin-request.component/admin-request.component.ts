@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
 import { AdminService } from '../../../../core/services/admin.service';
 import { User, UserService } from '../../../../core/services/user.service';
 import { CloudinaryUploadService } from '../../../../core/services/cloudinary.service';
-import { Subscription } from 'rxjs';
+import { ModalService } from '../../../../core/services/modal.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-request',
@@ -39,6 +40,7 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private cloudinaryService: CloudinaryUploadService,
     private cd: ChangeDetectorRef,
+    private modalService: ModalService,
   ) {
     this.adminForm = this.fb.group({
       passportPhoto: [false, Validators.requiredTrue],
@@ -63,7 +65,6 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
       this.cd.detectChanges();
     });
   }
-  // ... (le reste du fichier est bon)
 
   ngOnDestroy() {
     this.userSubscription?.unsubscribe();
@@ -129,15 +130,12 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
     this.uploadError = null;
 
     try {
-      // 1. Uploader l'image sur Cloudinary
       const imageUrl = await this.cloudinaryService.uploadImage(this.selectedPassportBase64);
-      
-      // 2. Soumettre la demande au backend avec l'URL de l'image
-      const response = await this.adminService.submitAdminRequest(imageUrl, this.adminForm.value.additionalInfo).toPromise();
+      const response = await firstValueFrom(this.adminService.submitAdminRequest(imageUrl, this.adminForm.value.additionalInfo));
 
       if (response?.success) {
         this.hasPendingRequest = true;
-        this.showSuccess(response.message || '📨 Demande envoyée ! Vous recevrez une notification une fois traitée.');
+        this.modalService.showSuccess('Demande envoyée', response.message || '📨 Demande envoyée ! Vous recevrez une notification une fois traitée.');
         this.adminForm.reset();
         this.passportPreview = null;
         this.selectedPassportBase64 = null;
@@ -146,7 +144,7 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
       }
     } catch (error: any) {
       console.error("Erreur lors de la soumission de la demande:", error);
-      this.codeError = "❌ Échec de l'envoi: " + (error.error?.error || error.message || 'Erreur inconnue');
+      this.codeError = "❌ Échec de l'envoi: " + (error.message || 'Erreur inconnue');  
     } finally {
       this.isLoading = false;
       this.cd.detectChanges();
@@ -168,10 +166,10 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
     this.adminService.validateAdminCode(code).subscribe({
       next: (response) => {
         if (response.success) {
-          this.codeError = '🎉 Félicitations ! Vous êtes maintenant administrateur. Redirection...';
-          this.isAdmin = true; // L'état sera mis à jour par le `currentUser$` de toute façon
+          this.modalService.showSuccess('Félicitations !', '🎉 Vous êtes maintenant administrateur. Redirection...');
+          this.isAdmin = true;  
           this.showCreatePostButton = true;
-          this.router.navigate(['/app/settings']); // Rediriger après succès
+          this.router.navigate(['/app/settings']); 
         } else {
           this.codeError = response.error || '❌ Code invalide, expiré ou ne correspond pas à votre communauté.';
         }
@@ -193,11 +191,11 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
   }
 
   private showError(message: string): void {
-    alert(message);
+    this.modalService.showError('Erreur', message);
   }
 
   private showSuccess(message: string): void {
-    alert(message);
+    this.modalService.showSuccess('Succès', message);
   }
 
   goBack(): void {
@@ -205,15 +203,13 @@ export class AdminRequestComponent implements OnInit, OnDestroy {
   }
 
   resetForTesting(): void {
-    this.adminService.resetAdminData();
-    this.showSuccess('🔄 Données admin réinitialisées. Le statut sera mis à jour.');
+    this.adminService.resetAdminData(); // Cette méthode est locale au service
+    this.modalService.showSuccess('Réinitialisation', '🔄 Données admin réinitialisées. Le statut sera mis à jour.');
   }
 
-  // Nouvelle méthode pour ouvrir le modal de création de post
   openCreatePostModal(): void {
     if (this.showCreatePostButton) {
       console.log('📝 Ouverture du modal de création de post');
-      // Implémenter l'ouverture du modal ici
       this.showSuccess('Fonctionnalité de création de post bientôt disponible !');
     }
   }

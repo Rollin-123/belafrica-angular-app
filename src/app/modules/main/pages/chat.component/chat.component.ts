@@ -13,6 +13,7 @@ import { map, debounceTime } from 'rxjs/operators';
 // Assurez-vous que ces paths sont corrects
 import { Message, Conversation, MessageAction } from '../../../../core/models/message.model';
 import { MessagingService } from '../../../../core/services/messaging.service';
+import { ModalService } from '../../../../core/services/modal.service';
 import { UserService } from '../../../../core/services/user.service';
 
 @Component({
@@ -50,8 +51,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000;
 
   // --- Indicateur "est en train d'écrire" ---
-  typingUsers: { userId: string, pseudo: string }[] = [];
+  typingUsers: Map<string, { pseudo: string, timeout: any }> = new Map(); // Changement de Array à Map
   private typingSubject = new Subject<void>();
+  isTyping = false; // Ajout de la propriété isTyping
+  readonly TYPING_TIMER_LENGTH = 3000; // Ajout de la constante
   
   private subscriptions: Subscription = new Subscription();
 
@@ -59,7 +62,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     private route: ActivatedRoute,
     private router: Router,
     private messagingService: MessagingService,
-    private userService: UserService,
+    private userService: UserService, // Assurez-vous que UserService est injecté
+    private modalService: ModalService, // Injecter le ModalService
     private cdr: ChangeDetectorRef
   ) {
     this.currentUser = this.userService.getCurrentUser();
@@ -103,7 +107,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.messages = messages;
       this.cdr.detectChanges();
       setTimeout(() => this.scrollToBottom(), 100);
-      // Marquer les messages non lus comme lus lors du chargement initial
       const unreadMessageIds = messages
         .filter(m => !this.isMyMessage(m) && m.status !== 'read')
         .map(m => m.id);
@@ -115,52 +118,57 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private listenForRealTimeEvents(): void {
-    // Écouter les nouveaux messages
     const newMsgSub = this.messagingService.getRealTimeMessages().subscribe(message => {
       if (message && message.conversationId === this.conversationId) {
         this.messages.push(message);
         this.cdr.detectChanges();
         setTimeout(() => this.scrollToBottom(), 100);
-        // Marquer le nouveau message comme lu s'il ne vient pas de moi
         if (!this.isMyMessage(message)) {
           this.messagingService.markAsRead(this.conversationId, [message.id]);
         }
       }
     });
 
-    // Écouter qui tape
-    const userTypingSub = this.messagingService.onUserTyping().subscribe(user => {
-      if (user && user.userId !== this.currentUser?.id && !this.typingUsers.some(u => u.userId === user.userId)) {
-        this.typingUsers.push(user);
-        this.cdr.detectChanges();
+    this.subscriptions.add(this.messagingService.onUserTyping().subscribe(data => {
+      if (data.userId !== this.currentUser?.id && data.conversationId === this.conversationId) { 
+        if (this.typingUsers.has(data.userId)) {
+          clearTimeout(this.typingUsers.get(data.userId)?.timeout);
+        }
+        const timeout = setTimeout(() => {  
+          this.typingUsers.delete(data.userId);
+          // this.cdr.detectChanges();  
+        }, this.TYPING_TIMER_LENGTH + 1000);
+        this.typingUsers.set(data.userId, { pseudo: data.pseudo, timeout });
+        // this.cdr.detectChanges();
       }
-    });
-    const userStoppedTypingSub = this.messagingService.onUserStoppedTyping().subscribe(user => {
-      this.typingUsers = this.typingUsers.filter(u => u.userId !== user.userId);
-      this.cdr.detectChanges();
-    });
+    }));
+    this.subscriptions.add(this.messagingService.onUserStoppedTyping().subscribe(data => {  
+      if (data.userId !== this.currentUser?.id && data.conversationId === this.conversationId) {
+        if (this.typingUsers.has(data.userId)) {
+          clearTimeout(this.typingUsers.get(data.userId)?.timeout);
+          this.typingUsers.delete(data.userId);
+          // this.cdr.detectChanges();
+        }
+      }
+    }));
 
-    // Gérer l'émission des événements "typing"
+
     const typingSub = this.typingSubject.pipe(debounceTime(2000)).subscribe(() => {
       this.messagingService.emitStopTyping(this.conversationId);
     });
 
-    // Écouter quand un autre utilisateur a lu les messages
     const messagesReadSub = this.messagingService.onMessagesRead().subscribe(data => {
       if (data && data.conversationId === this.conversationId && data.userId !== this.currentUser?.id) {
-        // Mettre à jour le statut des messages que J'AI envoyés
         this.messages.forEach(message => {
           if (this.isMyMessage(message) && message.status !== 'read') {
             message.status = 'read';
           }
         });
-        this.cdr.detectChanges(); // Forcer la mise à jour de la vue
+        this.cdr.detectChanges(); 
       }
     });
 
     this.subscriptions.add(newMsgSub);
-    this.subscriptions.add(userTypingSub);
-    this.subscriptions.add(userStoppedTypingSub);
     this.subscriptions.add(typingSub);
     this.subscriptions.add(messagesReadSub);
   }
@@ -199,7 +207,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       
     } catch (error) {
       console.error('❌ Erreur envoi message:', error);
-      alert('Erreur lors de l\'envoi du message');
+      this.modalService.showError('Erreur d\'envoi', 'Erreur lors de l\'envoi du message');
     } finally {
       this.isSending = false;
       // Vérifier que l'element existe avant de focus
@@ -210,13 +218,17 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onInput(): void {
-    // Émettre un événement 'startTyping' la première fois que l'utilisateur tape
-    if (this.newMessage.trim().length === 1) {
+    // Émettre un événement 'startTyping' si l'utilisateur n'est pas déjà en train de taper
+    if (!this.isTyping) {
+      this.isTyping = true;
       this.messagingService.emitStartTyping(this.conversationId);
     }
-    // Relancer le timer de 'stopTyping' à chaque frappe
+    // Réinitialiser le timer pour 'stopTyping' à chaque frappe
     this.typingSubject.next();
   }
+
+  // Ajout de la logique pour le timeout de typing
+  private typingTimeout: any;
 
   onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -225,6 +237,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       this.onInput();
     }
+
+    // Gestion de l'indicateur "en train d'écrire"
+    clearTimeout(this.typingTimeout);
+    this.typingTimeout = setTimeout(() => {
+      this.isTyping = false;
+      this.messagingService.emitStopTyping(this.conversationId);
+    }, this.TYPING_TIMER_LENGTH);
   }
 
   private scrollToBottom(): void {
@@ -250,11 +269,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getTypingIndicator(): string {
-    const otherTypingUsers = this.typingUsers.filter(u => u.userId !== this.currentUser?.id);
-    if (otherTypingUsers.length === 0) return '';
-    if (otherTypingUsers.length === 1) return `${otherTypingUsers[0].pseudo} est en train d'écrire...`;
-    if (otherTypingUsers.length === 2) return `${otherTypingUsers[0].pseudo} et ${otherTypingUsers[1].pseudo} sont en train d'écrire...`;
-    return `Plusieurs personnes sont en train d'écrire...`;
+    const typingUserPseudos = Array.from(this.typingUsers.values())
+      .filter(u => u.pseudo !== this.currentUser?.pseudo) // Filter out current user
+      .map(u => u.pseudo);
+    if (typingUserPseudos.length === 0) return '';
+    if (typingUserPseudos.length === 1) return `${typingUserPseudos[0]} est en train d'écrire...`;
+    if (typingUserPseudos.length === 2) return `${typingUserPseudos[0]} et ${typingUserPseudos[1]} sont en train d'écrire...`;
+    return 'Plusieurs personnes sont en train d\'écrire...';
   }
 
   // =================================================================
@@ -295,10 +316,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
         this.startEditing(message);
         break;
       case 'delete':
-        this.deleteMessage(message.id, true); // Supprimer pour tout le monde
+        this.deleteMessage(message.id, true);  
         break;
       case 'delete-for-self':
-        this.deleteMessage(message.id, false); // Supprimer pour soi
+        this.deleteMessage(message.id, false);  
         break;
       case 'copy':
         this.copyMessage(message);
@@ -340,7 +361,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.cancelEditing();
     } catch (error: any) {
       console.error('❌ Erreur édition message:', error);
-      alert(error.message || 'Erreur lors de la modification du message');
+      this.modalService.showError('Erreur d\'édition', error.message || 'Erreur lors de la modification du message');
     }
   }
 
@@ -348,14 +369,16 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
     const message = this.messages.find(m => m.id === messageId);
     if (!message || !this.canDeleteMessage(message)) return;
 
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
+    this.modalService.showConfirm('Confirmation', 'Êtes-vous sûr de vouloir supprimer ce message ?').then(async confirmed => {
+      if (confirmed) {
       try {
         await this.messagingService.deleteMessage(messageId, forEveryone);
       } catch (error: any) {
         console.error('❌ Erreur suppression message:', error);
-        alert(error.message || 'Erreur lors de la suppression du message');
+        this.modalService.showError('Erreur de suppression', error.message || 'Erreur lors de la suppression du message');
       }
     }
+    });
   }
 
   copyMessage(message: Message): void {

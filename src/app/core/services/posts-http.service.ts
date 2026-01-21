@@ -50,14 +50,11 @@ export class PostsHttpService extends PostsService {
     return response.post;
   }
 
-  async toggleLike(postId: string): Promise<void> {
-    // Le backend retourne { success: true, liked: boolean, likesCount: number }
-    // Nous n'avons pas besoin de la réponse ici, mais nous attendons que la requête se termine.
+  async toggleLike(postId: string): Promise<void> { 
     await this.http.post(`${this.apiUrl}/${postId}/like`, {}).toPromise();
   }
 
   async deletePost(postId: string): Promise<boolean> {
-    // Le backend retourne { success: true, message: '...' }
     const response = await this.http.delete<{ success: boolean }>(`${this.apiUrl}/${postId}`).toPromise();
     return response?.success ?? false;
   }

@@ -8,6 +8,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ModalService } from '../../../../core/services/modal.service';
 import { UserService } from '../../../../core/services/user.service';
 
 @Component({
@@ -39,10 +40,11 @@ export class PhoneVerificationComponent implements OnInit {
     private fb: FormBuilder, 
     private router: Router,
     private authService: AuthService,
-    private userService: UserService // Injecter UserService
+    private userService: UserService,
+    private modalService: ModalService
   ) {
     this.phoneForm = this.fb.group({
-      countryCode: [this.europeanCountries[2].code, Validators.required], // Biélorussie par défaut
+      countryCode: [this.europeanCountries[2].code, Validators.required],  
       phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9\s]{8,15}$/)]]
     });
   }
@@ -128,11 +130,11 @@ export class PhoneVerificationComponent implements OnInit {
       console.log('📱 Demande OTP pour:', fullPhoneNumber);
 
       // Nettoyer les données précédentes
-      localStorage.removeItem('belafrica_temp_phone'); // Assurez-vous que la clé est cohérente
+      localStorage.removeItem('belafrica_temp_phone');  
       localStorage.removeItem('verified_phone');
       localStorage.removeItem('userRegistrationData');
       localStorage.removeItem('geo_validation');
-      localStorage.removeItem('telegram_otp_response'); // ✅ Nettoyer la réponse précédente
+      localStorage.removeItem('telegram_otp_response');  
 
       this.authService.requestOtp(phoneNumber, formValue.countryCode)
         .subscribe({
@@ -141,7 +143,6 @@ export class PhoneVerificationComponent implements OnInit {
             console.log('✅ Réponse OTP:', response);
 
             if (response.success) {
-              // Sauvegarder la réponse complète pour la page de redirection
               if (response.links || response.requiresBotStart) {
                 localStorage.setItem('telegram_otp_response', JSON.stringify(response));
               }
@@ -166,101 +167,23 @@ export class PhoneVerificationComponent implements OnInit {
               }
             } else {
               this.errorMessage = response.error || 'Erreur lors de l\'envoi du code';
-              this.showError(this.errorMessage);
+              this.modalService.showError('Erreur', this.errorMessage);
             }
           },
           error: (error) => {
-            this.isLoading = false;
+            this.isLoading = false;  
             console.error('❌ Erreur OTP:', error);
             // ✅ Logique améliorée pour extraire le message d'erreur de l'API
             let apiErrorMessage = 'Erreur de connexion au serveur. Veuillez réessayer.';
             if (error.error && typeof error.error.error === 'string') {
-              // Le message d'erreur est directement dans error.error.error
               apiErrorMessage = error.error.error;
             } else if (error.message) {
               apiErrorMessage = error.message;
             }
             this.errorMessage = apiErrorMessage;
-            this.showError(this.errorMessage);
+            this.modalService.showError('Erreur', this.errorMessage);
           }
         });
     }
-  }
-
-  // ✅ AFFICHER LES ERREURS DANS UNE MODAL
-  private showError(message: string): void {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      animation: fadeIn 0.3s ease;
-    `;
-    
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    `;
-    
-    modalContent.innerHTML = `
-      <div style="color: #E53E3E; margin-bottom: 20px;">
-        <div style="font-size: 48px; margin-bottom: 10px;">🚫</div>
-        <h2 style="margin-bottom: 10px;">Accès Refusé</h2>
-      </div>
-      
-      <div style="
-        background: #FED7D7;
-        border-left: 4px solid #E53E3E;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 20px 0;
-        text-align: left;
-      ">
-        <p style="color: #742A2A; margin: 0; white-space: pre-line;">
-          ${message}
-        </p>
-      </div>
-      
-      <button id="closeBtn" style="
-        background: #E53E3E;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 30px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-      ">
-        Compris
-      </button>
-    `;
-    
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    // Fermer la modal
-    document.getElementById('closeBtn')?.addEventListener('click', () => {
-      document.body.removeChild(modal);
-    });
-    
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        document.body.removeChild(modal);
-      }
-    });
   }
 }

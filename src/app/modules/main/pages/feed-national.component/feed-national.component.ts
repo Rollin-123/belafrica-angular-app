@@ -7,6 +7,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable, of, Subscription } from 'rxjs';
 import { UserService } from '../../../../core/services/user.service';
 import { PostsService } from '../../../../core/services/posts.service';
+import { ModalService } from '../../../../core/services/modal.service';
 import { Post, isExpiringSoon, getTimeRemaining } from '../../../../core/models/post.model';
 
 @Component({
@@ -24,7 +25,8 @@ export class FeedNationalComponent implements OnInit, OnDestroy {
 
   constructor(
     private userService: UserService,
-    private postsService: PostsService
+    private postsService: PostsService,
+    private modalService: ModalService
   ) {
     this.posts$ = of([]); 
   }
@@ -37,7 +39,6 @@ export class FeedNationalComponent implements OnInit, OnDestroy {
         console.log(`🏠 FeedNational initialisé pour la communauté: ${this.userCommunity}`);
         this.loadNationalPosts();
       } else {
-        // Gérer le cas où l'utilisateur se déconnecte
         this.userCommunity = '';
         this.showCreatePostButton = false;
         this.isLoading = false;
@@ -66,7 +67,7 @@ export class FeedNationalComponent implements OnInit, OnDestroy {
 
   hasLiked(post: Post): boolean {
     const user = this.userService.getCurrentUser();
-    return user ? post.likes.includes(user.id) : false; // ✅ Correction: user.id
+    return user ? post.likes.includes(user.id) : false;  
   }
 
   toggleLike(postId: string): void {
@@ -85,16 +86,11 @@ export class FeedNationalComponent implements OnInit, OnDestroy {
   openCreatePostModal(): void {
     if (this.showCreatePostButton) {
       console.log('📝 Ouverture du modal de création de post national');
-      this.showFeatureComingSoon();
+      this.modalService.showSuccess('Fonctionnalité à venir', '🎯 Fonctionnalité de création de post bientôt disponible !\n\nVous pourrez bientôt créer des posts pour votre communauté.');
     } else {
       console.log('❌ Accès refusé: utilisateur non admin');
     }
   }
-
-  private showFeatureComingSoon(): void {
-    alert('🎯 Fonctionnalité de création de post bientôt disponible !\n\nVous pourrez bientôt créer des posts pour votre communauté.');
-  }
-
   refreshPosts(): void {
     this.isLoading = true;
     console.log('🔄 Actualisation des posts nationaux...');

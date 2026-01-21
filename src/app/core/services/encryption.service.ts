@@ -10,8 +10,8 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
+
 export class EncryptionService {
-  
   constructor() {}
 
   async generateEncryptionKey(): Promise<CryptoKey> {

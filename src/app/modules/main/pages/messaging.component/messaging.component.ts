@@ -3,13 +3,14 @@
     * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
     * Code source confidentiel - Usage interdit sans autorisation
     */
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
-import { Observable, of, firstValueFrom, Subscription } from 'rxjs';
-import { map, tap, switchMap, distinctUntilChanged } from 'rxjs/operators';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
+import { Observable, of, firstValueFrom, Subscription, Subject } from 'rxjs';
+import { map, tap, switchMap, distinctUntilChanged, debounceTime } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Message, Conversation, MessageAction, Mention } from '../../../../core/models/message.model';
-import { MessagingService } from '../../../../core/services/messaging.service';
+import { MessagingService } from '../../../../core/services/messaging.service'; 
 import { User, UserService } from '../../../../core/services/user.service';
+import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-messaging',
@@ -45,6 +46,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   typingUsers = new Map<string, { pseudo: string, timeout: any }>();
   isTyping = false;
   private typingTimeout: any;
+  private typingSubject = new Subject<void>();
   readonly TYPING_TIMER_LENGTH = 3000; 
 
   private touchStart = {
@@ -72,7 +74,9 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private messagingService: MessagingService,
     private userService: UserService,
-    private sanitizer: DomSanitizer  
+    private sanitizer: DomSanitizer,
+    private modalService: ModalService,
+    private cdr: ChangeDetectorRef  
   ) {
     const user = this.userService.getCurrentUser();
     this.currentUser = user;
@@ -107,6 +111,48 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  // ✅ NOUVEAU : Écoute des événements temps réel pour les indicateurs de frappe
+  private listenForRealTimeEvents(): void {
+    // Écoute des utilisateurs en train de taper
+    this.subscription.add(this.messagingService.onUserTyping().subscribe(async data => {
+      const conversation = await firstValueFrom(this.groupConversation$);
+      if (data.userId !== this.currentUser?.id && data.conversationId === conversation?.id) { 
+        if (this.typingUsers.has(data.userId)) {
+          clearTimeout(this.typingUsers.get(data.userId)?.timeout);
+        }
+        const timeout = setTimeout(() => {
+          this.typingUsers.delete(data.userId);
+          this.cdr.detectChanges(); 
+        }, this.TYPING_TIMER_LENGTH + 1000);  
+        
+        this.typingUsers.set(data.userId, { pseudo: data.pseudo, timeout });
+        this.cdr.detectChanges(); 
+      }
+    }));
+
+    // Écoute des utilisateurs qui arrêtent de taper
+    this.subscription.add(this.messagingService.onUserStoppedTyping().subscribe(async data => {
+      const conversation = await firstValueFrom(this.groupConversation$);
+      if (data.userId !== this.currentUser?.id && data.conversationId === conversation?.id) {  
+        if (this.typingUsers.has(data.userId)) {
+          clearTimeout(this.typingUsers.get(data.userId)?.timeout);
+          this.typingUsers.delete(data.userId);
+          this.cdr.detectChanges(); 
+        }
+      }
+    }));
+
+    // Le typingSubject est géré dans onKeyPress/onMessageInput
+    this.subscription.add(this.typingSubject.pipe(debounceTime(this.TYPING_TIMER_LENGTH)).subscribe(() => { 
+      firstValueFrom(this.groupConversation$).then(conv => {
+        if (conv) {
+          this.messagingService.emitStopTyping(conv.id);
+        }
+      });
+      this.isTyping = false;  
+    }));
+  }
+
   ngOnInit() {
     this.subscription.add(
       this.messages$.subscribe(messages => {
@@ -114,6 +160,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateReadStatus(messages);
       })
     );
+    this.listenForRealTimeEvents(); 
   }
 
   ngAfterViewInit() {
@@ -150,23 +197,9 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const messageContent = this.newMessage.trim();
 
     try {
-      const conversation = await firstValueFrom(this.groupConversation$);
-      if (!conversation) {
-        console.error('❌ Tentative d\'envoi de message sans conversation chargée. Probablement dû à une erreur de chargement initiale (401?).');
-        alert('Impossible d\'envoyer le message. La conversation n\'a pas pu être chargée. Veuillez rafraîchir la page.');
-        this.isSending = false;
-        return;
-      }
-
-      // Détecter les mentions avant l'envoi
+      const conversation = await this.getValidatedConversation();      
       const mentions = this.detectMentions(messageContent, conversation.id);
-
-      await this.messagingService.sendMessage(
-        messageContent,
-        conversation.id,
-        'group',
-        mentions
-      );
+      await this.messagingService.sendMessage(messageContent, conversation.id, 'group', mentions);
 
       this.newMessage = '';
       this.showMentionsList = false;
@@ -174,7 +207,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       
     } catch (error) {
       console.error('❌ Erreur envoi message:', error);
-      alert('Erreur lors de l\'envoi du message');
+      this.modalService.showError('Erreur d\'envoi', 'Erreur lors de l\'envoi du message');
     } finally {
       this.isSending = false;
       if (this.messageInput?.nativeElement) {
@@ -192,24 +225,10 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const messageContent = this.newMessage.trim();
 
     try {
-      const conversation = await firstValueFrom(this.groupConversation$);
-      if (!conversation) {
-        console.error('❌ Tentative d\'envoi de message sans conversation chargée. Probablement dû à une erreur de chargement initiale (401?).');
-        alert('Impossible d\'envoyer le message. La conversation n\'a pas pu être chargée. Veuillez rafraîchir la page.');
-        this.isSending = false;
-        return;
-      }
-
-      // Détecter les mentions avant l'envoi
+      const conversation = await this.getValidatedConversation();      
       const mentions = this.detectMentions(messageContent, conversation.id);
 
-      await this.messagingService.replyToMessage(
-        messageContent,
-        conversation.id,
-        this.replyingTo.id, 
-        'group',
-        mentions
-      );
+      await this.messagingService.replyToMessage(messageContent, conversation.id, this.replyingTo.id, 'group', mentions);
 
       this.newMessage = '';
       this.replyingTo = null;
@@ -218,7 +237,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       
     } catch (error) {
       console.error('❌ Erreur envoi message avec réponse:', error);
-      alert('Erreur lors de l\'envoi du message');
+      this.modalService.showError('Erreur d\'envoi', 'Erreur lors de l\'envoi du message');
     } finally {
       this.isSending = false;
       if (this.messageInput?.nativeElement) {
@@ -232,7 +251,11 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     // Gestion de l'indicateur "en train d'écrire"
     if (!this.isTyping) {
       this.isTyping = true;
-      // this.messagingService.emitStartTyping(this.activeConversationId);
+      firstValueFrom(this.groupConversation$).then(conv => {
+        if (conv) {
+          this.messagingService.emitStartTyping(conv.id);
+        }
+      });
     }
     clearTimeout(this.typingTimeout);
     // Gestion des @mentions
@@ -265,12 +288,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const input = event.target as HTMLTextAreaElement;
     this.newMessage = input.value;
 
+    // Réinitialiser le timer pour 'stopTyping' à chaque frappe
+    clearTimeout(this.typingTimeout);
     this.typingTimeout = setTimeout(() => {
       this.isTyping = false;
-      // this.messagingService.emitStopTyping(this.activeConversationId);
-    }, this.TYPING_TIMER_LENGTH);
+      this.typingSubject.next(); // Émettre un événement pour le debounce de stopTyping
+    }, this.TYPING_TIMER_LENGTH); 
     
-    // Vérifier si on est en train de taper une mention
     if (this.showMentionsList) {
       this.updateMentionCandidates();
     }
@@ -417,7 +441,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   // ✅ ACTIONS SUR LES MESSAGES
   startEditing(message: Message): void {
     if (!this.canEditMessage(message)) {
-      alert('Le délai de modification (30 minutes) est expiré');
+      this.modalService.showError('Modification impossible', 'Le délai de modification (30 minutes) est expiré');
       return;
     }
 
@@ -442,32 +466,32 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cancelEditing();
     } catch (error: any) {
       console.error('❌ Erreur édition message:', error);
-      alert(error.message || 'Erreur lors de la modification du message');
+      this.modalService.showError('Erreur d\'édition', error.message || 'Erreur lors de la modification du message');
     }
   }
 
   async deleteMessage(messageId: string, forEveryone: boolean): Promise<void> {
     try {
       const message = this.findMessageById(messageId);
-      if (!message) return alert('Message non trouvé');
+      if (!message) return this.modalService.showError('Erreur', 'Message non trouvé');
 
       const confirmationText = forEveryone 
         ? 'Êtes-vous sûr de vouloir supprimer ce message pour tout le monde ?'
         : 'Supprimer ce message uniquement pour vous ?';
-
+      
       if (forEveryone) {
         if (!this.canDeleteMessage(message)) {
-          return alert('Le délai de suppression (2 heures) est expiré');
+          return this.modalService.showError('Suppression impossible', 'Le délai de suppression (2 heures) est expiré');
         }
       }
 
-      if (!confirm(confirmationText)) return;
+      if (!(await this.modalService.showConfirm('Confirmation', confirmationText))) return; // Utilisation de la modal custom
 
       await this.messagingService.deleteMessage(messageId, forEveryone);
 
     } catch (error: any) {
       console.error('❌ Erreur suppression message:', error);
-      alert(error.message || 'Erreur lors de la suppression du message');
+      this.modalService.showError('Erreur de suppression', error.message || 'Erreur lors de la suppression du message');
     }
     finally {
       this.closeContextMenu();
@@ -583,5 +607,26 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       const conversationId = unreadMessages[0].conversationId;
       this.messagingService.markAsRead(conversationId, unreadMessages.map(m => m.id));
     }
+  }
+
+  private async getValidatedConversation(): Promise<Conversation> {
+    const conversation = await firstValueFrom(this.groupConversation$);
+    if (!conversation) {
+      console.error('❌ Tentative d\'envoi de message sans conversation chargée. Probablement dû à une erreur de chargement initiale (401?).');
+      this.modalService.showError('Erreur de conversation', 'Impossible d\'envoyer le message. La conversation n\'a pas pu être chargée. Veuillez rafraîchir la page.');
+      this.isSending = false;
+      throw new Error('Conversation not available'); 
+    }
+    return conversation;
+  }
+
+  getTypingIndicator(): string {
+    const typingUserPseudos = Array.from(this.typingUsers.values())
+      .filter(u => u.pseudo !== this.currentUser?.pseudo)  
+      .map(u => u.pseudo);
+    if (typingUserPseudos.length === 0) return '';
+    if (typingUserPseudos.length === 1) return `${typingUserPseudos[0]} est en train d'écrire...`;
+    if (typingUserPseudos.length === 2) return `${typingUserPseudos[0]} et ${typingUserPseudos[1]} sont en train d'écrire...`;
+    return 'Plusieurs personnes sont en train d\'écrire...';
   }
 }

@@ -72,7 +72,7 @@ permissionLevels = [
     // ✅ Utiliser le mapping complet pour avoir le nom et le code ISO
     this.europeanCountries = Object.entries(appConstants.PHONE_COUNTRY_MAPPING).map(([phoneCode, isoCodes]: [string, any]) => ({
         name: appConstants.COUNTRY_NAMES[phoneCode as keyof typeof appConstants.COUNTRY_NAMES],
-        code: isoCodes[0] // On prend le premier code ISO comme référence (ex: 'FR' pour '+33')
+        code: isoCodes[0]  
     }));
 
     // Mettre à jour countryName quand countryCode change
@@ -104,7 +104,6 @@ permissionLevels = [
       next: (response) => {
         if (response.success) {
           this.showSuccess(response.message || `🗑️ Code pour ${codeToDelete.userEmail} supprimé !`);
-          // Recharger la liste pour refléter la suppression
           this.loadGeneratedCodes();
         } else {
           this.showError(response.error || '❌ Échec de la suppression du code.');
@@ -128,7 +127,6 @@ permissionLevels = [
 
     const formValue = this.codeForm.value;
 
-    // Récupérer les permissions
     const selectedLevel = this.permissionLevels.find(level => level.value === formValue.permissionLevel);
     const permissions = selectedLevel?.permissions || ['post_national'];
 

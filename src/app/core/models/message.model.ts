@@ -19,7 +19,7 @@ export interface BackendMessage {
   is_deleted: boolean;
   reply_to_id: string | null;
   mentions: Mention[] | null;
-  user: { // Objet utilisateur joint
+  user: { 
     id: string;
     pseudo: string;
     avatar_url: string | null;
@@ -47,7 +47,7 @@ export interface Message {
   // Édition/Suppression
   isEdited: boolean;
   isDeleted: boolean;
-  deletedForSelf?: boolean; // Pour la suppression "pour soi"
+  deletedForSelf?: boolean;  
   editedAt?: Date;
   deletedAt?: Date;
   

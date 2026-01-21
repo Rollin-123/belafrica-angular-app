@@ -21,7 +21,6 @@ import { SocketService } from './socket.service';
 export class MessagingHttpService extends MessagingService {
   private apiUrl = `${environment.apiUrl}/messaging`;
   private userEncryptionKey: CryptoKey | null = null; 
-
   private conversations$ = new BehaviorSubject<Conversation[]>([]);
 
   constructor(
@@ -210,7 +209,6 @@ export class MessagingHttpService extends MessagingService {
   emitStopTyping(conversationId: string): void { this.socketService.emitStopTyping(conversationId); }
   onUserTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> { return this.socketService.onUserTyping(); }
   onUserStoppedTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> { return this.socketService.onUserStoppedTyping(); }
-
   onMessagesRead(): Observable<{ conversationId: string; userId: string; messageIds: string[]; }> {
     return this.socketService.onMessagesRead();
   }

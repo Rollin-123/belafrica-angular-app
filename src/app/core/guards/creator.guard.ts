@@ -22,7 +22,6 @@ export class CreatorGuard implements CanActivate {
     if (currentUser && (currentUser as any).role === 'CREATOR') {
       return true;
     } else {
-      // Rediriger vers l'app principale
       this.router.navigate(['/app/feed']);
       return false;
     }

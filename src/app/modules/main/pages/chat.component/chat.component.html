@@ -9,12 +9,12 @@
         <div class="bel-chat-meta">
           <h2 class="bel-chat-title">{{ conversation.name }}</h2>
           <div class="bel-chat-subtitle">
-            @if (typingUsers.length > 0) {
+            @if (typingUsers.size > 0) {
               <span class="bel-typing-indicator">
                 {{ getTypingIndicator() }}
               </span>
             }
-            @if (typingUsers.length === 0 && conversation.type === 'group') {
+            @if (typingUsers.size === 0 && conversation.type === 'group') {
               <span class="bel-badge-group">
                 {{ (conversation.participants.length || 0) }} membres
               </span>
@@ -47,7 +47,6 @@
         }"
           (contextmenu)="showContextMenu($event, message)">
           <div class="bel-message-bubble">
-            <!-- Reply Indicator -->
             @if (message.replyTo) {
               <div class="reply-indicator" (click)="scrollToMessage(message.replyTo.messageId)">
                 <div class="reply-content">
@@ -56,7 +55,6 @@
                 </div>
               </div>
             }
-            <!-- Edit Mode -->
             @if (editingMessageId === message.id) {
               <div class="message-edit">
                 <textarea
@@ -72,7 +70,6 @@
                 </div>
               </div>
             }
-            <!-- Normal Display Mode -->
             @if (editingMessageId !== message.id) {
               <div>
                 @if (!isMyMessage(message) && !message.isDeleted) {
@@ -93,7 +90,6 @@
                     <span class="edited-badge">(modifié)</span>
                   }
                   <span class="message-time">{{ formatMessageTime(message.timestamp) }}</span>
-                  <!-- Statut du message -->
                   @if (isMyMessage(message) && !message.isDeleted) {
                     <span class="message-status" [title]="message.status">
                       @if (message.status === 'sent') {
@@ -116,7 +112,6 @@
     </div>
   </div>
 
-  <!-- Reply Preview -->
   @if (replyingTo) {
     <div class="reply-preview">
       <div class="reply-preview-content">
@@ -165,7 +160,6 @@
     </div>
   </footer>
 
-  <!-- Context Menu -->
   @if (contextMenu.visible) {
     <div
       class="context-menu"

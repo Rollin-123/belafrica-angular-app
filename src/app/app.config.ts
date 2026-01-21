@@ -38,7 +38,7 @@ export const appConfig: ApplicationConfig = {
     },
     // ✅ Revenir à la méthode de déclaration stable
     { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, // Nécessaire pour le tempToken
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },  
     {
       provide: PostsService, 
       useClass: environment.production ? PostsHttpService : PostsMockService

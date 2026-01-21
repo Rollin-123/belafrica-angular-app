@@ -6,12 +6,13 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PostsService } from '../../../../core/services/posts.service';
+import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-create-post-modal',
   templateUrl: './create-post-modal.component.html',
   styleUrls: ['./create-post-modal.component.scss'],
-  standalone: false // ✅ CORRECTION: Ajout du décorateur
+  standalone: false  
 })
 export class CreatePostModalComponent implements OnInit {
   @Input() visibility: 'national' | 'international' = 'national';
@@ -25,7 +26,8 @@ export class CreatePostModalComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private postsService: PostsService
+    private postsService: PostsService,
+    private modalService: ModalService
   ) {
     this.postForm = this.fb.group({
       visibility: ['national', Validators.required],
@@ -41,17 +43,17 @@ export class CreatePostModalComponent implements OnInit {
     
     files.forEach(file => {
       if (!file.type.startsWith('image/')) {
-        alert('❌ Veuillez sélectionner uniquement des images');
+        this.modalService.showError('Erreur', '❌ Veuillez sélectionner uniquement des images');
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        alert('❌ L\'image ne doit pas dépasser 5MB');
+        this.modalService.showError('Erreur', '❌ L\'image ne doit pas dépasser 5MB');
         return;
       }
 
       if (this.selectedImages.length >= 4) {
-        alert('❌ Maximum 4 images autorisées');
+        this.modalService.showError('Erreur', '❌ Maximum 4 images autorisées');
         return;
       }
 
@@ -87,11 +89,11 @@ export class CreatePostModalComponent implements OnInit {
         this.postCreated.emit();
         this.closeModal();
         
-        alert('✅ Publication créée avec succès !');
+        this.modalService.showSuccess('Succès', '✅ Publication créée avec succès !');
         
       } catch (error) {
         console.error('❌ Erreur création post:', error);
-        alert('❌ Erreur lors de la création de la publication');
+        this.modalService.showError('Erreur', '❌ Erreur lors de la création de la publication');
       } finally {
         this.isLoading = false;
       }

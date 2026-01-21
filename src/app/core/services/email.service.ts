@@ -4,8 +4,8 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 
-import { Injectable } from '@angular/core';
-import emailjs from 'emailjs-com';
+import { Injectable, isDevMode } from '@angular/core';
+import emailjs from '@emailjs/browser';
 
 @Injectable({
   providedIn: 'root'
@@ -17,24 +17,23 @@ export class EmailService {
   private readonly USER_ID = 'GTz9vTGaQAwOMA9lT';
 
   constructor() {
-    emailjs.init(this.USER_ID);
+    if (!isDevMode()) {  
+      emailjs.init(this.USER_ID);
+    }
     this.testConnection();
   }
 
   private async testConnection(): Promise<void> {
     try {
       console.log('🔧 Test configuration EmailJS...');
-      
       if (!this.SERVICE_ID || !this.USER_ID) {
         console.error('❌ IDs EmailJS manquants');
         return;
       }
-
       console.log('✅ Configuration EmailJS chargée:', {
         serviceId: this.SERVICE_ID,
         userId: this.USER_ID.substring(0, 10) + '...'
       });
-
     } catch (error) {
       console.error('❌ Erreur configuration EmailJS:', error);
     }
@@ -46,9 +45,12 @@ export class EmailService {
     community: string,
     expiresInHours: number
   ): Promise<{success: boolean, error?: string}> {
+    if (isDevMode()) {
+      console.log('📧 [DEV MODE] Envoi de code admin simulé:', { userEmail, adminCode, community, expiresInHours });
+      return { success: true };
+    }
     try {
       console.log('📧 Tentative envoi code admin à:', userEmail);
-
       const expiryDate = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
 
       const templateParams = {
@@ -87,6 +89,10 @@ export class EmailService {
   }
  
   async sendAdminRequestNotification(requestData: any): Promise<{success: boolean, error?: string}> {
+    if (isDevMode()) {
+      console.log('📧 [DEV MODE] Envoi de notification demande admin simulé:', requestData);
+      return { success: true };
+    }
     try {
       console.log('📧 Tentative envoi notification demande admin');
 

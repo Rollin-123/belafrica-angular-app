@@ -215,8 +215,8 @@ export class GeolocationService {
         detectedCountry: location.country,
         detectedCountryCode: location.countryCode
       };
-
-    } catch (error: any) {
+    } 
+    catch (error: any) {
       console.error('❌ Erreur validation géolocalisation:', error);
       
       return {
@@ -239,7 +239,6 @@ export class GeolocationService {
       'RU': 'Russie',
       'BY': 'Biélorussie'
     };
-    
     return countries[code.toUpperCase()] || code;
   }
 

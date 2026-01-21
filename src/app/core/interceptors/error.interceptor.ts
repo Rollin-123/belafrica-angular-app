@@ -22,7 +22,6 @@ export class ErrorInterceptor implements HttpInterceptor {
           status: error.status,
           message: error.message
         });
-
         if (error.status === 401 || error.status === 403) {
           console.log('🔐 Session expirée, redirection login');
           localStorage.clear();

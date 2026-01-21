@@ -43,23 +43,23 @@ export class MessagingMockService extends MessagingService {
   private readonly messagesKey = 'belafrica_messages';
   private readonly conversationsKey = 'belafrica_conversations';
   private readonly userKeyStorageKey = 'belafrica_user_encryption_key';
-  private readonly deletedForSelfKey = 'belafrica_deleted_for_self'; // ✅ Pour la suppression locale
+  private readonly deletedForSelfKey = 'belafrica_deleted_for_self';  
   
   // --- Flux de données (BehaviorSubjects) ---
-  private messages = new BehaviorSubject<BackendMessage[]>([]); // ✅ Stocke les données brutes du backend
+  private messages = new BehaviorSubject<BackendMessage[]>([]);  
   private conversations = new BehaviorSubject<Conversation[]>([]);
   
   // --- Sujets pour les événements temps réel (simulés) ---
   private userTypingSubject = new Subject<{ userId: string; pseudo: string; conversationId: string }>();
-  private userStoppedTypingSubject = new Subject<{ userId: string; conversationId: string }>();
+  private userStoppedTypingSubject = new Subject<{ userId: string; pseudo: string; conversationId: string }>();  
   private messagesReadSubject = new Subject<{ conversationId: string; userId: string; messageIds: string[] }>();
 
   // --- Clé de chiffrement utilisateur ---
   private userEncryptionKey: CryptoKey | null = null;
 
   // --- Constantes de temps (en millisecondes) ---
-  private readonly EDIT_TIMEOUT = 30 * 60 * 1000; // 30 minutes
-  private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000; // 2 heures
+  private readonly EDIT_TIMEOUT = 30 * 60 * 1000; 
+  private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000; 
 
   // --- Stockage local des messages supprimés "pour soi" ---
   private deletedForSelfIds: Set<string> = new Set();
@@ -76,11 +76,11 @@ export class MessagingMockService extends MessagingService {
   // ✅ NOUVEAU : Méthode d'initialisation asynchrone
   private async init(): Promise<void> {
     await this.initializeEncryption();
-    this.loadInitialData(); // Charge les données existantes
+    this.loadInitialData();  
     const deletedIds = this.storageService.getItem(this.deletedForSelfKey) || [];
     this.deletedForSelfIds = new Set(deletedIds);
     if (!environment.production) {
-      this.createInitialConversations(); // Crée les données de démo
+      this.createInitialConversations();  
     }
   }
 
@@ -322,7 +322,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     actions.push({
       type: 'reply',
       label: 'Répondre',
-      icon: 'reply', // Nom de l'icône SVG
+      icon: 'reply',  
       condition: (msg, userId) => true
     });
   }
@@ -361,8 +361,8 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   actions.push({
     type: 'delete-for-self',
     label: 'Supprimer pour moi',
-      icon: 'delete', // Using same icon for now, can be different
-    condition: (msg, userId) => true // Toujours possible
+      icon: 'delete',  
+    condition: (msg, userId) => true  
   });
 
 
@@ -394,7 +394,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       map(messages => 
         messages
           .filter(msg => msg.conversationId === conversationId)
-          .filter(msg => !this.deletedForSelfIds.has(msg.id)) // ✅ Filtre les messages supprimés localement
+          .filter(msg => !this.deletedForSelfIds.has(msg.id))  
           .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
       ),
       // 3. Déchiffrer
@@ -458,7 +458,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       .filter(participant => 
         participant.pseudo.toLowerCase().includes(term) && participant.userId !== this.userService.getCurrentUser()?.id
       )
-      .slice(0, 5) // Limiter à 5 suggestions
+      .slice(0, 5)  
       .map(participant => ({
         userId: participant.userId,
         userName: participant.pseudo,
@@ -503,11 +503,11 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
 
     while ((match = mentionRegex.exec(text)) !== null) {
       const userName = match[1];
-      const position = match.index; // Position dans le texte original
+      const position = match.index;  
       const mentionLength = match[0].length;
 
       mentions.push({
-        userId: `user_${userName}`, // ID simulé
+        userId: `user_${userName}`,  
         userName: userName,
         position: position,
         length: mentionLength
@@ -699,16 +699,15 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     const user = this.userService.getCurrentUser();
     if (user) {
       console.log(`[MOCK] Événement "stopTyping" émis pour ${conversationId}`);
-      this.userStoppedTypingSubject.next({ userId: user.id, conversationId });
+      this.userStoppedTypingSubject.next({ userId: user.id, pseudo: user.pseudo, conversationId }); // Envoyer le pseudo
     }
   }
 
   onUserTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> { return this.userTypingSubject.asObservable(); }
   onUserStoppedTyping(): Observable<{ userId: string; pseudo: string; conversationId: string; }> {
-    // This needs to be adapted to match the base class if it expects a pseudo
     return this.userStoppedTypingSubject.pipe(map(data => ({
       ...data,
-      pseudo: this.userService.getCurrentUser()?.pseudo || 'unknown'
+      pseudo: data.pseudo || this.userService.getCurrentUser()?.pseudo || 'unknown'
     })));
   }
   onMessagesRead(): Observable<{ conversationId: string; userId: string; messageIds: string[] }> { return this.messagesReadSubject.asObservable(); }

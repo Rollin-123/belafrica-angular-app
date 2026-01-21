@@ -38,17 +38,14 @@ export class SocketService implements OnDestroy {
     });
   }
 
-  // Émettre un événement pour rejoindre une "room"
   joinConversation(conversationId: string) {
     if (this.socket) this.socket.emit('joinConversation', conversationId);
   }
 
-  // Émettre un événement pour quitter une "room"
   leaveConversation(conversationId: string) {
     if (this.socket) this.socket.emit('leaveConversation', conversationId);
   }
 
-  // Écouter les nouveaux messages entrants
   onNewMessage(): Observable<Message> {
     return this.listenToEvent<Message>('newMessage');
   }

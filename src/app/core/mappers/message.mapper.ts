@@ -10,6 +10,7 @@ import { Message, BackendMessage } from '../models/message.model';
  * @param backendMessage - L'objet message provenant de l'API.
  * @returns Un objet Message formaté pour le frontend.
  */
+
 export function mapBackendMessageToFrontend(backendMessage: BackendMessage): Message {
   return {
     id: backendMessage.id,
