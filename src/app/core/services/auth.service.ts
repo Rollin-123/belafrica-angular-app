@@ -9,6 +9,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { UserService, User } from './user.service';
+import { StorageService } from './storage.service';
 import { environment } from '../../../environments/environment';
 
 interface AuthResponse {
@@ -32,7 +33,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private userService: UserService
+    private userService: UserService,
+    private storageService: StorageService
   ) {
   }
 
@@ -56,10 +58,12 @@ export class AuthService {
       phoneNumber,
       code
     }).pipe( // @ts-ignore
-      tap((response: { success: boolean, tempToken?: string }) => {
+      tap((response: { success: boolean, tempToken?: string, user?: User, token?: string }) => {
         console.log('✅ OTP vérifié');
         if (response.success && response.tempToken) {
           localStorage.setItem('belafrica_temp_token', response.tempToken);
+        } else if (response.success && response.user && response.token) {
+          this.storageService.setItem('belafrica_token', response.token);  
         }
       }),
       catchError(error => {
@@ -74,6 +78,7 @@ export class AuthService {
       tap(response => {
         if (response.success && response.user) {
           this.userService.setCurrentUser(response.user);
+          this.storageService.setItem('belafrica_token', response.token); 
           localStorage.removeItem('belafrica_temp_token');
           console.log('✅ Profil finalisé et utilisateur mis à jour:', response.user.pseudo);
         }
@@ -101,7 +106,8 @@ export class AuthService {
       'temp_phone',
       'verified_phone',
       'userRegistrationData',
-      'belafrica_temp_token'
+      'belafrica_temp_token',
+      'belafrica_token'  
     ];
     keys.forEach(key => localStorage.removeItem(key));
   }

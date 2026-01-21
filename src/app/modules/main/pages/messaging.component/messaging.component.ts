@@ -4,8 +4,8 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
-import { Observable, of, firstValueFrom, Subscription, Subject } from 'rxjs';
-import { map, tap, switchMap, distinctUntilChanged, debounceTime } from 'rxjs/operators';
+import { Observable, of, firstValueFrom, Subscription, Subject, combineLatest } from 'rxjs';
+import { map, tap, switchMap, distinctUntilChanged, debounceTime, filter } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Message, Conversation, MessageAction, Mention } from '../../../../core/models/message.model';
 import { MessagingService } from '../../../../core/services/messaging.service'; 
@@ -66,6 +66,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   messages$: Observable<Message[]>;
   userCommunity: string = '';
   conversationParticipants: any[] = [];
+  communityMembersCount: number = 0;
 
   // Stockage local des messages
   private currentMessages: Message[] = [];
@@ -83,15 +84,18 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userCommunity = user?.community || 'Communauté inconnue';
 
     // Charger la conversation de groupe
-    this.groupConversation$ = this.messagingService.getConversations().pipe( 
+    this.groupConversation$ = this.messagingService.getConversations().pipe(
       map(conversations => conversations.find(c => c.type === 'group')),
       tap(conversation => {
-        if (conversation) {
-          this.conversationParticipants = conversation.participantsDetails || [];
-        }
-      }),
-      distinctUntilChanged()
-    );
+      if (conversation) {
+        this.conversationParticipants = conversation.participantsDetails || [];
+        this.communityMembersCount = this.conversationParticipants.filter(
+          p => p.users.community === this.userCommunity
+        ).length;
+      }
+    }),
+    distinctUntilChanged()
+  );
 
     // Charger les messages du groupe
     this.messages$ = this.groupConversation$.pipe(
@@ -110,8 +114,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       })
     );
   }
-
-  // ✅ NOUVEAU : Écoute des événements temps réel pour les indicateurs de frappe
+ 
   private listenForRealTimeEvents(): void {
     // Écoute des utilisateurs en train de taper
     this.subscription.add(this.messagingService.onUserTyping().subscribe(async data => {
@@ -143,7 +146,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     }));
 
     // Le typingSubject est géré dans onKeyPress/onMessageInput
-    this.subscription.add(this.typingSubject.pipe(debounceTime(this.TYPING_TIMER_LENGTH)).subscribe(() => { 
+    this.subscription.add(this.typingSubject.pipe(debounceTime(this.TYPING_TIMER_LENGTH)).subscribe(async () => { 
       firstValueFrom(this.groupConversation$).then(conv => {
         if (conv) {
           this.messagingService.emitStopTyping(conv.id);
@@ -155,6 +158,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
+      // S'abonner aux messages pour les mettre à jour et marquer comme lus
       this.messages$.subscribe(messages => {
         this.currentMessages = messages;
         this.updateReadStatus(messages);
@@ -615,7 +619,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       console.error('❌ Tentative d\'envoi de message sans conversation chargée. Probablement dû à une erreur de chargement initiale (401?).');
       this.modalService.showError('Erreur de conversation', 'Impossible d\'envoyer le message. La conversation n\'a pas pu être chargée. Veuillez rafraîchir la page.');
       this.isSending = false;
-      throw new Error('Conversation not available'); 
+      throw new Error('Conversation not available'); // Lance une erreur pour arrêter l'exécution
     }
     return conversation;
   }

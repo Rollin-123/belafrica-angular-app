@@ -19,26 +19,26 @@ import { MessagingService } from './core/services/messaging.service';
 import { MessagingMockService } from './core/services/messaging-mock.service';
 import { MessagingHttpService } from './core/services/messaging-http.service';
 import { provideServiceWorker } from '@angular/service-worker';
+import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 
 export function initializeApp(configService: ConfigService): () => Observable<any> {
   return () => configService.loadAppConfig();
 }
 
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes), 
     importProvidersFrom(HttpClientModule),
-    provideHttpClient(withInterceptorsFromDi()), 
+    provideHttpClient(withInterceptorsFromDi()),  
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       deps: [ConfigService],
       multi: true,
     },
-    // ✅ Revenir à la méthode de déclaration stable
     { provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },  
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     {
       provide: PostsService, 
       useClass: environment.production ? PostsHttpService : PostsMockService

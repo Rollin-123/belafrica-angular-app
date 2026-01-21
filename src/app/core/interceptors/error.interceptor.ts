@@ -24,7 +24,8 @@ export class ErrorInterceptor implements HttpInterceptor {
         });
         if (error.status === 401 || error.status === 403) {
           console.log('🔐 Session expirée, redirection login');
-          localStorage.clear();
+          localStorage.removeItem('belafrica_token');  
+          localStorage.removeItem('belafrica_temp_token');  
           this.router.navigate(['/auth']);
         }
         return throwError(() => error);

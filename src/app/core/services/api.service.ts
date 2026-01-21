@@ -23,13 +23,11 @@ export class ApiService {
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('belafrica_token');
-    
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     });
-    return headers;
+    return headers;  
   }
 
   // ✅ GET
