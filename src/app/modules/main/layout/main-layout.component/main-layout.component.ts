@@ -37,11 +37,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
  ngOnInit() {
     this.userSubscription = this.userService.currentUser$.subscribe(user => {
       this.user = user;
+      if (user) {
+        this.socketService.initializeSocket();
+      }
     });
-    // ✅ Initialiser le socket une fois que l'utilisateur est chargé
-    if (this.user) {
-      this.socketService.initializeSocket();
-    }
 
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))

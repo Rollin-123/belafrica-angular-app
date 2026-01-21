@@ -13,7 +13,9 @@ import { Message, Conversation, MessageAction } from '../models/message.model';
 import { MessagingService } from './messaging.service';
 import { EncryptionService } from './encryption.service';
 import { StorageService } from './storage.service';
+import { UserService } from './user.service';
 import { SocketService } from './socket.service';
+import { mapBackendMessageToFrontend } from '../mappers/message.mapper';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +29,8 @@ export class MessagingHttpService extends MessagingService {
     private http: HttpClient,
     private encryptionService: EncryptionService,  
     private storageService: StorageService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private userService: UserService  
   ) {
     super();
     console.log('⚡️ MessagingHttpService initialisé (mode production)');
@@ -53,7 +56,24 @@ export class MessagingHttpService extends MessagingService {
 
   getConversations(): Observable<Conversation[]> {
     return this.http.get<{ conversations: Conversation[] }>(`${this.apiUrl}/conversations`).pipe(
-      map(response => response.conversations || []),
+      map((response: any) => {
+        return (response.conversations || []).map((conv: any) => {
+          const participantsDetails: any[] = (conv.conversation_participants || []).map((p: any) => ({
+            userId: p.users.id,
+            pseudo: p.users.pseudo,
+            avatar: p.users.avatar_url,
+            community: p.users.community,
+            isOnline: false,
+            lastSeen: new Date()
+          }));
+
+          return {
+            ...conv,
+            participantsDetails: participantsDetails,
+            participants: participantsDetails.map(p => p.userId)
+          };
+        });
+      }),
       tap(conversations => {
         console.log(`⚡️ [HTTP] ${conversations.length} conversations chargées.`);
         this.conversations$.next(conversations);  
@@ -66,8 +86,10 @@ export class MessagingHttpService extends MessagingService {
   }
 
   getMessages(conversationId: string): Observable<Message[]> {
-    return this.http.get<{ messages: Message[] }>(`${this.apiUrl}/conversations/${conversationId}/messages`).pipe(
-      map(response => response.messages || []),
+    return this.http.get<{ messages: any[] }>(`${this.apiUrl}/conversations/${conversationId}/messages`).pipe(
+      map(response => (response.messages || []).map(msg => {
+        return mapBackendMessageToFrontend(msg, this.userService.getCurrentUser()?.id);
+      })),
       switchMap(async (messages) => {
         if (!this.userEncryptionKey) {
           console.warn('⚠️ [HTTP] Clé de chiffrement non prête, messages non déchiffrés.');
