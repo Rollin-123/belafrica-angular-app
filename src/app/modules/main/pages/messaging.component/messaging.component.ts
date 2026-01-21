@@ -326,12 +326,12 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     
     if (this.currentMentionQuery.length === 0) {
       this.mentionCandidates = this.conversationParticipants.filter(p => 
-        p.users.id !== this.userService.getCurrentUser()?.id
+        p.userId !== this.userService.getCurrentUser()?.id
       );
     } else {
       this.mentionCandidates = this.conversationParticipants.filter(p => 
-        p.users.pseudo.toLowerCase().includes(this.currentMentionQuery.toLowerCase()) &&
-        p.users.id !== this.userService.getCurrentUser()?.id
+        p.pseudo.toLowerCase().includes(this.currentMentionQuery.toLowerCase()) &&
+        p.userId !== this.userService.getCurrentUser()?.id
       );
     }
     this.showMentionsList = this.mentionCandidates.length > 0;
@@ -349,14 +349,14 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     const textBefore = this.newMessage.substring(0, this.mentionStartPosition);
     const textAfter = this.newMessage.substring(this.mentionStartPosition + this.currentMentionQuery.length + 1);
     
-    this.newMessage = textBefore + '@' + user.users.pseudo + ' ' + textAfter;
+    this.newMessage = textBefore + '@' + user.pseudo + ' ' + textAfter;
     this.showMentionsList = false;
     this.currentMentionQuery = '';
     
     setTimeout(() => {
       if (this.messageInput?.nativeElement) {
         this.messageInput.nativeElement.focus();
-        const newPosition = this.mentionStartPosition + user.users.pseudo.length + 2;
+        const newPosition = this.mentionStartPosition + user.pseudo.length + 2;
         this.messageInput.nativeElement.setSelectionRange(newPosition, newPosition);
       }
     }, 0);
@@ -371,13 +371,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     while ((match = mentionRegex.exec(text)) !== null) {
       const userName = match[1];
       const participant = this.conversationParticipants.find(p =>
-        p.users.pseudo === userName
+        p.pseudo === userName
       );
 
       if (participant) {
         mentions.push({
-          userId: participant.users.id,
-          userName: participant.users.pseudo,
+          userId: participant.userId,
+          userName: participant.pseudo,
           position: match.index,
           length: match[0].length
         });
