@@ -36,9 +36,8 @@
           <div class="bel-group-info">
             <h2>Chat de Groupe - {{ userCommunity }}</h2>
           </div>
-          <div class="bel-group-members">
-            <span class="bel-members-count">👥 {{ (groupConversation$ | async)?.participants?.length || 0 }} membres</span>
-          </div>
+          <span class="bel-members-count">👥 {{ communityMembersCount }} membres</span>
+
         </div>
 
         <!-- Zone des Messages -->

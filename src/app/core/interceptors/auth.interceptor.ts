@@ -17,15 +17,20 @@ export class AuthInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {  
-    let clonedReq = req.clone({
-      withCredentials: true,
-    });
+    let clonedReq = req;
     
     if (req.url.includes('/complete-profile')) {
       const tempToken = this.storageService.getItem('belafrica_temp_token');
       if (tempToken) {
         clonedReq = clonedReq.clone({
           headers: clonedReq.headers.set('Authorization', `Bearer ${tempToken}`),
+        });
+        }
+    } else {
+      const token = this.storageService.getItem('belafrica_token');
+      if (token) {
+        clonedReq = clonedReq.clone({
+          headers: clonedReq.headers.set('Authorization', `Bearer ${token}`),
         });
       }
     }

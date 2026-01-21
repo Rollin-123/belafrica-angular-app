@@ -22,7 +22,8 @@ export class SocketService implements OnDestroy {
 
   private connect(): void {
     this.socket = io(environment.apiUrl, {
-      withCredentials: true
+      withCredentials: true,
+      path: '/socket.io/'  
     });
 
     this.socket.on('connect', () => {
