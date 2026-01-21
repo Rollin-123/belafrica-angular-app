@@ -297,7 +297,7 @@ export class MessagingMockService extends MessagingService {
         is_deleted: true,
         updated_at: new Date().toISOString(),
         encrypted_content: null,
-        iv: ''
+        iv: ''  
       };
 
       const updatedMessages = [...currentMessages];
@@ -325,7 +325,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'reply',
       label: 'Répondre',
       icon: 'reply',  
-      condition: (msg: Message, userId: string) => true
+      condition: (msg: Message, userId: string) => true // ✅ Typage explicite
     });
   }
 
@@ -335,7 +335,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'copy',
       label: 'Copier',
       icon: 'copy',
-      condition: (msg: Message, userId: string) => true
+      condition: (msg: Message, userId: string) => true // ✅ Typage explicite
     });
   }
 
@@ -345,7 +345,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'edit',
       label: 'Modifier',
       icon: 'edit',
-      condition: (msg: Message, userId: string) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.EDIT_TIMEOUT
+      condition: (msg: Message, userId: string) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.EDIT_TIMEOUT // ✅ Typage explicite
     });
   }
 
@@ -355,7 +355,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'delete',
       label: 'Supprimer',
       icon: 'delete',
-      condition: (msg: Message, userId: string) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.DELETE_TIMEOUT
+      condition: (msg: Message, userId: string) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.DELETE_TIMEOUT // ✅ Typage explicite
     });
   }
 
@@ -364,7 +364,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     type: 'delete-for-self',
     label: 'Supprimer pour moi',
       icon: 'delete',  
-    condition: (msg: Message, userId: string) => true  
+    condition: (msg: Message, userId: string) => true // ✅ Typage explicite
   });
 
 
@@ -391,7 +391,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   getMessages(conversationId: string): Observable<Message[]> {
     return this.messages.asObservable().pipe(
       // 1. Mapper les messages backend en messages frontend
-      map(backendMessages => backendMessages.map(msg => mapBackendMessageToFrontend(msg, this.userService.getCurrentUser()?.id))),
+      map(backendMessages => backendMessages.map(msg => mapBackendMessageToFrontend(msg, this.userService.getCurrentUser()?.id))), // ✅ Ajout de currentUserId
       // 2. Filtrer par conversation et ceux supprimés "pour soi"
       map(messages => 
         messages
@@ -412,7 +412,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       // Si la clé n'est pas prête, retourner un message d'attente
       console.warn('⚠️ Clé de chiffrement non disponible');
       return messages.map(msg => {
-        const frontendMsg = mapBackendMessageToFrontend(msg as BackendMessage, this.userService.getCurrentUser()?.id);
+        const frontendMsg = mapBackendMessageToFrontend(msg as BackendMessage, this.userService.getCurrentUser()?.id);  
         return { ...frontendMsg, content: 'Veuillez patienter le chargement de ce message' };
       });
     }
@@ -457,7 +457,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
 
     const term = searchTerm.toLowerCase();
     return conversation.participantsDetails
-      .filter((participant: Participant) => 
+      .filter((participant: Participant) => // ✅ Typage explicite
         participant.pseudo.toLowerCase().includes(term) && participant.userId !== this.userService.getCurrentUser()?.id
       )
       .slice(0, 5)  
@@ -586,7 +586,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
           updatedParticipants.push(user.id);
         }
 
-        const isUserInDetails = conv.participantsDetails?.some((p: Participant) => p.userId === user.id);
+        const isUserInDetails = conv.participantsDetails?.some(p => p.userId === user.id);
 
         // 2. Mettre à jour/Ajouter les détails du participant
         if (!isUserInDetails) {
@@ -596,12 +596,12 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
             avatar: user.avatar_url ?? undefined,
             isOnline: true,
             lastSeen: new Date(),
-            community: user.community
+            community: ''
           };
           updatedParticipantsDetails.push(newParticipant);
         } else {
           // Mettre à jour le statut en ligne
-          updatedParticipantsDetails = updatedParticipantsDetails.map((p: Participant) =>
+          updatedParticipantsDetails = updatedParticipantsDetails.map(p =>
             p.userId === user.id
               ? { ...p, isOnline: true, lastSeen: new Date() }
               : p
@@ -686,7 +686,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     // Simule la réception d'un nouveau message en le mappant
     return this.messages.pipe(
       map(messages => messages[messages.length - 1]), // Prend le dernier
-      switchMap(async backendMessage => mapBackendMessageToFrontend(backendMessage as BackendMessage, this.userService.getCurrentUser()?.id))
+      switchMap(async backendMessage => mapBackendMessageToFrontend(backendMessage as BackendMessage, this.userService.getCurrentUser()?.id)) // ✅ Ajout de currentUserId
     );
   }
 
