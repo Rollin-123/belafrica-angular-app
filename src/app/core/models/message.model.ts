@@ -4,22 +4,23 @@
     * Code source confidentiel - Usage interdit sans autorisation
     */
 
-/**
- * Représente la structure d'un message tel qu'il vient du backend (snake_case).
- */
+export function generateMessageId(): string {
+  return 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+}
+
 export interface BackendMessage {
   id: string;
   conversation_id: string;
-  user_id: string;
+  user_id: string;  
   encrypted_content: string | null;
-  iv: string | null;
+  iv: string;  
   created_at: string;
   updated_at: string | null;
   is_edited: boolean;
   is_deleted: boolean;
   reply_to_id: string | null;
-  mentions: Mention[] | null;
-  user: { 
+  mentions: Mention[];
+  user: {
     id: string;
     pseudo: string;
     avatar_url: string | null;
@@ -29,44 +30,53 @@ export interface BackendMessage {
 export interface Message {
   id: string;
   conversationId: string;
-  type: 'group' | 'private';
   fromUserId: string;
   fromUserName: string;
   fromUserAvatar?: string;
-  
-  // Chiffrement
-  encryptedContent: string | null;
-  encryptionKey?: string;
   content?: string;
-
-  // Métadonnées
   timestamp: Date;
-  isRead?: boolean;
-  readBy?: string[];
-  
-  // Édition/Suppression
+  status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
+  isMyMessage: boolean;
   isEdited: boolean;
   isDeleted: boolean;
-  deletedForSelf?: boolean;  
   editedAt?: Date;
-  deletedAt?: Date;
-  
-  // Statut d'envoi
-  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
-  
-  // NOUVEAU : RÉPONSE À UN MESSAGE
   replyTo?: {
     messageId: string;
-    fromUserId: string;
     fromUserName: string;
     content: string;
-    isDeleted?: boolean;
+    isDeleted: boolean;
   };
-  
-  mentions?: Mention[];
+  mentions: Mention[];
+  encryptedContent: string | null;
+  encryptionKey: string | null; // This is the IV
 }
 
-// NOUVEAU : INTERFACE POUR LES MENTIONS
+export interface Participant {
+  userId: string;
+  pseudo: string;
+  avatar?: string;
+  isOnline: boolean;
+  lastSeen: Date;
+  community: string;
+}
+
+export interface Conversation {
+  id: string;
+  type: 'group' | 'private';
+  name: string;
+  avatar?: string;
+  participants: string[];
+  participantsDetails?: Participant[];
+  unreadCount: number;
+  lastMessage?: string;
+  lastMessageTimestamp?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  adminIds: string[];
+  description?: string;
+  community?: string;
+}
+
 export interface Mention {
   userId: string;
   userName: string;
@@ -74,55 +84,9 @@ export interface Mention {
   length: number;
 }
 
-// INTERFACE POUR LE MENU CONTEXTUEL
 export interface MessageAction {
-  type: 'reply' | 'edit' | 'delete' | 'copy' | 'forward' | 'delete-for-self';
+  type: 'reply' | 'edit' | 'delete' | 'copy' | 'delete-for-self';
   label: string;
   icon: string;
   condition: (message: Message, currentUserId: string) => boolean;
-}
-
-// INTERFACE POUR LES CONVERSATIONS
-export interface Conversation {
-  id: string;
-  type: 'group' | 'private';
-  name: string;
-  avatar?: string;
-  participants: string[];
-  lastMessage?: string;
-  lastMessageTimestamp?: Date;
-  unreadCount: number;
-  isOnline?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  
-  adminIds?: string[];
-  description?: string;
-  
-  // NOUVEAU : Participants avec infos complètes
-  participantsDetails?: Participant[];
-}
-
-// NOUVELLE INTERFACE POUR LES PARTICIPANTS
-export interface Participant {
-  userId: string;
-  pseudo: string;
-  avatar?: string;
-  isOnline: boolean;
-  lastSeen?: Date;
-}
-
-// Helpers pour générer des IDs
-export function generateConversationId(user1: string, user2: string): string {
-  const sortedIds = [user1, user2].sort();
-  return `conv_${sortedIds[0]}_${sortedIds[1]}`;
-}
-
-export function generateGroupId(community: string): string {
-  const cleanCommunity = community.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_');
-  return `group_${cleanCommunity}_${Date.now().toString(36)}`;
-}
-
-export function generateMessageId(): string {
-  return 'msg_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
 }

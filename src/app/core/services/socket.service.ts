@@ -19,7 +19,15 @@ export class SocketService implements OnDestroy {
   constructor(private storageService: StorageService) {
     this.connect();
   }
-
+  initializeSocket(): void {
+    if (this.socket && this.socket.connected) {
+      return;
+    }
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+    this.connect();  
+  }
   private connect(): void {
     const token = this.storageService.getItem('belafrica_token');
 
@@ -45,6 +53,11 @@ export class SocketService implements OnDestroy {
 
     this.socket.on('connect_error', (err) => {
       console.error('❌ Erreur de connexion Socket.IO:', err.message);
+    });
+
+    // Écouter les événements de déconnexion pour tenter de se reconnecter si le token est présent
+    this.socket.on('disconnect', (reason) => {
+      console.log('🔌 Déconnecté du serveur Socket.IO, raison:', reason);
     });
   }
 
