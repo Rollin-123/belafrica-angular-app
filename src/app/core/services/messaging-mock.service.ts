@@ -126,10 +126,11 @@ export class MessagingMockService extends MessagingService {
 
     if (!groupConversation) {
       const currentParticipant: Participant = {
-        userId: user.id, // ✅ CORRECTION
+        userId: user.id, 
         pseudo: user.pseudo,
-        avatar: user.avatar_url ?? undefined, // ✅ CORRECTION
-        isOnline: true,
+        avatar: user.avatar_url ?? undefined, 
+        isOnline: true,  
+        community: user.community,  
         lastSeen: new Date()
       };
 
@@ -137,12 +138,13 @@ export class MessagingMockService extends MessagingService {
         id: groupConversationId,
         type: 'group',
         name: `Groupe ${user.community}`,
-        participants: [user.id], // ✅ CORRECTION
+        participants: [user.id], 
         participantsDetails: [currentParticipant],
         unreadCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        adminIds: [user.id], // ✅ CORRECTION
+        adminIds: [user.id], 
+        community: user.community,  
         description: `Discussion de la communauté ${user.community}`
       };
       const updatedConversations = [...existingConversations, groupConversation];
@@ -199,7 +201,7 @@ export class MessagingMockService extends MessagingService {
       this.saveMessages(updatedMessages);
 
       // Simule la mise à jour de la conversation
-      const frontendMessage = mapBackendMessageToFrontend(newMessage);
+      const frontendMessage = mapBackendMessageToFrontend(newMessage, user.id);
       this.updateConversationLastMessage(conversationId, frontendMessage);
       this.simulateMessageDelivery(newMessage.id);
 
@@ -295,7 +297,7 @@ export class MessagingMockService extends MessagingService {
         is_deleted: true,
         updated_at: new Date().toISOString(),
         encrypted_content: null,
-        iv: null
+        iv: ''
       };
 
       const updatedMessages = [...currentMessages];
@@ -323,7 +325,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'reply',
       label: 'Répondre',
       icon: 'reply',  
-      condition: (msg, userId) => true
+      condition: (msg: Message, userId: string) => true
     });
   }
 
@@ -333,7 +335,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'copy',
       label: 'Copier',
       icon: 'copy',
-      condition: (msg, userId) => true
+      condition: (msg: Message, userId: string) => true
     });
   }
 
@@ -343,7 +345,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'edit',
       label: 'Modifier',
       icon: 'edit',
-      condition: (msg, userId) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.EDIT_TIMEOUT
+      condition: (msg: Message, userId: string) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.EDIT_TIMEOUT
     });
   }
 
@@ -353,7 +355,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
       type: 'delete',
       label: 'Supprimer',
       icon: 'delete',
-      condition: (msg, userId) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.DELETE_TIMEOUT
+      condition: (msg: Message, userId: string) => new Date().getTime() - new Date(msg.timestamp).getTime() <= this.DELETE_TIMEOUT
     });
   }
 
@@ -362,7 +364,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     type: 'delete-for-self',
     label: 'Supprimer pour moi',
       icon: 'delete',  
-    condition: (msg, userId) => true  
+    condition: (msg: Message, userId: string) => true  
   });
 
 
@@ -389,7 +391,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
   getMessages(conversationId: string): Observable<Message[]> {
     return this.messages.asObservable().pipe(
       // 1. Mapper les messages backend en messages frontend
-      map(backendMessages => backendMessages.map(mapBackendMessageToFrontend)),
+      map(backendMessages => backendMessages.map(msg => mapBackendMessageToFrontend(msg, this.userService.getCurrentUser()?.id))),
       // 2. Filtrer par conversation et ceux supprimés "pour soi"
       map(messages => 
         messages
@@ -409,14 +411,14 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     if (!this.userEncryptionKey) {
       // Si la clé n'est pas prête, retourner un message d'attente
       console.warn('⚠️ Clé de chiffrement non disponible');
-      return messages.map(msg => ({
-        ...mapBackendMessageToFrontend(msg as BackendMessage),
-        content: 'Veuillez patienter le chargement de ce message'
-      }));
+      return messages.map(msg => {
+        const frontendMsg = mapBackendMessageToFrontend(msg as BackendMessage, this.userService.getCurrentUser()?.id);
+        return { ...frontendMsg, content: 'Veuillez patienter le chargement de ce message' };
+      });
     }
 
     const decryptionPromises = messages.map(async (message) => {
-      const frontendMessage = ('fromUserId' in message) ? message as Message : mapBackendMessageToFrontend(message as BackendMessage);
+      const frontendMessage = ('fromUserId' in message) ? message as Message : mapBackendMessageToFrontend(message as BackendMessage, this.userService.getCurrentUser()?.id);
 
       // Cas du message supprimé
       if (frontendMessage.isDeleted) {
@@ -455,7 +457,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
 
     const term = searchTerm.toLowerCase();
     return conversation.participantsDetails
-      .filter(participant => 
+      .filter((participant: Participant) => 
         participant.pseudo.toLowerCase().includes(term) && participant.userId !== this.userService.getCurrentUser()?.id
       )
       .slice(0, 5)  
@@ -557,7 +559,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
           lastMessageTimestamp: message.timestamp,
           updatedAt: new Date(),
           // Incrémenter si ce n'est pas l'utilisateur actuel qui envoie (simulation pour l'instant)
-          unreadCount: (message.fromUserId !== this.userService.getCurrentUser()?.id) // ✅ CORRECTION
+          unreadCount: (message.fromUserId !== this.userService.getCurrentUser()?.id) 
                        ? conv.unreadCount + 1 
                        : conv.unreadCount
         };
@@ -584,21 +586,22 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
           updatedParticipants.push(user.id);
         }
 
-        const isUserInDetails = conv.participantsDetails?.some(p => p.userId === user.id);
+        const isUserInDetails = conv.participantsDetails?.some((p: Participant) => p.userId === user.id);
 
         // 2. Mettre à jour/Ajouter les détails du participant
         if (!isUserInDetails) {
           const newParticipant: Participant = {
             userId: user.id,
             pseudo: user.pseudo,
-            avatar: user.avatar_url ?? undefined, // ✅ CORRECTION
+            avatar: user.avatar_url ?? undefined,
             isOnline: true,
-            lastSeen: new Date()
+            lastSeen: new Date(),
+            community: user.community
           };
           updatedParticipantsDetails.push(newParticipant);
         } else {
           // Mettre à jour le statut en ligne
-          updatedParticipantsDetails = updatedParticipantsDetails.map(p =>
+          updatedParticipantsDetails = updatedParticipantsDetails.map((p: Participant) =>
             p.userId === user.id
               ? { ...p, isOnline: true, lastSeen: new Date() }
               : p
@@ -683,7 +686,7 @@ getMessageActions(message: Message, currentUserId: string): MessageAction[] {
     // Simule la réception d'un nouveau message en le mappant
     return this.messages.pipe(
       map(messages => messages[messages.length - 1]), // Prend le dernier
-      switchMap(async backendMessage => mapBackendMessageToFrontend(backendMessage as BackendMessage))
+      switchMap(async backendMessage => mapBackendMessageToFrontend(backendMessage as BackendMessage, this.userService.getCurrentUser()?.id))
     );
   }
 

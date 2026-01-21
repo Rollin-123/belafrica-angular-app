@@ -8,6 +8,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { MessagingService } from '../../../../core/services/messaging.service';
 import { User, UserService } from '../../../../core/services/user.service';
+import { SocketService } from '../../../../core/services/socket.service'; // Import SocketService
 import { ModalService } from '../../../../core/services/modal.service';
 import { Subscription } from 'rxjs';
 
@@ -29,6 +30,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private router: Router,
   private userService: UserService, 
   private messagingService: MessagingService, 
+  private socketService: SocketService, // Inject SocketService
   private modalService: ModalService,
  ) { }
 
@@ -36,6 +38,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.userSubscription = this.userService.currentUser$.subscribe(user => {
       this.user = user;
     });
+    // ✅ Initialiser le socket une fois que l'utilisateur est chargé
+    if (this.user) {
+      this.socketService.initializeSocket();
+    }
 
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -51,6 +57,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }));
   }
 
+  
   ngOnDestroy() {
     this.subscriptions.unsubscribe(); 
  }
