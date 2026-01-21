@@ -4,7 +4,6 @@
     * Code source confidentiel - Usage interdit sans autorisation
 */
 import { Message, BackendMessage } from '../models/message.model';
-import { User } from '../services/user.service';
 
 /**
  * Mappe un objet message du backend (avec snake_case) vers le modèle du frontend (avec camelCase).
@@ -12,14 +11,13 @@ import { User } from '../services/user.service';
  * @param currentUserId - L'ID de l'utilisateur actuel pour déterminer `isMyMessage`.
  * @returns Un objet Message formaté pour le frontend.
  */
-
 export function mapBackendMessageToFrontend(backendMessage: BackendMessage, currentUserId: string | undefined): Message {
   return {
     id: backendMessage.id,
     conversationId: backendMessage.conversation_id,
     fromUserId: backendMessage.user_id,
     fromUserName: backendMessage.user.pseudo,
-    fromUserAvatar: backendMessage.user.avatar_url ?? undefined,
+    fromUserAvatar: backendMessage.user.avatar_url || undefined,  
     encryptedContent: backendMessage.encrypted_content,
     encryptionKey: backendMessage.iv,
     timestamp: new Date(backendMessage.created_at),
@@ -29,5 +27,6 @@ export function mapBackendMessageToFrontend(backendMessage: BackendMessage, curr
     status: 'sent',
     mentions: backendMessage.mentions || [],
     isMyMessage: backendMessage.user_id === currentUserId,
+    replyTo: undefined  
   };
 }

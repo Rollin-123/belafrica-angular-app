@@ -11,9 +11,9 @@ export function generateMessageId(): string {
 export interface BackendMessage {
   id: string;
   conversation_id: string;
-  user_id: string;  
+  user_id: string; // Correction: user_id devrait être string, pas string | null
   encrypted_content: string | null;
-  iv: string;  
+  iv: string; // ✅ CORRECTION: iv est NOT NULL dans la DB
   created_at: string;
   updated_at: string | null;
   is_edited: boolean;
@@ -39,7 +39,7 @@ export interface Message {
   isMyMessage: boolean;
   isEdited: boolean;
   isDeleted: boolean;
-  editedAt?: Date;
+  editedAt?: Date;  
   replyTo?: {
     messageId: string;
     fromUserName: string;
@@ -48,7 +48,7 @@ export interface Message {
   };
   mentions: Mention[];
   encryptedContent: string | null;
-  encryptionKey: string | null; // This is the IV
+  encryptionKey: string | null;  
 }
 
 export interface Participant {
