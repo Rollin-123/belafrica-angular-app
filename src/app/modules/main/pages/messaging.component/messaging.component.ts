@@ -152,7 +152,10 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       const conversation = await firstValueFrom(this.groupConversation$);
       if (!conversation) {
-        throw new Error('Conversation de groupe non trouvée');
+        console.error('❌ Tentative d\'envoi de message sans conversation chargée. Probablement dû à une erreur de chargement initiale (401?).');
+        alert('Impossible d\'envoyer le message. La conversation n\'a pas pu être chargée. Veuillez rafraîchir la page.');
+        this.isSending = false;
+        return;
       }
 
       // Détecter les mentions avant l'envoi
@@ -191,7 +194,10 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       const conversation = await firstValueFrom(this.groupConversation$);
       if (!conversation) {
-        throw new Error('Conversation de groupe non trouvée');
+        console.error('❌ Tentative d\'envoi de message sans conversation chargée. Probablement dû à une erreur de chargement initiale (401?).');
+        alert('Impossible d\'envoyer le message. La conversation n\'a pas pu être chargée. Veuillez rafraîchir la page.');
+        this.isSending = false;
+        return;
       }
 
       // Détecter les mentions avant l'envoi
