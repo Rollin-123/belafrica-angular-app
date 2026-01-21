@@ -7,8 +7,8 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth.service';
 import { Message } from '../models/message.model';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,14 +16,23 @@ import { Message } from '../models/message.model';
 export class SocketService implements OnDestroy {
   private socket?: Socket;
 
-  constructor(private authService: AuthService) {
+  constructor(private storageService: StorageService) {
     this.connect();
   }
 
   private connect(): void {
+    const token = this.storageService.getItem('belafrica_token');
+
+    // Se connecter uniquement si un token existe
+    if (!token) {
+      console.warn('🔌 Pas de token, connexion socket reportée.');
+      return;
+    }
+
     this.socket = io(environment.apiUrl, {
       withCredentials: true,
-      path: '/socket.io/'  
+      path: '/socket.io/',
+      auth: { token }  
     });
 
     this.socket.on('connect', () => {

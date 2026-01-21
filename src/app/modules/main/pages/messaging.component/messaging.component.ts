@@ -88,7 +88,8 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       map(conversations => conversations.find(c => c.type === 'group')),
       tap(conversation => {
       if (conversation) {
-        this.conversationParticipants = conversation.participantsDetails || [];
+        this.conversationParticipants = conversation.participantsDetails || []; 
+        // Filtrer et compter les membres de la communauté ici
         this.communityMembersCount = this.conversationParticipants.filter(
           p => p.users.community === this.userCommunity
         ).length;
@@ -114,7 +115,9 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       })
     );
   }
- 
+
+  // ✅ NOUVEAU : Écoute des événements temps réel pour les indicateurs de frappe
+  // ✅ NOUVEAU : Écoute des événements temps réel pour les indicateurs de frappe
   private listenForRealTimeEvents(): void {
     // Écoute des utilisateurs en train de taper
     this.subscription.add(this.messagingService.onUserTyping().subscribe(async data => {
