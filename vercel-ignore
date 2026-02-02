@@ -1,0 +1,25 @@
+# Ignorer pour Vercel
+.git
+.gitignore
+*.log
+*.tmp
+*.swp
+.DS_Store
+.vercel
+.angular
+.vscode
+.idea
+coverage
+dist/old
+tmp
+node_modules
+*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+README.md
+LICENSE
+CHANGELOG.md
+docker-compose.yml
+Dockerfile

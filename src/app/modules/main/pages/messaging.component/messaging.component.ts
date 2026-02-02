@@ -327,7 +327,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.currentMentionQuery.length === 0) {
       this.mentionCandidates = this.conversationParticipants.filter(p => 
         p.userId !== this.userService.getCurrentUser()?.id
-      );
+      ); 
     } else {
       this.mentionCandidates = this.conversationParticipants.filter(p => 
         p.pseudo.toLowerCase().includes(this.currentMentionQuery.toLowerCase()) &&

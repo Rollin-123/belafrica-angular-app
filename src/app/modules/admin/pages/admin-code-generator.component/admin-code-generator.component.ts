@@ -166,16 +166,26 @@ getPermissionLabel(): string {
   
   return permissionMap[level as keyof typeof permissionMap] || 'Inconnu';
 }
-  copyToClipboard() {
-    // Remplacer par une méthode plus robuste pour la compatibilité iFrame
-    const tempInput = document.createElement('textarea');
-    tempInput.value = this.generatedCode;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    document.execCommand('copy');
-    document.body.removeChild(tempInput);
-
-    this.showSuccess('📋 Code copié dans le presse-papier !');
+  async copyToClipboard(): Promise<void> {
+    // Utilisation de l'API Clipboard, plus moderne et sécurisée
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(this.generatedCode);
+        this.showSuccess('📋 Code copié dans le presse-papier !');
+      } catch (err) {
+        console.error('Erreur lors de la copie via Clipboard API:', err);
+        this.showError('Impossible de copier le code automatiquement.');
+      }
+    } else {
+      // Fallback pour les anciens navigateurs ou contextes non sécurisés (http)
+      const tempInput = document.createElement('textarea');
+      tempInput.value = this.generatedCode;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy'); // Déprécié, mais utile en fallback
+      document.body.removeChild(tempInput);
+      this.showSuccess('📋 Code copié dans le presse-papier !');
+    }
   }
 
   sendByEmail() {

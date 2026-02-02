@@ -16,9 +16,7 @@ import { StorageService } from './storage.service';
 export class SocketService implements OnDestroy {
   private socket?: Socket;
 
-  constructor(private storageService: StorageService) {
-    this.connect();
-  }
+  constructor(private storageService: StorageService) {}
   initializeSocket(): void {
     if (this.socket && this.socket.connected) {
       return;
@@ -37,7 +35,10 @@ export class SocketService implements OnDestroy {
       return;
     }
 
-    this.socket = io(environment.apiUrl, {
+    // ✅ CORRECTION: Le socket doit se connecter à la base de l'URL, pas au chemin /api
+    const baseUrl = environment.apiUrl.replace('/api', '');
+
+    this.socket = io(baseUrl, {
       withCredentials: true,
       auth: { token }  
     });
