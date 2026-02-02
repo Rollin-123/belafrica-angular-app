@@ -175,7 +175,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async sendMessage(): Promise<void> {
     if (!this.newMessage.trim() || this.isSending) return;
-
     this.isSending = true;
     const messageContent = this.newMessage.trim();
 

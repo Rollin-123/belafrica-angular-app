@@ -1,0 +1,56 @@
+{
+  "version": 2,
+  "public": false,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/angular"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "status": 404,
+      "dest": "/index.html"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "https://belafrica-backend.onrender.com/api/$1"
+    }
+  ],
+  "env": {
+    "NODE_VERSION": "18.17.0"
+  },
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "dist/belafrica/browser",
+  "framework": "angular",
+  "installCommand": "npm ci",
+  "devCommand": "npm run start -- --port $PORT",
+  "regions": ["cdg1"],
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "develop": true,
+      "preview": true
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/health",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

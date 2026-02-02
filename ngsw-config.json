@@ -35,10 +35,10 @@
         "https://belafrica-backend.onrender.com/api/**"
       ],
       "cacheConfig": {
-        "strategy": "freshness",
         "maxSize": 20,
         "maxAge": "1h",
-        "timeout": "10s"
+        "timeout": "10s",
+        "strategy": "performance"
       }
     }
   ],
@@ -46,9 +46,6 @@
     "/**",
     "!/**/*.*",
     "!/**/*__*",
-    "!/**/*__*/**",
-    "!/ngsw-worker.js",
-    "!/ngsw.json",
-    "!/ngsw-status.json"
+    "!/**/*__*/**"
   ]
 }

@@ -89,7 +89,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     public userService: UserService,
     private authService: AuthService,
     private router: Router,
-    private modalService: ModalService // Injectez le ModalService ici
+    private modalService: ModalService  
   ) {}
 
   ngOnInit() {

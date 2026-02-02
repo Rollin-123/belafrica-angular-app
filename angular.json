@@ -3,7 +3,12 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": false 
+    "analytics": false,
+    "cache": {
+      "enabled": true,
+      "path": ".angular/cache",
+      "environment": "all"
+    }
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -11,7 +16,14 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "scss",
+          "skipTests": true
+        },
+        "@schematics/angular:directive": {
+          "skipTests": true
+        },
+        "@schematics/angular:service": {
+          "skipTests": true
         }
       },
       "root": "",
@@ -19,25 +31,44 @@
       "prefix": "bel",
       "architect": {
         "build": {
-          "builder": "@angular/build:application", 
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": {
               "base": "dist/belafrica"
             },
             "index": "src/index.html",
-            "polyfills": ["src/polyfills.ts","zone.js"],
+            "browser": "src/main.ts",
+            "polyfills": [
+              "src/polyfills.ts",
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
               "src/favicon.ico",
-              "src/assets",
-              "src/manifest.webmanifest"   
+              "src/apple-touch-icon.png",
+              "src/robots.txt",
+              "src/site.webmanifest",
+              {
+                "glob": "**/*",
+                "input": "src/manifest",
+                "output": "manifest"
+              }
             ],
             "styles": [
               "src/styles.scss"
             ],
-            "serviceWorker": "ngsw-config.json",
-            "browser": "src/main.ts"
+            "scripts": [],
+            "serviceWorker": "src/ngsw-config.json",
+            "prerender": false,
+            "ssr": {
+              "entry": "server.ts"
+            }
           },
           "configurations": {
             "production": {
@@ -45,12 +76,12 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "20kb",
-                  "maximumError": "30kb"
+                  "maximumWarning": "4kb",
+                  "maximumError": "8kb"
                 }
               ],
               "fileReplacements": [
@@ -60,39 +91,106 @@
                 }
               ],
               "outputHashing": "all",
-              "sourceMap": false,
-              "optimization": true,
+              "sourceMap": {
+                "scripts": false,
+                "styles": false,
+                "hidden": false,
+                "vendor": false
+              },
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": {
+                  "inline": true
+                }
+              },
+              "aot": true,
               "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
               "namedChunks": false,
-              "serviceWorker": "ngsw-config.json" 
+              "serviceWorker": true
             },
             "development": {
               "optimization": false,
-              "extractLicenses": false,
               "sourceMap": true,
+              "extractLicenses": false,
               "namedChunks": true,
-              "serviceWorker": false   
+              "serviceWorker": false,
+              "buildOptimizer": false,
+              "outputHashing": "none"
+            },
+            "vercel": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.vercel.ts"
+                }
+              ],
+              "outputHashing": "all",
+              "sourceMap": {
+                "scripts": false,
+                "styles": false,
+                "hidden": true
+              },
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": true
+              },
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "namedChunks": false,
+              "serviceWorker": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ],
+              "outputPath": "dist/belafrica/browser",
+              "index": {
+                "input": "src/index.html",
+                "output": "index.html"
+              }
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "belafrica:build:production"
             },
             "development": {
               "buildTarget": "belafrica:build:development"
+            },
+            "vercel": {
+              "buildTarget": "belafrica:build:vercel"
             }
           },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular/build:extract-i18n"
+          "builder": "@angular-devkit/build-angular:extract-i18n"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
@@ -102,7 +200,23 @@
             ],
             "styles": [
               "src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
+          }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {
+            "ssr": false
           }
         }
       }

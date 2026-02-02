@@ -37,6 +37,7 @@ import { MessageBubbleComponent } from './components/message-bubble/message-bubb
   imports: [
     CommonModule,
     FormsModule,
+    MessageBubbleComponent,
     MainRoutingModule,
     ReactiveFormsModule,
     SharedModule
