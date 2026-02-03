@@ -4,8 +4,8 @@
     {
       "src": "angular.json",
       "use": "@vercel/angular",
-      "options": {
-        "buildTarget": "vercel"
+      "config": {
+        "buildTarget": "belafrica:build:vercel"
       } 
     }
   ],
