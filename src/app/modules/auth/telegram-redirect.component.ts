@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-telegram-redirect',
-    imports: [],
+    standalone: true,
     template: `
     <div class="telegram-redirect-container">
       <div class="telegram-card">

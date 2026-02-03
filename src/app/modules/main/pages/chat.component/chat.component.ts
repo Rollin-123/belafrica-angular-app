@@ -3,14 +3,11 @@
     * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
     * Code source confidentiel - Usage interdit sans autorisation
     */
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, HostListener } from '@angular/core'; 
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, firstValueFrom, Subject } from 'rxjs';
 import { map, debounceTime } from 'rxjs/operators';
 
-// Assurez-vous que ces paths sont corrects
 import { Message, Conversation, MessageAction } from '../../../../core/models/message.model';
 import { MessagingService } from '../../../../core/services/messaging.service';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -20,7 +17,7 @@ import { UserService } from '../../../../core/services/user.service';
     selector: 'app-chat',
     templateUrl: './chat.component.html',
     styleUrls: ['./chat.component.scss'],
-    imports: [CommonModule, FormsModule]
+    standalone: false,
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;

@@ -17,7 +17,6 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "analyze": "ng build --stats-json && webpack-bundle-analyzer dist/belafrica/stats.json",
-    "postinstall": "ngcc --properties es2022 browser module main --first-only --create-ivy-entry-points",
     "vercel-build": "npm run build:vercel",
     "vercel-dev": "ng serve --host 0.0.0.0 --port 3000",
     "deploy": "vercel --prod",
@@ -37,6 +36,8 @@
     "@angular/platform-browser-dynamic": "^17.0.0",
     "@angular/router": "^17.0.0",
     "@angular/service-worker": "^17.0.0",
+    "@angular/ssr": "^17.3.17",
+    "@emailjs/browser": "^4.3.3",
     "@supabase/supabase-js": "^2.38.0",
     "axios": "^1.5.0",
     "crypto-js": "^4.1.1",
@@ -97,11 +98,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "resolutions": {
-    "zone.js": "0.14.0"
-  },
-  "overrides": {
-    "zone.js": "0.14.0"
   }
 }

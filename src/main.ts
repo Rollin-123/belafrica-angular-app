@@ -1,13 +1,10 @@
-import { provideZoneChangeDetection } from "@angular/core";
 /* 
     * BELAFRICA - Plateforme diaspora africaine
     * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
     * Code source confidentiel - Usage interdit sans autorisation
     */
-import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
-import { appConfig } from './app/app.config'; 
-import './polyfills';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { AppModule } from './app/app.module';
 
-bootstrapApplication(AppComponent, {...appConfig, providers: [provideZoneChangeDetection(), ...appConfig.providers]})
+platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.error(err));
