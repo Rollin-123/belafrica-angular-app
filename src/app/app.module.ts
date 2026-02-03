@@ -11,8 +11,6 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { AppComponent } from './app.component';
-import { ModalComponent } from './shared/components/modal/modal.component';  
-import { TelegramRedirectComponent } from './modules/auth/telegram-redirect.component';
 import { Observable } from 'rxjs';
 import { ConfigService } from './core/services/config.service';
 import { CredentialsInterceptor } from './core/interceptors/credentials.interceptor';
@@ -24,19 +22,23 @@ import { PostsHttpService } from './core/services/posts-http.service';
 import { MessagingService } from './core/services/messaging.service';
 import { MessagingMockService } from './core/services/messaging-mock.service';
 import { MessagingHttpService } from './core/services/messaging-http.service';
+import { AuthModule } from './modules/auth/auth.module';
+import { SharedModule } from './shared/shared/shared.module';
 
 export function initializeApp(configService: ConfigService): () => Observable<any> {
   return () => configService.loadAppConfig();
 }
 
 @NgModule({
-  declarations: [AppComponent, ModalComponent, TelegramRedirectComponent],  
+  declarations: [AppComponent],  
   imports: [
     BrowserModule,
     BrowserAnimationsModule,  
     AppRoutingModule,
     HttpClientModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {enabled: !isDevMode(), registrationStrategy: 'registerWhenStable:30000'})
+    ServiceWorkerModule.register('ngsw-worker.js', {enabled: !isDevMode(), registrationStrategy: 'registerWhenStable:30000'}),
+    AuthModule,
+    SharedModule
   ],
   providers: [
     ConfigService,

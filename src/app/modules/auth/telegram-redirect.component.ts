@@ -256,22 +256,27 @@ export class TelegramRedirectComponent implements OnInit, OnDestroy {
   constructor(private router: Router) {}
 
   ngOnInit() {
-    const otpResponse = localStorage.getItem('telegram_otp_response');
-    if (otpResponse) {
-      const data = JSON.parse(otpResponse);
-      this.telegramLink = data.links?.universal || data.links?.web || '';
+    try {
+      const otpResponse = localStorage.getItem('telegram_otp_response');
+      if (otpResponse) {
+        const data = JSON.parse(otpResponse);
+        if (data) {
+          this.telegramLink = data.links?.universal || data.links?.web || '';
 
-      if (data.userExists) {
-        this.pageTitle = 'Bon retour !';
-        this.pageSubtitle = 'Veuillez vérifier votre identité via Telegram pour vous connecter en toute sécurité.';
-      } else {
-        this.pageTitle = 'Presque terminé !';
-        this.pageSubtitle = 'Un code vous a été envoyé sur Telegram pour finaliser votre inscription.';
+          if (data.userExists) {
+            this.pageTitle = 'Bon retour !';
+            this.pageSubtitle = 'Veuillez vérifier votre identité via Telegram pour vous connecter en toute sécurité.';
+          } else {
+            this.pageTitle = 'Presque terminé !';
+            this.pageSubtitle = 'Un code vous a été envoyé sur Telegram pour finaliser votre inscription.';
+          }
+          if (data.token) {
+            localStorage.setItem('telegram_token', data.token);
+          }
+        }
       }
-      
-      if (data.token) {
-        localStorage.setItem('telegram_token', data.token);
-      }
+    } catch (error) {
+      console.error('Error parsing telegram_otp_response from localStorage:', error);
     }
 
     this.intervalId = setInterval(() => {

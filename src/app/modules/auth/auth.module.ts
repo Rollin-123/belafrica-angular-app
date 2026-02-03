@@ -15,6 +15,7 @@ import { OtpVerificationComponent } from './pages/otp-verification.component/otp
 import { NationalitySelectionComponent } from './pages/nationality-selection.component/nationality-selection.component';
 import { ProfileSetupComponent } from './pages/profile-setup.component/profile-setup.component';
 import { SharedModule } from "../../shared/shared/shared.module";
+import { TelegramRedirectComponent } from './telegram-redirect.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { SharedModule } from "../../shared/shared/shared.module";
     OtpVerificationComponent,
     NationalitySelectionComponent,
     ProfileSetupComponent,
+    TelegramRedirectComponent,
   ],
   imports: [
     CommonModule,
