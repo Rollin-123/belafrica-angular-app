@@ -20,6 +20,7 @@ import { CreatePostModalComponent } from './pages/create-post-modal.component/cr
 import { provideHttpClient } from '@angular/common/http';
 import { ModalService } from '../../core/services/modal.service';
 import { MessageBubbleComponent } from './components/message-bubble/message-bubble.component';
+import { ChatComponent } from './pages/chat.component/chat.component';
 
 
 @NgModule({
@@ -32,12 +33,12 @@ import { MessageBubbleComponent } from './components/message-bubble/message-bubb
     ProfileComponent,
     AdminRequestComponent,
     CreatePostModalComponent,
+    ChatComponent,
     MessageBubbleComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
-    MessageBubbleComponent,
     MainRoutingModule,
     ReactiveFormsModule,
     SharedModule

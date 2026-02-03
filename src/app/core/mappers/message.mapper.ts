@@ -17,7 +17,7 @@ export function mapBackendMessageToFrontend(backendMessage: BackendMessage, curr
     conversationId: backendMessage.conversation_id,
     fromUserId: backendMessage.user_id,
     fromUserName: backendMessage.user.pseudo,
-    fromUserAvatar: backendMessage.user.avatar_url || undefined,  
+    fromUserAvatar: backendMessage.user.avatar_url ?? undefined,
     encryptedContent: backendMessage.encrypted_content,
     encryptionKey: backendMessage.iv,
     timestamp: new Date(backendMessage.created_at),
