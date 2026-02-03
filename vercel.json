@@ -2,17 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/belafrica"
-      }
+      "src": "angular.json",
+      "use": "@vercel/angular",
+      "options": {
+        "buildTarget": "vercel"
+      } 
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "src": "/assets/(.*)",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" },
+      "dest": "/assets/$1"
     }
   ],
   "env": {
