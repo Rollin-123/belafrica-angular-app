@@ -2,11 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "angular.json",
-      "use": "@vercel/angular",
+      "src": "package.json",
+      "use": "@vercel/static-build",
       "config": {
-        "buildTarget": "belafrica:build:vercel"
-      } 
+        "distDir": "dist/belafrica"
+      }
     }
   ],
   "routes": [
@@ -16,10 +16,7 @@
       "dest": "/assets/$1"
     }
   ],
-  "env": {
-    "NG_APP_SUPABASE_URL": "https://zaaubhewtugkgsuoxgqi.supabase.co",
-    "NG_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphYXViaGV3dHVna2dzdW94Z3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTUyNzYsImV4cCI6MjA4MDI3MTI3Nn0.-MzEVsGnC4QQc0z9wP14IOVi1CWaznF1omft_KZChYo",
-    "NG_APP_API_URL": "https://belafrica-backend.onrender.com/api",
-    "NG_APP_WEBSOCKET_URL": "wss://belafrica-backend.onrender.com"
-  }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
