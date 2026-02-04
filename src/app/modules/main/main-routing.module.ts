@@ -11,10 +11,11 @@ import { FeedInternationalComponent } from './pages/feed-international.component
 import { MessagingComponent } from './pages/messaging.component/messaging.component';
 import { SettingsComponent } from './pages/settings.component/settings.component';
 import { ChatComponent } from './pages/chat.component/chat.component';
-import { ProfileComponent } from './pages/profile.component/profile.component';
-import { PrivacySettingsComponent } from './pages/privacy-settings.component/privacy-settings.component';
-import { NotificationSettingsComponent } from './pages/notification-settings.component/notification-settings.component';
+import { ProfileComponent } from './pages/settings/profile.component/profile.component';
 import { AdminRequestComponent } from './pages/admin-request.component/admin-request.component';
+import { PrivacySecurityComponent } from './pages/settings/privacy-security/privacy-security.component';
+import { AppearanceComponent } from './pages/settings/appearance/appearance.component';
+import { LanguageRegionComponent } from './pages/settings/language-region/language-region.component';
 
 const routes: Routes = [
   {
@@ -28,11 +29,12 @@ const routes: Routes = [
       {path: 'chat/:conversationId', component: ChatComponent, data: { preload: false }},
       {path: 'profile', component: ProfileComponent},
       {path: 'settings', component: SettingsComponent},
-      {path: 'settings/privacy', component: PrivacySettingsComponent }, 
-      {path: 'settings/notifications', component: NotificationSettingsComponent },
-      {path: 'admin-request', component: AdminRequestComponent}
+      {path: 'admin-request', component: AdminRequestComponent},
+      { path: 'privacy', component: PrivacySecurityComponent },
+      { path: 'appearance', component: AppearanceComponent },
+      { path: 'language', component: LanguageRegionComponent }
     ]
-  }
+  },
 ];
 
 @NgModule({

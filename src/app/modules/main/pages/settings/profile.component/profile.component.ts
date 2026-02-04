@@ -5,7 +5,7 @@
     */
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { UserService, User, UserUpdateData } from '../../../../core/services/user.service';
+import { UserService, User, UserUpdateData } from '../../../../../core/services/user.service';
 
 @Component({
   selector: 'app-profile',

@@ -1,0 +1,44 @@
+/* CONTENEUR GLOBAL ================================== */
+.bel-privacy-container {
+    min-height: 100vh;
+    background: var(--bel-light);
+    padding-bottom: 80px;
+}
+
+/* HEADER ============================================== */
+.bel-privacy-header {
+    background: var(--bel-white);
+    padding: 20px 16px;
+    border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-privacy-header .bel-privacy-header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.bel-privacy-header .bel-back-btn {
+    background: none;
+    border: none;
+    color: var(--bel-primary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 0;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    transition: opacity 0.2s ease;
+}
+
+.bel-privacy-header .bel-back-btn:hover {
+    opacity: 0.8;
+}
+
+.bel-privacy-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+} 

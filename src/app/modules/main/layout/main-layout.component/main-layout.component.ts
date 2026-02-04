@@ -30,7 +30,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private router: Router,
   private userService: UserService, 
   private messagingService: MessagingService, 
-  private socketService: SocketService, // Inject SocketService
+  private socketService: SocketService,  
   private modalService: ModalService,
  ) { }
 
@@ -50,7 +50,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
     this.updateActiveTab(this.router.url);
 
-    // ✅ S'abonner au nombre de messages non lus
     this.subscriptions.add(this.messagingService.getConversations().subscribe(conversations => {
       this.unreadCount = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
     }));

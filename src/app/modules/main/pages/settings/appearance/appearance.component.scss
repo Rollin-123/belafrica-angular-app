@@ -1,0 +1,99 @@
+/* CONTENEUR GLOBAL ================================== */
+.bel-appearence-container {
+    min-height: 100vh;
+    background: var(--bel-light);
+    padding-bottom: 80px;
+}
+
+/* HEADER ============================================== */
+.bel-appearence-header {
+    background: var(--bel-white);
+    padding: 20px 16px;
+    border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-appearence-header .bel-appearence-header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.bel-appearence-header .bel-back-btn {
+    background: none;
+    border: none;
+    color: var(--bel-primary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 0;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    transition: opacity 0.2s ease;
+}
+
+.bel-appearence-header .bel-back-btn:hover {
+    opacity: 0.8;
+}
+
+.bel-appearence-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-appearence-header p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+}
+/* src/app/modules/main/pages/settings/appearance/appearance.component.scss */
+.setting-page {
+  padding: 20px;
+}
+
+.theme-options {
+  display: flex;
+  gap: 20px;
+}
+
+.theme-option {
+  cursor: pointer;
+
+  input[type="radio"] {
+    display: none; 
+  }
+
+  .option-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+
+    .preview {
+      width: 100px;
+      height: 60px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      
+      &.light { background-color: #f5f5f5; }
+      &.dark { background-color: #333; }
+      &.system {
+        background: linear-gradient(45deg, #f5f5f5 50%, #333 50%);
+      }
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+
+  input[type="radio"]:checked + .option-card {
+    border-color: var(--bel-primary-color, #007bff);
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+  }
+}

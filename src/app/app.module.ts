@@ -15,7 +15,6 @@ import { Observable } from 'rxjs';
 import { ConfigService } from './core/services/config.service';
 import { CredentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
-import { environment } from '../environments/environment';
 import { PostsService } from './core/services/posts.service';
 import { PostsHttpService } from './core/services/posts-http.service';
 import { MessagingService } from './core/services/messaging.service';

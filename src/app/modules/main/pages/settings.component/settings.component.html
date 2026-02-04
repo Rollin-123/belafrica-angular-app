@@ -4,6 +4,7 @@
     <p>Gérez vos préférences et paramètres de compte</p>
   </header>
 
+  
   @if (user) {
     <div class="bel-user-card">
       <div class="bel-user-avatar">
@@ -46,7 +47,7 @@
         </section>
         @if (user && !user.is_admin) {
           <section class="bel-settings-group">
-            <h3 class="bel-settings-group-title">👑 Administration</h3>
+            <h3 class="bel-settings-group-title">Administration</h3>
             <div class="bel-settings-list">
               <div
                 class="bel-settings-item"

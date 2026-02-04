@@ -1,0 +1,52 @@
+/* CONTENEUR GLOBAL ================================== */
+.bel-language-container {
+    min-height: 100vh;
+    background: var(--bel-light);
+    padding-bottom: 80px;
+}
+
+
+/* HEADER ============================================== */
+.bel-language-header {
+    background: var(--bel-white);
+    padding: 20px 16px;
+    border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-language-header .bel-language-header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.bel-language-header .bel-back-btn {
+    background: none;
+    border: none;
+    color: var(--bel-primary);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 0;
+    font-weight: 500;
+    font-family: var(--bel-font-body);
+    transition: opacity 0.2s ease;
+}
+
+.bel-language-header .bel-back-btn:hover {
+    opacity: 0.8;
+}
+
+.bel-language-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--bel-dark);
+    font-family: var(--bel-font-heading);
+}
+
+.bel-language-header p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bel-gray);
+    font-family: var(--bel-font-body);
+}

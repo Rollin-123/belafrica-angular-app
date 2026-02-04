@@ -3,6 +3,11 @@
     * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
     * Code source confidentiel - Usage interdit sans autorisation
     */
+
+import { LanguageRegionComponent } from './pages/settings/language-region/language-region.component';
+import { AppearanceComponent } from './pages/settings/appearance/appearance.component';
+import { PrivacySecurityComponent } from './pages/settings/privacy-security/privacy-security.component';
+
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -14,13 +19,13 @@ import { SettingsComponent } from './pages/settings.component/settings.component
 import { SharedModule } from '../../shared/shared/shared.module';
 import { FeedNationalComponent } from './pages/feed-national.component/feed-national.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ProfileComponent } from './pages/profile.component/profile.component';
+import { ProfileComponent } from './pages/settings/profile.component/profile.component';
 import { AdminRequestComponent } from './pages/admin-request.component/admin-request.component';
 import { CreatePostModalComponent } from './pages/create-post-modal.component/create-post-modal.component';
 import { provideHttpClient } from '@angular/common/http';
 import { ModalService } from '../../core/services/modal.service';
 import { MessageBubbleComponent } from './components/message-bubble/message-bubble.component';
-import { ChatComponent } from './pages/chat.component/chat.component';
+import { ChatComponent } from './pages/chat.component/chat.component'; 
 
 
 @NgModule({
@@ -34,6 +39,9 @@ import { ChatComponent } from './pages/chat.component/chat.component';
     AdminRequestComponent,
     CreatePostModalComponent,
     ChatComponent,
+    PrivacySecurityComponent,
+    AppearanceComponent, 
+    LanguageRegionComponent,
     MessageBubbleComponent
   ],
   imports: [

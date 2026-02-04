@@ -1,0 +1,42 @@
+<div class="bel-appearence-container">
+      <!-- Header avec bouton retour -->
+  <header class="bel-appearence-header">
+    <div class="bel-appearence-header-content">
+      <button (click)="goBackToSettings()" class="bel-back-btn" title="Retour aux paramètres">
+        ← Retour
+      </button>
+      <h1>Apparence</h1>
+    </div>
+    <p>Personnalisez l'apparence de l'application.</p>
+  </header>
+
+<!-- src/app/modules/main/pages/settings/appearance/appearance.component.html -->
+<div class="setting-page"> 
+  <div class="theme-options">
+    <label class="theme-option">
+      <input type="radio" name="theme" value="light" [checked]="selectedTheme === 'light'" (change)="onThemeChange('light')">
+      <div class="option-card">
+        <div class="preview light"></div>
+        <span>Clair</span>
+      </div>
+    </label>
+
+    <label class="theme-option">
+      <input type="radio" name="theme" value="dark" [checked]="selectedTheme === 'dark'" (change)="onThemeChange('dark')">
+      <div class="option-card">
+        <div class="preview dark"></div>
+        <span>Sombre</span>
+      </div>
+    </label>
+
+    <label class="theme-option">
+      <input type="radio" name="theme" value="system" [checked]="selectedTheme === 'system'" (change)="onThemeChange('system')">
+      <div class="option-card">
+        <div class="preview system"></div>
+        <span>Système</span>
+      </div>
+    </label>
+  </div>
+</div>
+</div>
+

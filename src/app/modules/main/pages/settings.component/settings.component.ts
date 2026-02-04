@@ -52,9 +52,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
       title: 'Apparence',
       description: 'Thème clair/sombre et interface',
       icon: '🎨',
-      route: null,
-      badge: 'Bientôt',
-      disabled: true
+      route: '/app/settings/appearance',
+      badge: null
     },
     {
       id: 'messaging',
@@ -70,11 +69,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
       title: 'Langue & Région',
       description: 'Langue et paramètres régionaux',
       icon: '🌍',
-      route: null,
-      badge: 'Bientôt',
-      disabled: true
+      route: '/app/settings/language',
+      badge: null
     }
   ];
+
   criticalActions = [
     {
       id: 'logout',
@@ -112,6 +111,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   navigateToAdminRequest(): void {
   this.router.navigate(['/app/admin-request']);
 }
+
 
   logout(): void {
     this.modalService.showConfirm('Déconnexion', 'Êtes-vous sûr de vouloir vous déconnecter ?').then((confirmed) => {
