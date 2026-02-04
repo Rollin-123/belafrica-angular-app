@@ -204,6 +204,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       const conversation = await this.getValidatedConversation();      
       const mentions = this.detectMentions(messageContent, conversation.id);
 
+      // ✅ SÉCURITÉ : Vérifier que l'ID de conversation n'est pas la valeur par défaut
+      if (conversation.id === '10000000-0000-0000-0000-000000000001') {
+        this.modalService.showError('Erreur Critique', 'Impossible de trouver la conversation de groupe. Veuillez vous déconnecter et vous reconnecter.');
+        this.isSending = false;
+        return;
+      }
+
       const payload: MessagePayload = {
         content: messageContent,
         conversationId: conversation.id,
@@ -221,8 +228,10 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       
     } catch (error: any) {
       console.error('❌ Erreur envoi message:', error);
+      // Logique améliorée pour afficher l'erreur de validation du backend
       let errorMessage = 'Une erreur est survenue lors de l\'envoi du message.';
       if (error?.error && Array.isArray(error.error.errors) && error.error.errors.length > 0) {
+        // Prend le message de la première erreur de validation
         errorMessage = error.error.errors[0].msg;
       }
       this.modalService.showError('Erreur d\'envoi', errorMessage);
