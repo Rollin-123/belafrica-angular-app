@@ -116,50 +116,25 @@ export class MessagingHttpService extends MessagingService {
     );
   }
 
-  async sendMessage(
-    content: string,
-    conversationId: string,
-    type: 'group' | 'private',
-    mentions: import("../models/message.model").Mention[],
-    replyToId?: string
-  ): Promise<void> {
+  async sendMessage(payload: import("../models/message.model").MessagePayload): Promise<void> {
     if (!this.userEncryptionKey) {
       throw new Error('Clé de chiffrement non disponible pour l\'envoi.');
     }
   
     const encryptedData = await this.encryptionService.encryptAndSerialize(
-      content,
+      payload.content,
       this.userEncryptionKey
     );
   
     await this.http.post(
-      `${this.apiUrl}/conversations/${conversationId}/messages`,
+      `${this.apiUrl}/conversations/${payload.conversationId}/messages`,
       { 
         encryptedContent: encryptedData.encryptedContent,
         iv: encryptedData.iv,
-        replyToId: replyToId || null,
-        mentions: mentions
+        replyToId: payload.replyToMessageId || null,
+        mentions: payload.mentions
       }
     ).toPromise();
-  }
-
-  async sendMessageWithMentions(
-    content: string,
-    conversationId: string,
-    type: 'group' | 'private',
-    mentions: import("../models/message.model").Mention[]
-  ): Promise<void> {
-    return this.sendMessage(content, conversationId, type, mentions);
-  }
-
-  async replyToMessage(
-    content: string,
-    conversationId: string,
-    replyToMessageId: string,
-    type: 'group' | 'private',
-    mentions: import("../models/message.model").Mention[]
-  ): Promise<void> {
-    return this.sendMessage(content, conversationId, type, mentions, replyToMessageId);
   }
 
   async editMessage(messageId: string, newContent: string): Promise<void> {

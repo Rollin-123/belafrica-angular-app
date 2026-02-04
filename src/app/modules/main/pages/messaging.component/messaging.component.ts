@@ -7,7 +7,7 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, Hos
 import { Observable, of, firstValueFrom, Subscription, Subject, combineLatest } from 'rxjs';
 import { map, tap, switchMap, distinctUntilChanged, debounceTime, filter } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Message, Conversation, MessageAction, Mention } from '../../../../core/models/message.model';
+import { Message, Conversation, MessageAction, Mention, MessagePayload } from '../../../../core/models/message.model';
 import { MessagingService } from '../../../../core/services/messaging.service'; 
 import { User, UserService } from '../../../../core/services/user.service';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -203,10 +203,20 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       const conversation = await this.getValidatedConversation();      
       const mentions = this.detectMentions(messageContent, conversation.id);
-      await this.messagingService.sendMessage(messageContent, conversation.id, 'group', mentions);
+
+      const payload: MessagePayload = {
+        content: messageContent,
+        conversationId: conversation.id,
+        conversationType: 'group',
+        mentions: mentions,
+        replyToMessageId: this.replyingTo ? this.replyingTo.id : undefined
+      };
+
+      await this.messagingService.sendMessage(payload);
 
       this.newMessage = '';
       this.showMentionsList = false;
+      this.replyingTo = null; 
       this.scrollToBottom();
       
     } catch (error) {
@@ -220,39 +230,8 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
-  // ✅ ENVOI DE MESSAGE AVEC RÉPONSE
-  async sendMessageWithReply(): Promise<void> {
-    if (!this.newMessage.trim() || this.isSending || !this.replyingTo) return;
-
-    this.isSending = true;
-    const messageContent = this.newMessage.trim();
-
-    try {
-      const conversation = await this.getValidatedConversation();      
-      const mentions = this.detectMentions(messageContent, conversation.id);
-
-      await this.messagingService.replyToMessage(messageContent, conversation.id, this.replyingTo.id, 'group', mentions);
-
-      this.newMessage = '';
-      this.replyingTo = null;
-      this.showMentionsList = false;
-      this.scrollToBottom();
-      
-    } catch (error) {
-      console.error('❌ Erreur envoi message avec réponse:', error);
-      this.modalService.showError('Erreur d\'envoi', 'Erreur lors de l\'envoi du message');
-    } finally {
-      this.isSending = false;
-      if (this.messageInput?.nativeElement) {
-        this.messageInput.nativeElement.focus();
-      }
-    }
-  }
-
   // ✅ GESTION DES TOUCHES AVEC @MENTIONS
-  onKeyPress(event: KeyboardEvent): void {
-    // Gestion de l'indicateur "en train d'écrire"
+  onKeyPress(event: KeyboardEvent): void { 
     if (!this.isTyping) {
       this.isTyping = true;
       firstValueFrom(this.groupConversation$).then(conv => {
@@ -279,11 +258,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     // Envoi du message
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      if (this.replyingTo) {
-        this.sendMessageWithReply();
-      } else {
-        this.sendMessage();
-      }
+      this.sendMessage();  
     }
   }
 
@@ -296,7 +271,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     clearTimeout(this.typingTimeout);
     this.typingTimeout = setTimeout(() => {
       this.isTyping = false;
-      this.typingSubject.next(); // Émettre un événement pour le debounce de stopTyping
+      this.typingSubject.next();  
     }, this.TYPING_TIMER_LENGTH); 
     
     if (this.showMentionsList) {
@@ -489,7 +464,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
-      if (!(await this.modalService.showConfirm('Confirmation', confirmationText))) return; // Utilisation de la modal custom
+      if (!(await this.modalService.showConfirm('Confirmation', confirmationText))) return;  
 
       await this.messagingService.deleteMessage(messageId, forEveryone);
 
@@ -619,7 +594,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       console.error('❌ Tentative d\'envoi de message sans conversation chargée. Probablement dû à une erreur de chargement initiale (401?).');
       this.modalService.showError('Erreur de conversation', 'Impossible d\'envoyer le message. La conversation n\'a pas pu être chargée. Veuillez rafraîchir la page.');
       this.isSending = false;
-      throw new Error('Conversation not available'); // Lance une erreur pour arrêter l'exécution
+      throw new Error('Conversation not available');  
     }
     return conversation;
   }

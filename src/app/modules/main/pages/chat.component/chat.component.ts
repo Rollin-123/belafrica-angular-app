@@ -179,22 +179,15 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       const conversation = await firstValueFrom(this.conversation$);
       if (!conversation) throw new Error("Conversation not found");
 
-      if (this.replyingTo) {
-        await this.messagingService.replyToMessage(
-          messageContent,
-          this.conversationId,
-          this.replyingTo.id,
-          conversation.type,
-          [] 
-        );
-      } else {
-        await this.messagingService.sendMessage(
-          messageContent,
-          this.conversationId,
-          conversation.type,
-          [] 
-        );
-      }
+      const payload = {
+        content: messageContent,
+        conversationId: this.conversationId,
+        conversationType: conversation.type,
+        mentions: [],  
+        replyToMessageId: this.replyingTo ? this.replyingTo.id : undefined
+      };
+
+      await this.messagingService.sendMessage(payload);
 
       this.newMessage = '';
       this.replyingTo = null;
@@ -206,7 +199,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
       this.modalService.showError('Erreur d\'envoi', 'Erreur lors de l\'envoi du message');
     } finally {
       this.isSending = false;
-      // Vérifier que l'element existe avant de focus
       if (this.messageInput?.nativeElement) {
         this.messageInput.nativeElement.focus();
       }
@@ -214,16 +206,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onInput(): void {
-    // Émettre un événement 'startTyping' si l'utilisateur n'est pas déjà en train de taper
     if (!this.isTyping) {
       this.isTyping = true;
       this.messagingService.emitStartTyping(this.conversationId);
     }
-    // Réinitialiser le timer pour 'stopTyping' à chaque frappe
     this.typingSubject.next();
   }
 
-  // Ajout de la logique pour le timeout de typing
   private typingTimeout: any;
 
   onKeydown(event: KeyboardEvent): void {
@@ -266,7 +255,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getTypingIndicator(): string {
     const typingUserPseudos = Array.from(this.typingUsers.values())
-      .filter(u => u.pseudo !== this.currentUser?.pseudo) // Filter out current user
+      .filter(u => u.pseudo !== this.currentUser?.pseudo)  
       .map(u => u.pseudo);
     if (typingUserPseudos.length === 0) return '';
     if (typingUserPseudos.length === 1) return `${typingUserPseudos[0]} est en train d'écrire...`;

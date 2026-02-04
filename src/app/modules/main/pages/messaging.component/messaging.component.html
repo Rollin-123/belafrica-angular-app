@@ -114,7 +114,7 @@
 
             <button
               class="bel-send-btn"
-              (click)="replyingTo ? sendMessageWithReply() : sendMessage()"
+              (click)="sendMessage()"
               [disabled]="!newMessage.trim() || isSending"
               [class.sending]="isSending">
               @if (isSending) {

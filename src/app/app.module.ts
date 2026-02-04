@@ -17,10 +17,8 @@ import { CredentialsInterceptor } from './core/interceptors/credentials.intercep
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 import { environment } from '../environments/environment';
 import { PostsService } from './core/services/posts.service';
-import { PostsMockService } from './core/services/posts-mock.service';
 import { PostsHttpService } from './core/services/posts-http.service';
 import { MessagingService } from './core/services/messaging.service';
-import { MessagingMockService } from './core/services/messaging-mock.service';
 import { MessagingHttpService } from './core/services/messaging-http.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { SharedModule } from './shared/shared/shared.module';
@@ -57,11 +55,11 @@ export function initializeApp(configService: ConfigService): () => Observable<an
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     {
       provide: PostsService,
-      useClass: environment.production ? PostsHttpService : PostsMockService
+      useClass: PostsHttpService  
     },
     {
       provide: MessagingService,
-      useClass: environment.production ? MessagingHttpService : MessagingMockService
+      useClass: MessagingHttpService  
     },
   ],
   bootstrap: [AppComponent]

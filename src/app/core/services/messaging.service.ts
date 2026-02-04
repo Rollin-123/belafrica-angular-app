@@ -10,10 +10,10 @@ import {
   Message, 
   Conversation,
   Mention, 
+  MessagePayload,
   MessageAction
 } from '../models/message.model';
 
-// 📦 INTERFACE LOCALE
 interface EncryptedData {
   iv: string;
   encryptedContent: string;
@@ -24,29 +24,8 @@ interface EncryptedData {
 })
 export abstract class MessagingService {
   abstract getConversations(): Observable<Conversation[]>;
-  abstract getMessages(conversationId: string): Observable<Message[]>;
-  abstract sendMessage(
-    content: string, 
-    conversationId: string,
-    type: 'group' | 'private',
-    mentions: Mention[],
-    replyToId?: string
-  ): Promise<void>;
-  abstract sendMessageWithMentions(
-    content: string, 
-    conversationId: string, 
-    type: 'group' | 'private',
-    mentions: Mention[]
-  ): Promise<void>;
-  abstract replyToMessage(
-    content: string, 
-    conversationId: string, 
-    replyToMessageId: string,
-    type: 'group' | 'private',
-    mentions: Mention[]
-  ): Promise<void>;
-
-  
+  abstract getMessages(conversationId: string): Observable<Message[]>;  
+  abstract sendMessage(payload: MessagePayload): Promise<void>;
   abstract editMessage(messageId: string, newContent: string): Promise<void>;
   abstract deleteMessage(messageId: string, forEveryone: boolean): Promise<void>;
   abstract getMessageActions(message: Message, currentUserId: string): MessageAction[];

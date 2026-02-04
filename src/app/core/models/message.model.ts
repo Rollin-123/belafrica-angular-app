@@ -11,9 +11,9 @@ export function generateMessageId(): string {
 export interface BackendMessage {
   id: string;
   conversation_id: string;
-  user_id: string; // Correction: user_id devrait être string, pas string | null
+  user_id: string;  
   encrypted_content: string | null;
-  iv: string; // ✅ CORRECTION: iv est NOT NULL dans la DB
+  iv: string;  
   created_at: string;
   updated_at: string | null;
   is_edited: boolean;
@@ -89,4 +89,11 @@ export interface MessageAction {
   label: string;
   icon: string;
   condition: (message: Message, currentUserId: string) => boolean;
+}
+export interface MessagePayload {
+  content: string;
+  conversationId: string;
+  conversationType: 'group' | 'private';
+  mentions: Mention[];
+  replyToMessageId?: string;
 }
