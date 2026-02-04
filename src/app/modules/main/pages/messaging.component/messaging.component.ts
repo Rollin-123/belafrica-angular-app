@@ -219,9 +219,13 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.replyingTo = null; 
       this.scrollToBottom();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Erreur envoi message:', error);
-      this.modalService.showError('Erreur d\'envoi', 'Erreur lors de l\'envoi du message');
+      let errorMessage = 'Une erreur est survenue lors de l\'envoi du message.';
+      if (error?.error && Array.isArray(error.error.errors) && error.error.errors.length > 0) {
+        errorMessage = error.error.errors[0].msg;
+      }
+      this.modalService.showError('Erreur d\'envoi', errorMessage);
     } finally {
       this.isSending = false;
       if (this.messageInput?.nativeElement) {
