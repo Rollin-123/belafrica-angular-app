@@ -56,23 +56,11 @@ export class MessagingHttpService extends MessagingService {
 
   getConversations(): Observable<Conversation[]> {
     return this.http.get<{ conversations: Conversation[] }>(`${this.apiUrl}/conversations`).pipe(
-      map((response: any) => {
-        return (response.conversations || []).map((conv: any) => {
-          const participantsDetails: any[] = (conv.conversation_participants || []).map((p: any) => ({
-            userId: p.users.id,
-            pseudo: p.users.pseudo,
-            avatar: p.users.avatar_url,
-            community: p.users.community,
-            isOnline: false,
-            lastSeen: new Date()
-          }));
-
-          return {
-            ...conv,
-            participantsDetails: participantsDetails,
-            participants: participantsDetails.map(p => p.userId)
-          };
-        });
+      map(response => {
+        // Le backend fait maintenant tout le travail de formatage grâce à la fonction RPC.
+        // Nous n'avons plus besoin de mapper les données ici.
+        // La réponse contient déjà `participantsDetails`.
+        return response.conversations || [];
       }),
       tap(conversations => {
         console.log(`⚡️ [HTTP] ${conversations.length} conversations chargées.`);

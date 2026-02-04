@@ -89,7 +89,8 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       tap(conversation => {
       if (conversation) {
         this.conversationParticipants = conversation.participantsDetails || []; 
-        this.communityMembersCount = this.conversationParticipants.filter(p => p.community === this.userCommunity).length;
+        // ✅ CORRECTION: Compter tous les participants de la conversation de groupe.
+        this.communityMembersCount = this.conversationParticipants.length; 
       }
     }),
     distinctUntilChanged()
