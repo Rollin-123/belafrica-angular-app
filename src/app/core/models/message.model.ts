@@ -1,6 +1,6 @@
-/* 
+/*
     * BELAFRICA - Plateforme diaspora africaine
-    * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
+    * Copyright (c) 2025 Rollin Loic Tianga. Tous droits reserves.
     * Code source confidentiel - Usage interdit sans autorisation
     */
 
@@ -11,9 +11,9 @@ export function generateMessageId(): string {
 export interface BackendMessage {
   id: string;
   conversation_id: string;
-  user_id: string;  
+  sender_id: string;
   encrypted_content: string | null;
-  iv: string;  
+  iv: string;
   created_at: string;
   updated_at: string | null;
   is_edited: boolean;
@@ -39,7 +39,7 @@ export interface Message {
   isMyMessage: boolean;
   isEdited: boolean;
   isDeleted: boolean;
-  editedAt?: Date;  
+  editedAt?: Date;
   replyTo?: {
     messageId: string;
     fromUserName: string;
@@ -48,7 +48,7 @@ export interface Message {
   };
   mentions: Mention[];
   encryptedContent: string | null;
-  encryptionKey: string | null;  
+  encryptionKey: string | null;
 }
 
 export interface Participant {
@@ -67,6 +67,7 @@ export interface Conversation {
   avatar?: string;
   participants: string[];
   participantsDetails?: Participant[];
+  communityMembersCount?: number;
   unreadCount: number;
   lastMessage?: string;
   lastMessageTimestamp?: Date;
@@ -90,8 +91,8 @@ export interface MessageAction {
   icon: string;
   condition: (message: Message, currentUserId: string) => boolean;
 }
+
 export interface MessagePayload {
-  me: any;
   content: string;
   conversationId: string;
   conversationType: 'group' | 'private';
