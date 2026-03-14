@@ -1,17 +1,40 @@
 export const environment = {
-  production: false,
+  production: true,
   appName: 'BELAFRICA',
-  
-  apiUrl: 'http://localhost:3000/api',
+
+  apiUrl: 'https://belafrica-backend.onrender.com/api',
   apiVersion: 'v1',
-  
+  apiTimeout: 30000,
+
   supabaseUrl: 'https://zaaubhewtugkgsuoxgqi.supabase.co',
   supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphYXViaGV3dHVna2dzdW94Z3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2OTUyNzYsImV4cCI6MjA4MDI3MTI3Nn0.-MzEVsGnC4QQc0z9wP14IOVi1CWaznF1omft_KZChYo',
-  
-  enableAnalytics: false,
-  enableLogging: true,
+
+  frontendUrl: 'https://belafrica.vercel.app',
+  backendUrl: 'https://belafrica-backend.onrender.com',
+  websocketUrl: 'wss://belafrica-backend.onrender.com',
+
+  enableAnalytics: true,
+  enableLogging: false,
+  enableServiceWorker: true,
+  enableCache: true,
+
   requestTimeout: 30000,
-  otpTimeout: 600000, 
-  telegramBot: 'https://t.me/BelafricaDevBot', 
-  supportEmail: 'rollinloictianga@gmail.com'
+  otpTimeout: 600000,
+  socketTimeout: 10000,
+
+  telegramBot: 'https://t.me/Belafrica_bot',
+  supportEmail: 'rollinloictianga@[gmail.com](https://gmail.com)',
+
+  enableMessaging: true,
+  enablePosts: true,
+  enableAdmin: true,
+  enablePushNotifications: false,
+
+  enableGeoValidation: true,
+  encryptionEnabled: true,
+
+  paginationLimit: 20,
+  imageQuality: 80,
+  cacheDuration: 3600,
+  debugMode: false
 };

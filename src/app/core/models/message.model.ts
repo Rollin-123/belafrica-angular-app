@@ -91,6 +91,7 @@ export interface MessageAction {
   condition: (message: Message, currentUserId: string) => boolean;
 }
 export interface MessagePayload {
+  me: any;
   content: string;
   conversationId: string;
   conversationType: 'group' | 'private';
