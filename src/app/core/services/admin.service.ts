@@ -98,7 +98,7 @@ export class AdminService {
     return this.http.get<{ success: boolean, codes: AdminCode[] }>(`${this.apiUrl}/codes`).pipe(
       map((response: { codes: any; }) => response.codes || []),
       catchError(err => {
-        console.error('❌ Erreur API getGeneratedCodes:', err); // Ne pas throw ici pour ne pas bloquer l'affichage
+        console.error('❌ Erreur API getGeneratedCodes:', err);  
         return of([]); 
       })
     );
