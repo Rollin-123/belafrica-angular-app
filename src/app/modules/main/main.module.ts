@@ -1,9 +1,8 @@
 /* 
     * BELAFRICA - Plateforme diaspora africaine
-    * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
+    * Copyright (c) 2025 Rollin Loic Tianga. Tous droits reserves.
     * Code source confidentiel - Usage interdit sans autorisation
     */
-
 import { LanguageRegionComponent } from './pages/settings/language-region/language-region.component';
 import { AppearanceComponent } from './pages/settings/appearance/appearance.component';
 import { PrivacySecurityComponent } from './pages/settings/privacy-security/privacy-security.component';
@@ -25,8 +24,8 @@ import { CreatePostModalComponent } from './pages/create-post-modal.component/cr
 import { provideHttpClient } from '@angular/common/http';
 import { ModalService } from '../../core/services/modal.service';
 import { MessageBubbleComponent } from './components/message-bubble/message-bubble.component';
-import { ChatComponent } from './pages/chat.component/chat.component'; 
-
+import { ChatComponent } from './pages/chat.component/chat.component';
+import { PrivateMessagingComponent } from './pages/private-messaging.component/private-messaging.component';
 
 @NgModule({
   declarations: [
@@ -40,9 +39,10 @@ import { ChatComponent } from './pages/chat.component/chat.component';
     CreatePostModalComponent,
     ChatComponent,
     PrivacySecurityComponent,
-    AppearanceComponent, 
+    AppearanceComponent,
     LanguageRegionComponent,
-    MessageBubbleComponent
+    MessageBubbleComponent,
+    PrivateMessagingComponent  
   ],
   imports: [
     CommonModule,
@@ -51,7 +51,7 @@ import { ChatComponent } from './pages/chat.component/chat.component';
     ReactiveFormsModule,
     SharedModule
   ],
-   providers: [
+  providers: [
     provideHttpClient(),
     ModalService
   ]

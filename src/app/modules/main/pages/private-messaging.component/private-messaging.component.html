@@ -1,0 +1,185 @@
+<div class="bel-private-container">
+
+  <!-- Header -->
+  <div class="bel-private-header">
+    <h2>Messages Privés</h2>
+    <button class="bel-add-contact-btn" (click)="openAddContactModal()" title="Ajouter un contact">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+        <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bel-private-tabs">
+    <button [class.active]="activeTab === 'conversations'" (click)="activeTab = 'conversations'">
+      💬 Conversations
+    </button>
+    <button [class.active]="activeTab === 'contacts'" (click)="activeTab = 'contacts'">
+      👥 Contacts ({{ contacts.length }})
+    </button>
+  </div>
+
+  <!-- Loader -->
+  @if (isLoading) {
+    <div class="bel-loading">
+      <div class="bel-spinner"></div>
+      <p>Chargement...</p>
+    </div>
+  }
+
+  <!-- ONGLET CONVERSATIONS -->
+  @if (!isLoading && activeTab === 'conversations') {
+    <div class="bel-conversations-list">
+      @if (contactsWithConversation.length === 0) {
+        <div class="bel-empty-state">
+          <div class="bel-empty-icon">💬</div>
+          <h3>Aucune conversation</h3>
+          <p>Ajoutez des contacts pour commencer à discuter.</p>
+          <button class="bel-start-btn" (click)="openAddContactModal()">
+            Ajouter un contact
+          </button>
+        </div>
+      }
+      @for (contact of contactsWithConversation; track contact.id) {
+        <div class="bel-conversation-item" (click)="openChat(contact)">
+          <div class="bel-conv-avatar">
+            @if (contact.avatar) {
+              <img [src]="contact.avatar" [alt]="contact.pseudo">
+            } @else {
+              <div class="bel-avatar-initials">{{ getInitials(contact.pseudo) }}</div>
+            }
+          </div>
+          <div class="bel-conv-info">
+            <div class="bel-conv-name">
+              {{ contact.pseudo }}
+              @if (contact.isVerified) { <span class="bel-verified">✓</span> }
+            </div>
+            <div class="bel-conv-community">{{ contact.community }}</div>
+          </div>
+          <div class="bel-conv-actions">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ONGLET CONTACTS -->
+  @if (!isLoading && activeTab === 'contacts') {
+    <div class="bel-contacts-list">
+      @if (contacts.length === 0) {
+        <div class="bel-empty-state">
+          <div class="bel-empty-icon">👥</div>
+          <h3>Aucun contact</h3>
+          <p>Recherchez des amis par numéro de téléphone.</p>
+          <button class="bel-start-btn" (click)="openAddContactModal()">
+            Ajouter un contact
+          </button>
+        </div>
+      }
+      @for (contact of contacts; track contact.id) {
+        <div class="bel-contact-item">
+          <div class="bel-contact-avatar">
+            @if (contact.avatar) {
+              <img [src]="contact.avatar" [alt]="contact.pseudo">
+            } @else {
+              <div class="bel-avatar-initials">{{ getInitials(contact.pseudo) }}</div>
+            }
+          </div>
+          <div class="bel-contact-info">
+            <div class="bel-contact-name">
+              {{ contact.pseudo }}
+              @if (contact.isVerified) { <span class="bel-verified">✓</span> }
+            </div>
+            <div class="bel-contact-meta">{{ contact.community }}</div>
+          </div>
+          <div class="bel-contact-actions">
+            <button class="bel-msg-btn" (click)="openChat(contact)" title="Envoyer un message">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+              </svg>
+            </button>
+            <button class="bel-remove-btn" (click)="confirmRemoveContact(contact)" title="Supprimer">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- MODAL AJOUT CONTACT -->
+  @if (showAddContactModal) {
+    <div class="bel-modal-overlay" (click)="closeAddContactModal()">
+      <div class="bel-modal" (click)="$event.stopPropagation()">
+        <div class="bel-modal-header">
+          <h3>Ajouter un contact</h3>
+          <button class="bel-modal-close" (click)="closeAddContactModal()">×</button>
+        </div>
+        <div class="bel-modal-body">
+          <p class="bel-modal-hint">
+            Entrez le numéro complet avec l'indicatif (ex: +375251234567)
+          </p>
+          <div class="bel-search-row">
+            <input
+              type="tel"
+              [(ngModel)]="searchPhone"
+              placeholder="+375251234567"
+              class="bel-phone-input"
+              (keydown.enter)="searchContact()"
+              [disabled]="isSearching">
+            <button
+              class="bel-search-btn"
+              (click)="searchContact()"
+              [disabled]="!searchPhone.trim() || isSearching">
+              @if (isSearching) { <div class="bel-mini-spinner"></div> }
+              @if (!isSearching) { 🔍 }
+            </button>
+          </div>
+
+          <!-- Résultat recherche -->
+          @if (searchError) {
+            <div class="bel-search-error">
+              <span>❌</span> {{ searchError }}
+            </div>
+          }
+
+          @if (searchResult) {
+            <div class="bel-search-result">
+              <div class="bel-result-avatar">
+                @if (searchResult.avatar_url) {
+                  <img [src]="searchResult.avatar_url" [alt]="searchResult.pseudo">
+                } @else {
+                  <div class="bel-avatar-initials large">{{ getInitials(searchResult.pseudo) }}</div>
+                }
+              </div>
+              <div class="bel-result-info">
+                <div class="bel-result-name">
+                  {{ searchResult.pseudo }}
+                  @if (searchResult.is_verified) { <span class="bel-verified">✓</span> }
+                </div>
+                <div class="bel-result-meta">
+                  {{ searchResult.community }} · {{ searchResult.nationality_name }}
+                </div>
+              </div>
+              @if (searchResult.isAlreadyContact) {
+                <span class="bel-already-contact">✅ Déjà contact</span>
+              } @else if (!searchResult.isBlocked) {
+                <button
+                  class="bel-add-btn"
+                  (click)="addFoundContact()"
+                  [disabled]="isAddingContact">
+                  @if (isAddingContact) { <div class="bel-mini-spinner"></div> }
+                  @if (!isAddingContact) { + Ajouter }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

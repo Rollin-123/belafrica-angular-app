@@ -1,6 +1,6 @@
 /* 
     * BELAFRICA - Plateforme diaspora africaine
-    * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
+    * Copyright (c) 2025 Rollin Loic Tianga. Tous droits reserves.
     * Code source confidentiel - Usage interdit sans autorisation
     */
 import { Injectable, OnDestroy } from '@angular/core';
@@ -9,55 +9,53 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { Message } from '../models/message.model';
 import { StorageService } from './storage.service';
+import { mapBackendMessageToFrontend } from '../mappers/message.mapper';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService implements OnDestroy {
   private socket?: Socket;
+  private currentUserId?: string;
 
   constructor(private storageService: StorageService) {}
-  initializeSocket(): void {
+
+  initializeSocket(userId?: string): void {
+    this.currentUserId = userId;
     if (this.socket && this.socket.connected) {
       return;
     }
     if (this.socket) {
       this.socket.disconnect();
     }
-    this.connect();  
+    this.connect();
   }
+
   private connect(): void {
     const token = this.storageService.getItem('belafrica_token');
-
-    // Se connecter uniquement si un token existe
     if (!token) {
-      console.warn('🔌 Pas de token, connexion socket reportée.');
+      console.warn('Pas de token, connexion socket reportee.');
       return;
     }
-
-    // ✅ CORRECTION: Le socket doit se connecter à la base de l'URL, pas au chemin /api
     const baseUrl = environment.apiUrl.replace('/api', '');
-
     this.socket = io(baseUrl, {
       withCredentials: true,
-      auth: { token }  
+      auth: { token },
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
     });
 
     this.socket.on('connect', () => {
-      console.log('🚀 Connecté au serveur Socket.IO:', this.socket?.id);
+      console.log('Connecte au serveur Socket.IO:', this.socket?.id);
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('🔌 Déconnecté du serveur Socket.IO');
+    this.socket.on('disconnect', (reason) => {
+      console.log('Deconnecte du serveur Socket.IO, raison:', reason);
     });
 
     this.socket.on('connect_error', (err) => {
-      console.error('❌ Erreur de connexion Socket.IO:', err.message);
-    });
-
-    // Écouter les événements de déconnexion pour tenter de se reconnecter si le token est présent
-    this.socket.on('disconnect', (reason) => {
-      console.log('🔌 Déconnecté du serveur Socket.IO, raison:', reason);
+      console.error('Erreur connexion Socket.IO:', err.message);
     });
   }
 
@@ -69,11 +67,34 @@ export class SocketService implements OnDestroy {
     if (this.socket) this.socket.emit('leaveConversation', conversationId);
   }
 
+  // ✅ onNewMessage mappe le message backend vers le modèle frontend
   onNewMessage(): Observable<Message> {
-    return this.listenToEvent<Message>('newMessage');
+    return new Observable(observer => {
+      this.socket?.on('newMessage', (data: any) => {
+        // Le backend envoie un BackendMessage - on le mappe
+        const mapped = mapBackendMessageToFrontend(data, this.currentUserId);
+        const messageWithContent: Message = {
+          ...mapped,
+          content: mapped.isDeleted ? 'Message supprime' : (mapped.encryptedContent || (data.content || ''))
+        };
+        observer.next(messageWithContent);
+      });
+    });
   }
 
-  // --- Indicateur "est en train d'écrire" ---
+  onMessageUpdated(): Observable<Message> {
+    return new Observable(observer => {
+      this.socket?.on('messageUpdated', (data: any) => {
+        const mapped = mapBackendMessageToFrontend(data, this.currentUserId);
+        observer.next({ ...mapped, content: mapped.encryptedContent || '' });
+      });
+    });
+  }
+
+  onMessageDeleted(): Observable<{ messageId: string; conversationId: string }> {
+    return this.listenToEvent<{ messageId: string; conversationId: string }>('messageDeleted');
+  }
+
   emitStartTyping(conversationId: string) {
     this.socket?.emit('startTyping', { conversationId });
   }
@@ -90,7 +111,6 @@ export class SocketService implements OnDestroy {
     return this.listenToEvent<{ userId: string, pseudo: string, conversationId: string }>('userStoppedTyping');
   }
 
-  // --- Statut "lu" ---
   emitMarkAsRead(conversationId: string, messageIds: string[]) {
     this.socket?.emit('markAsRead', { conversationId, messageIds });
   }

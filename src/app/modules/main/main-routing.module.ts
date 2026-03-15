@@ -1,6 +1,6 @@
 /* 
     * BELAFRICA - Plateforme diaspora africaine
-    * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
+    * Copyright (c) 2025 Rollin Loic Tianga. Tous droits reserves.
     * Code source confidentiel - Usage interdit sans autorisation
     */
 import { NgModule } from '@angular/core';
@@ -22,17 +22,22 @@ const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     children: [
-      {path: '', redirectTo: 'national', pathMatch: 'full'},
-      {path: 'national', component: FeedNationalComponent},
-      {path: 'international', component: FeedInternationalComponent},
-      {path: 'messaging', component: MessagingComponent},
-      {path: 'chat/:conversationId', component: ChatComponent, data: { preload: false }},
-      {path: 'profile', component: ProfileComponent},
-      {path: 'settings', component: SettingsComponent},
-      {path: 'admin-request', component: AdminRequestComponent},
-      { path: 'privacy', component: PrivacySecurityComponent },
-      { path: 'appearance', component: AppearanceComponent },
-      { path: 'language', component: LanguageRegionComponent }
+      { path: '', redirectTo: 'national', pathMatch: 'full' },
+      { path: 'national', component: FeedNationalComponent },
+      { path: 'international', component: FeedInternationalComponent },
+      { path: 'messaging', component: MessagingComponent },
+      { path: 'chat/:conversationId', component: ChatComponent, data: { preload: false } },
+      { path: 'profile', component: ProfileComponent },
+      { path: 'admin-request', component: AdminRequestComponent },
+      {
+        path: 'settings',
+        children: [
+          { path: '', component: SettingsComponent },
+          { path: 'privacy', component: PrivacySecurityComponent },
+          { path: 'appearance', component: AppearanceComponent },
+          { path: 'language', component: LanguageRegionComponent },
+        ]
+      }
     ]
   },
 ];

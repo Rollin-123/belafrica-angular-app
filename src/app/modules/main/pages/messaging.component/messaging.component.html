@@ -146,20 +146,8 @@
 
     <!-- ONGLET MESSAGES PRIVÉS -->
     @if (activeTab === 'private') {
-      <div class="bel-private-chat-container">
-
-        <!-- État de développement -->
-        <div class="bel-feature-development">
-          <div class="bel-development-icon">🚧</div>
-          <h3>Messagerie Privée</h3>
-          <p class="bel-development-text">
-            Fonctionnalité en cours de développement
-          </p>
-          <p class="bel-feature-description">
-            Les messages privés seront chiffrés de bout en bout pour garantir votre confidentialité.
-          </p>
-        </div>
-
+      <div class="bel-private-chat-container" style="height: 100%; padding: 0; overflow: hidden;">
+        <app-private-messaging></app-private-messaging>
       </div>
     }
   </main>

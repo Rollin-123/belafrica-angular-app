@@ -30,11 +30,28 @@ export class MessagingHttpService extends MessagingService {
   ) {
     super();
     console.log('MessagingHttpService initialise');
+    // Initialiser le socket avec l'userId pour le mapping des messages
+    const userId = this.userService.getCurrentUser()?.id;
+    this.socketService.initializeSocket(userId);
   }
 
   getConversations(): Observable<Conversation[]> {
-    return this.http.get<{ conversations: Conversation[] }>(`${this.apiUrl}/conversations`).pipe(
-      map(response => response.conversations || []),
+    return this.http.get<{ conversations: any[] }>(`${this.apiUrl}/conversations`).pipe(
+      map(response => {
+        return (response.conversations || []).map((conv: any) => ({
+          ...conv,
+          communityMembersCount: conv.communityMembersCount || conv.community_members_count || 0,
+          participantsDetails: conv.participantsDetails || conv.participants || [],
+          createdAt: new Date(conv.created_at || conv.createdAt),
+          updatedAt: new Date(conv.updated_at || conv.updatedAt),
+          unreadCount: conv.unreadCount || conv.unread_count || 0,
+          adminIds: conv.adminIds || [],
+          lastMessage: conv.lastMessage || conv.last_message_content || '',
+          lastMessageTimestamp: conv.lastMessageTimestamp || conv.last_message_created_at
+            ? new Date(conv.last_message_created_at || conv.lastMessageTimestamp)
+            : undefined
+        }));
+      }),
       tap(conversations => {
         console.log(conversations.length + ' conversations chargees.');
         this.conversations$.next(conversations);
@@ -47,21 +64,17 @@ export class MessagingHttpService extends MessagingService {
   }
 
   getMessages(conversationId: string): Observable<Message[]> {
+    const currentUserId = this.userService.getCurrentUser()?.id;
     return this.http.get<{ messages: any[] }>(`${this.apiUrl}/conversations/${conversationId}/messages`).pipe(
-      map((response: { messages: any[] }) => {
-        const currentUserId = this.userService.getCurrentUser()?.id;
-        return (response.messages || []).map((msg: any) =>
-          mapBackendMessageToFrontend(msg, currentUserId)
-        );
+      map(response => {
+        return (response.messages || []).map((msg: any) => {
+          const mapped = mapBackendMessageToFrontend(msg, currentUserId);
+          return {
+            ...mapped,
+            content: mapped.isDeleted ? 'Message supprime' : (mapped.encryptedContent || '')
+          };
+        });
       }),
-      map((messages: Message[]) =>
-        messages.map((message: Message) => ({
-          ...message,
-          content: message.isDeleted
-            ? 'Message supprime'
-            : (message.encryptedContent || '')
-        }))
-      ),
       catchError(error => {
         console.error('Erreur chargement messages:', error);
         return of([]);
@@ -70,14 +83,17 @@ export class MessagingHttpService extends MessagingService {
   }
 
   async sendMessage(payload: MessagePayload): Promise<void> {
+    const body: any = {
+      encryptedContent: payload.content,
+      iv: 'none',
+      mentions: payload.mentions || []
+    };
+    if (payload.replyToMessageId) {
+      body.replyToId = payload.replyToMessageId;
+    }
     await this.http.post(
       `${this.apiUrl}/conversations/${payload.conversationId}/messages`,
-      {
-        encryptedContent: payload.content,
-        iv: 'none',
-        replyToId: payload.replyToMessageId || null,
-        mentions: payload.mentions
-      }
+      body
     ).toPromise();
   }
 
@@ -101,8 +117,13 @@ export class MessagingHttpService extends MessagingService {
       actions.push({ type: 'copy', label: 'Copier', icon: 'content_copy', condition: () => true });
     }
     if (message.fromUserId === currentUserId && !message.isDeleted) {
-      actions.push({ type: 'edit', label: 'Modifier', icon: 'edit', condition: () => true });
-      actions.push({ type: 'delete', label: 'Supprimer', icon: 'delete', condition: () => true });
+      const elapsed = new Date().getTime() - new Date(message.timestamp).getTime();
+      if (elapsed < 30 * 60 * 1000) {
+        actions.push({ type: 'edit', label: 'Modifier', icon: 'edit', condition: () => true });
+      }
+      if (elapsed < 2 * 60 * 60 * 1000) {
+        actions.push({ type: 'delete', label: 'Supprimer', icon: 'delete', condition: () => true });
+      }
     }
     return actions;
   }
@@ -113,6 +134,10 @@ export class MessagingHttpService extends MessagingService {
 
   markAsRead(conversationId: string, messageIds: string[]): void {
     this.socketService.emitMarkAsRead(conversationId, messageIds);
+    // Optionnel: appel HTTP aussi
+    this.http.post(`${this.apiUrl}/conversations/${conversationId}/read`, { messageIds })
+      .pipe(catchError(() => of(null)))
+      .subscribe();
   }
 
   getStats(): any {
@@ -128,14 +153,7 @@ export class MessagingHttpService extends MessagingService {
   }
 
   getRealTimeMessages(): Observable<Message> {
-    return this.socketService.onNewMessage().pipe(
-      map((message: Message) => ({
-        ...message,
-        content: message.isDeleted
-          ? 'Message supprime'
-          : (message.encryptedContent || '')
-      }))
-    );
+    return this.socketService.onNewMessage();
   }
 
   emitStartTyping(conversationId: string): void {
