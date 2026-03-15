@@ -231,12 +231,7 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // Vérification de sécurité: pas l'ID de test
-    if (this.currentConversationId === '10000000-0000-0000-0000-000000000001') {
-      this.modalService.showError('Erreur Critique', 'Conversation de test détectée. Reconnectez-vous.');
-      this.isSending = false;
-      return;
-    }
+    // Conversation chargée - on peut envoyer
 
     // ✅ Message optimiste (affiché immédiatement)
     const optimisticId = 'temp_' + Date.now();
