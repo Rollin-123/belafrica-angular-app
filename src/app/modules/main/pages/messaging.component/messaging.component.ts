@@ -138,9 +138,29 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
+        // ✅ FIX: ignorer mes propres messages (déjà ajoutés en mode optimiste)
+        if (newMessage.fromUserId === this.currentUser?.id) {
+          // Remplacer le message optimiste temp_ par le vrai ID si existant
+          const current = this.messagesSubject.getValue();
+          const hasTempMessage = current.some(m => m.id.startsWith('temp_') && m.isMyMessage);
+          if (hasTempMessage) {
+            const updated = current.map(m => {
+              if (m.id.startsWith('temp_') && m.isMyMessage &&
+                  m.content === (newMessage.encryptedContent || (newMessage as any).content || '')) {
+                return { ...m, id: newMessage.id, status: 'sent' as const };
+              }
+              return m;
+            });
+            this.messagesSubject.next(updated);
+            this.currentMessages = updated;
+            this.cdr.detectChanges();
+          }
+          return;
+        }
+
         const current = this.messagesSubject.getValue();
 
-        // Éviter les doublons (le sender voit déjà son message en optimiste ou via HTTP)
+        // Éviter les doublons
         if (current.some(m => m.id === newMessage.id)) {
           return;
         }

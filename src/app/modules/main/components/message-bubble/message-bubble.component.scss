@@ -1,130 +1,169 @@
 .bel-message-wrapper {
   display: flex;
+  margin-bottom: 4px;
+  padding: 0 8px;
 
+  // ✅ MES MESSAGES — droite, fond jaune/orange (couleur primaire BelAfrica)
   &.my-message {
     justify-content: flex-end;
+
     .bel-message-bubble {
-      background: var(--bel-primary);
-      color: var(--bel-white);
-      border-bottom-right-radius: 4px;
+      background: #F2A900;          // jaune BelAfrica
+      color: #FFFFFF;
+      border-radius: 18px 18px 4px 18px;   // coin bas-droit aplati = style WhatsApp
 
       .bel-message-time {
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 0.75);
       }
       .bel-message-sender {
         color: rgba(255, 255, 255, 0.9);
       }
       .bel-reply-indicator {
-        background: rgba(255, 255, 255, 0.1);
-        border-left-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+        border-left-color: rgba(255, 255, 255, 0.6);
         .bel-reply-content {
-          strong {
-            color: rgba(255, 255, 255, 0.9);
-          }
-          p {
-            color: rgba(255, 255, 255, 0.7);
-          }
+          strong { color: rgba(255, 255, 255, 0.95); }
+          p { color: rgba(255, 255, 255, 0.75); }
         }
+      }
+      .bel-edited-badge {
+        color: rgba(255, 255, 255, 0.65);
       }
     }
   }
 
+  // ✅ MESSAGES DES AUTRES — gauche, fond vert ciel (secondaire BelAfrica)
   &.other-message {
     justify-content: flex-start;
+
     .bel-message-bubble {
-      background: var(--bel-secondary-light);
-      color: var(--bel-light);
-      border-bottom-left-radius: 4px;
+      background: #E8F5EE;          // vert ciel clair (lisible, confortable)
+      color: #2D3748;               // texte sombre
+      border-radius: 18px 18px 18px 4px;   // coin bas-gauche aplati
 
       .bel-message-time {
-        color: var(--bel-gray);
+        color: #718096;
+      }
+      .bel-message-sender {
+        color: #008751;             // vert BelAfrica pour le nom
       }
       .bel-reply-indicator {
-        background: rgba(0, 0, 0, 0.05);
-        border-left-color: var(--bel-secondary);
+        background: rgba(0, 135, 81, 0.06);
+        border-left-color: #008751;
         .bel-reply-content {
-          strong {
-            color: var(--bel-secondary-dark);
-          }
-          p {
-            color: var(--bel-gray);
-          }
+          strong { color: #006B3F; }
+          p { color: #718096; }
         }
       }
     }
   }
 
-  // Animation de surbrillance
+  // Animation de surbrillance lors du scroll vers un message cité
   &.bel-message-highlight {
     animation: highlightMessage 2s ease;
   }
 }
 
 @keyframes highlightMessage {
-  0% {
-    background: transparent;
-  }
-  10% {
-    background: rgba(242, 169, 0, 0.1);
-  }
-  100% {
-    background: transparent;
-  }
+  0%   { background: transparent; }
+  15%  { background: rgba(242, 169, 0, 0.12); }
+  100% { background: transparent; }
 }
 
+// ─── BULLE ──────────────────────────────────────────────────────────────────
 .bel-message-bubble {
-  width: 85%;
-  padding: 12px 16px;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  animation: messageAppear 0.3s ease;
+  max-width: 75%;
+  min-width: 80px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  animation: messageAppear 0.25s ease;
   position: relative;
   cursor: pointer;
+  word-break: break-word;
 }
 
 @keyframes messageAppear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-// INDICATEUR DE RÉPONSE ==============================
+// ─── EN-TÊTE (nom + avatar pour les autres) ─────────────────────────────────
+.bel-message-header {
+  margin-bottom: 4px;
+}
+
+.bel-message-sender-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bel-user-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.bel-user-avatar-placeholder {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #008751;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.bel-message-sender {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--bel-font-body);
+}
+
+// ─── CONTENU ────────────────────────────────────────────────────────────────
+.bel-message-content {
+  font-size: 14px;
+  line-height: 1.45;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-family: var(--bel-font-body);
+}
+
+.mention-highlight {
+  background: rgba(242, 169, 0, 0.25);
+  color: #D69400;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin: 0 1px;
+}
+
+// ─── INDICATEUR DE RÉPONSE ──────────────────────────────────────────────────
 .bel-reply-indicator {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 8px 12px;
-  margin: -8px -12px 8px -12px;
+  padding: 6px 10px;
+  margin: -4px -8px 8px -8px;
   border-radius: 12px 12px 0 0;
   cursor: pointer;
   transition: background-color 0.2s ease;
   border-left: 3px solid;
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.05);
-  }
-}
-
-.bel-reply-line {
-  width: 2px;
-  background: currentColor;
-  border-radius: 1px;
-  flex-shrink: 0;
-  margin-top: 2px;
-  opacity: 0.6;
+  &:hover { filter: brightness(0.96); }
 }
 
 .bel-reply-content {
   flex: 1;
-
   strong {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     display: block;
     margin-bottom: 2px;
     font-family: var(--bel-font-body);
@@ -132,7 +171,7 @@
   p {
     margin: 0;
     font-size: 11px;
-    opacity: 0.8;
+    opacity: 0.85;
     line-height: 1.3;
     font-family: var(--bel-font-body);
     overflow: hidden;
@@ -143,143 +182,80 @@
   }
 }
 
-// EN-TÊTE DU MESSAGE ================================
-.bel-message-header {
-  margin-bottom: 4px;
-}
-
-.bel-message-sender-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.bel-user-avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.bel-user-avatar-placeholder {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--bel-primary);
-  color: var(--bel-white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.bel-message-sender {
-  font-size: 13px;
-  color: var(--bel-secondary);
-  font-weight: 600;
-  font-family: var(--bel-font-body);
-}
-
-// CONTENU DU MESSAGE ================================
-.bel-message-content {
-  font-size: 15px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  font-family: var(--bel-font-body);
-}
-
-// MENTIONS DANS LE MESSAGE ==========================
-.mention-highlight {
-  background: rgba(242, 169, 0, 0.2);
-  color: var(--bel-primary-dark);
-  font-weight: 600;
-  padding: 1px 4px;
-  border-radius: 4px;
-  margin: 0 1px;
-}
-
-// PIED DU MESSAGE ===================================
+// ─── PIED (heure + statut) ───────────────────────────────────────────────────
 .bel-message-footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 4px;
+  margin-top: 3px;
 }
 
 .bel-message-time {
   font-size: 11px;
-  opacity: 0.8;
+  opacity: 0.85;
   font-family: var(--bel-font-body);
 }
 
 .bel-message-status {
   display: flex;
   align-items: center;
-  color: var(--bel-gray);
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     fill: currentColor;
   }
 
-  &.status-read {
-    color: var(--bel-secondary);
-  }
-  &.status-delivered {
-    color: var(--bel-primary);
-  }
+  &.status-sending  { color: rgba(255,255,255,0.5); }
+  &.status-sent     { color: rgba(255,255,255,0.7); }
+  &.status-delivered{ color: rgba(255,255,255,0.9); }
+  &.status-read     { color: #FFFFFF; }
 }
 
 .sending-spinner {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: var(--bel-white);
+  border-top-color: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 1px;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-// MESSAGE SUPPRIMÉ ==================================
+// ─── MESSAGE SUPPRIMÉ ────────────────────────────────────────────────────────
 .bel-deleted-message {
-  color: var(--bel-gray);
   font-style: italic;
-  opacity: 0.7;
-  font-size: 14px;
+  opacity: 0.6;
+  font-size: 13px;
 }
 
 .bel-edited-badge {
-  font-size: 11px;
-  color: var(--bel-gray);
+  font-size: 10px;
   font-style: italic;
   margin-left: 4px;
   font-family: var(--bel-font-body);
+  opacity: 0.7;
 }
 
-// ÉDITION DE MESSAGE ================================
+// ─── MODE ÉDITION ────────────────────────────────────────────────────────────
 .bel-message-edit {
   .bel-edit-input {
     width: 100%;
-    border: 2px solid var(--bel-primary);
+    border: 2px solid #F2A900;
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 8px 10px;
     font-size: 14px;
     font-family: inherit;
     resize: vertical;
     min-height: 60px;
-    background: var(--bel-white);
-    color: var(--bel-dark);
+    background: #FFFFFF;
+    color: #2D3748;
+    box-sizing: border-box;
     &:focus {
       outline: none;
-      border-color: var(--bel-primary-dark);
+      border-color: #D69400;
     }
   }
   .bel-edit-actions {
@@ -292,26 +268,22 @@
 
 .bel-btn-cancel,
 .bel-btn-save {
-  padding: 6px 12px;
+  padding: 5px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: var(--bel-font-body);
   transition: all 0.2s ease;
 }
 .bel-btn-cancel {
-  background: var(--bel-light);
-  color: var(--bel-gray);
-  &:hover {
-    background: var(--bel-border);
-  }
+  background: #F7FAFC;
+  color: #718096;
+  &:hover { background: #E2E8F0; }
 }
 .bel-btn-save {
-  background: var(--bel-secondary);
-  color: var(--bel-white);
-  &:hover {
-    background: var(--bel-secondary-dark);
-  }
+  background: #008751;
+  color: #FFFFFF;
+  &:hover { background: #006B3F; }
 }
