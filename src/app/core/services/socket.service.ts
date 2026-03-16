@@ -9,6 +9,7 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { Message } from '../models/message.model';
 import { StorageService } from './storage.service';
+import { NotificationService } from './notification.service';
 import { mapBackendMessageToFrontend } from '../mappers/message.mapper';
 
 @Injectable({
@@ -18,7 +19,10 @@ export class SocketService implements OnDestroy {
   private socket?: Socket;
   private currentUserId?: string;
 
-  constructor(private storageService: StorageService) {}
+  constructor(
+    private storageService: StorageService,
+    private notificationService: NotificationService  // ✅ AJOUT
+  ) {}
 
   initializeSocket(userId?: string): void {
     this.currentUserId = userId;
@@ -67,17 +71,28 @@ export class SocketService implements OnDestroy {
     if (this.socket) this.socket.emit('leaveConversation', conversationId);
   }
 
-  // ✅ onNewMessage mappe le message backend vers le modèle frontend
+  // ✅ onNewMessage mappe + déclenche notification si message d'un autre
   onNewMessage(): Observable<Message> {
     return new Observable(observer => {
       this.socket?.on('newMessage', (data: any) => {
-        // Le backend envoie un BackendMessage - on le mappe
         const mapped = mapBackendMessageToFrontend(data, this.currentUserId);
         const messageWithContent: Message = {
           ...mapped,
           content: mapped.isDeleted ? 'Message supprime' : (mapped.encryptedContent || (data.content || ''))
         };
         observer.next(messageWithContent);
+
+        // ✅ Notification si ce n'est PAS notre propre message
+        if (data.sender_id !== this.currentUserId) {
+          const senderName = data.user?.pseudo || 'Nouveau message';
+          // On n'affiche pas le contenu chiffré dans la notif
+          const preview = '📨 Nouveau message de ' + senderName;
+          this.notificationService.notifyNewMessage(
+            senderName,
+            preview,
+            data.conversation_id || ''
+          );
+        }
       });
     });
   }

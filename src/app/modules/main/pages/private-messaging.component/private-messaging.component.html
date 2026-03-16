@@ -1,180 +1,224 @@
-<div class="bel-private-container">
+<!--
+  BELAFRICA - Messagerie privée
+  Vision: comme WhatsApp — liste de contacts BelAfrica, clic = chat direct
+-->
+<div class="bpm-container">
 
-  <!-- Header (sans bouton - FAB remplace) -->
-  <div class="bel-private-header">
-    <h2>Messages Privés</h2>
+  <!-- ── HEADER ── -->
+  <div class="bpm-header">
+    <h2>Messages</h2>
+    <span class="bpm-count">{{ contacts.length }} contact{{ contacts.length > 1 ? 's' : '' }}</span>
   </div>
 
-  <!-- Tabs -->
-  <div class="bel-private-tabs">
-    <button [class.active]="activeTab === 'conversations'" (click)="activeTab = 'conversations'">
-      💬 Conversations
-    </button>
-    <button [class.active]="activeTab === 'contacts'" (click)="activeTab = 'contacts'">
-      👥 Contacts ({{ contacts.length }})
-    </button>
+  <!-- ── BARRE RECHERCHE LOCALE ── -->
+  <div class="bpm-search-bar">
+    <svg class="bpm-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+    </svg>
+    <input
+      type="text"
+      [(ngModel)]="localSearch"
+      placeholder="Rechercher un contact…"
+      class="bpm-search-input"
+      autocomplete="off">
+    @if (localSearch) {
+      <button class="bpm-search-clear" (click)="localSearch = ''">×</button>
+    }
   </div>
 
-  <!-- Loader -->
+  <!-- ── LOADER ── -->
   @if (isLoading) {
-    <div class="bel-loading">
-      <div class="bel-spinner"></div>
-      <p>Chargement...</p>
+    <div class="bpm-loading">
+      <div class="bpm-spinner"></div>
     </div>
   }
 
-  <!-- ONGLET CONVERSATIONS -->
-  @if (!isLoading && activeTab === 'conversations') {
-    <div class="bel-conversations-list">
-      @if (contactsWithConversation.length === 0) {
-        <div class="bel-empty-state">
-          <div class="bel-empty-icon">💬</div>
-          <h3>Aucune conversation</h3>
-          <p>Ajoutez un contact et démarrez votre première discussion.</p>
-          <button class="bel-start-btn" (click)="openAddContactModal()">
-            + Ajouter un contact
+  <!-- ── LISTE ── -->
+  @if (!isLoading) {
+    <div class="bpm-list">
+
+      <!-- Conversations existantes -->
+      @if (contactsWithConversation.length > 0) {
+        <div class="bpm-section-label">Conversations récentes</div>
+        @for (contact of contactsWithConversation; track contact.id) {
+          <div class="bpm-item" (click)="openOrStartChat(contact)">
+            <div class="bpm-avatar">
+              @if (contact.avatar) {
+                <img [src]="contact.avatar" [alt]="contact.pseudo">
+              } @else {
+                <div class="bpm-avatar-letter">{{ getInitials(contact.pseudo) }}</div>
+              }
+              @if (contact.isOnline) {
+                <span class="bpm-online-dot"></span>
+              }
+            </div>
+            <div class="bpm-info">
+              <div class="bpm-name">
+                {{ contact.pseudo }}
+                @if (contact.isVerified) {
+                  <svg class="bpm-verified" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                  </svg>
+                }
+              </div>
+              <div class="bpm-sub">{{ contact.community }}</div>
+            </div>
+            <div class="bpm-arrow">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+              </svg>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Contacts sans conversation -->
+      @if (contactsWithoutConversation.length > 0) {
+        <div class="bpm-section-label">
+          {{ contactsWithConversation.length > 0 ? 'Autres contacts' : 'Contacts BelAfrica' }}
+        </div>
+        @for (contact of contactsWithoutConversation; track contact.id) {
+          <div class="bpm-item" (click)="openOrStartChat(contact)">
+            <div class="bpm-avatar">
+              @if (contact.avatar) {
+                <img [src]="contact.avatar" [alt]="contact.pseudo">
+              } @else {
+                <div class="bpm-avatar-letter">{{ getInitials(contact.pseudo) }}</div>
+              }
+            </div>
+            <div class="bpm-info">
+              <div class="bpm-name">
+                {{ contact.pseudo }}
+                @if (contact.isVerified) {
+                  <svg class="bpm-verified" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                  </svg>
+                }
+              </div>
+              <div class="bpm-sub">{{ contact.community }} · {{ getLastSeen(contact) }}</div>
+            </div>
+            <button class="bpm-start-btn" (click)="openOrStartChat(contact); $event.stopPropagation()">
+              Écrire
+            </button>
+          </div>
+        }
+      }
+
+      <!-- Vide -->
+      @if (filteredContacts.length === 0 && !localSearch) {
+        <div class="bpm-empty">
+          <div class="bpm-empty-icon">💬</div>
+          <h3>Aucun contact BelAfrica</h3>
+          <p>Appuyez sur <strong>+</strong> pour chercher un membre de votre communauté et lui écrire.</p>
+          <button class="bpm-add-first-btn" (click)="openAddModal()">
+            + Ajouter mon premier contact
           </button>
         </div>
       }
-      @for (contact of contactsWithConversation; track contact.id) {
-        <div class="bel-conversation-item" (click)="openChat(contact)">
-          <div class="bel-conv-avatar">
-            @if (contact.avatar) {
-              <img [src]="contact.avatar" [alt]="contact.pseudo">
-            } @else {
-              <div class="bel-avatar-initials">{{ getInitials(contact.pseudo) }}</div>
-            }
-          </div>
-          <div class="bel-conv-info">
-            <div class="bel-conv-name">
-              {{ contact.pseudo }}
-              @if (contact.isVerified) { <span class="bel-verified">✓</span> }
-            </div>
-            <div class="bel-conv-community">{{ contact.community }}</div>
-          </div>
-          <div class="bel-conv-actions">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-            </svg>
-          </div>
+
+      @if (filteredContacts.length === 0 && localSearch) {
+        <div class="bpm-empty">
+          <div class="bpm-empty-icon">🔍</div>
+          <p>Aucun contact correspondant à "<strong>{{ localSearch }}</strong>"</p>
         </div>
       }
+
     </div>
   }
 
-  <!-- ONGLET CONTACTS -->
-  @if (!isLoading && activeTab === 'contacts') {
-    <div class="bel-contacts-list">
-      @if (contacts.length === 0) {
-        <div class="bel-empty-state">
-          <div class="bel-empty-icon">👥</div>
-          <h3>Aucun contact</h3>
-          <p>Appuyez sur le bouton <strong>+</strong> en bas à droite pour ajouter un ami.</p>
-        </div>
-      }
-      @for (contact of contacts; track contact.id) {
-        <div class="bel-contact-item">
-          <div class="bel-contact-avatar">
-            @if (contact.avatar) {
-              <img [src]="contact.avatar" [alt]="contact.pseudo">
-            } @else {
-              <div class="bel-avatar-initials">{{ getInitials(contact.pseudo) }}</div>
-            }
-          </div>
-          <div class="bel-contact-info">
-            <div class="bel-contact-name">
-              {{ contact.pseudo }}
-              @if (contact.isVerified) { <span class="bel-verified">✓</span> }
-            </div>
-            <div class="bel-contact-meta">{{ contact.community }}</div>
-          </div>
-          <div class="bel-contact-actions">
-            <button class="bel-msg-btn" (click)="openChat(contact)" title="Envoyer un message">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-              </svg>
-            </button>
-            <button class="bel-remove-btn" (click)="confirmRemoveContact(contact)" title="Supprimer">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      }
-    </div>
-  }
-
-  <!-- FAB - Bouton flottant ajouter contact -->
-  <button class="bel-fab" (click)="openAddContactModal()" title="Ajouter un contact" aria-label="Ajouter un contact">
-    <svg viewBox="0 0 24 24" fill="currentColor">
+  <!-- ── FAB ── -->
+  <button class="bpm-fab" (click)="openAddModal()" title="Ajouter un contact" aria-label="Ajouter un contact">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
       <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
     </svg>
   </button>
 
-  <!-- MODAL AJOUT CONTACT (bottom sheet) -->
+  <!-- ── MODAL AJOUT CONTACT ── -->
   @if (showAddContactModal) {
-    <div class="bel-modal-overlay" (click)="closeAddContactModal()">
-      <div class="bel-modal" (click)="$event.stopPropagation()">
-        <div class="bel-modal-header">
+    <div class="bpm-overlay" (click)="closeAddModal()">
+      <div class="bpm-modal" (click)="$event.stopPropagation()">
+
+        <div class="bpm-modal-head">
           <h3>Ajouter un contact</h3>
-          <button class="bel-modal-close" (click)="closeAddContactModal()">×</button>
+          <button class="bpm-modal-close" (click)="closeAddModal()">×</button>
         </div>
-        <div class="bel-modal-body">
-          <p class="bel-modal-hint">
-            📱 Entrez le numéro complet avec l'indicatif pays (ex: +375251234567)
+
+        <!-- Toggle mode -->
+        <div class="bpm-mode-toggle">
+          <button [class.active]="searchMode === 'pseudo'" (click)="searchMode = 'pseudo'; resetModalSearch_internal()">
+            Par pseudo
+          </button>
+          <button [class.active]="searchMode === 'phone'" (click)="searchMode = 'phone'; resetModalSearch_internal()">
+            Par numéro
+          </button>
+        </div>
+
+        <div class="bpm-modal-body">
+          <p class="bpm-modal-hint">
+            @if (searchMode === 'pseudo') {
+              🔍 Cherchez un membre de votre communauté par son pseudo
+            } @else {
+              📱 Entrez le numéro complet (ex: +33612345678)
+            }
           </p>
-          <div class="bel-search-row">
+
+          <div class="bpm-input-row">
             <input
-              type="tel"
-              [(ngModel)]="searchPhone"
-              placeholder="+375251234567"
-              class="bel-phone-input"
-              (keydown.enter)="searchContact()"
-              [disabled]="isSearching"
-              autocomplete="tel">
-            <button
-              class="bel-search-btn"
-              (click)="searchContact()"
-              [disabled]="!searchPhone.trim() || isSearching">
-              @if (isSearching) { <div class="bel-mini-spinner"></div> }
-              @if (!isSearching) { 🔍 }
+              type="text"
+              [(ngModel)]="searchQuery"
+              [placeholder]="searchMode === 'pseudo' ? 'Pseudo...' : '+33612345678'"
+              class="bpm-text-input"
+              (keydown.enter)="search()"
+              [disabled]="isSearching">
+            <button class="bpm-go-btn" (click)="search()" [disabled]="!searchQuery.trim() || isSearching">
+              @if (isSearching) { <div class="bpm-mini-spin"></div> }
+              @else { <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg> }
             </button>
           </div>
 
           @if (searchError) {
-            <div class="bel-search-error">
-              <span>❌</span> {{ searchError }}
+            <div class="bpm-error">❌ {{ searchError }}</div>
+          }
+
+          <!-- Résultats par pseudo (liste) -->
+          @for (u of searchResults; track u.id) {
+            <div class="bpm-result-item">
+              <div class="bpm-avatar small">
+                @if (u.avatar_url) { <img [src]="u.avatar_url" [alt]="u.pseudo"> }
+                @else { <div class="bpm-avatar-letter">{{ getInitials(u.pseudo) }}</div> }
+              </div>
+              <div class="bpm-info">
+                <div class="bpm-name">{{ u.pseudo }}</div>
+                <div class="bpm-sub">{{ u.community }}</div>
+              </div>
+              @if (u.isAlreadyContact) {
+                <span class="bpm-badge-done">✓ Ajouté</span>
+              } @else {
+                <button class="bpm-add-btn" (click)="addContact(u)" [disabled]="isAddingContact">
+                  @if (isAddingContact) { <div class="bpm-mini-spin"></div> }
+                  @else { + }
+                </button>
+              }
             </div>
           }
 
+          <!-- Résultat par numéro (unique) -->
           @if (searchResult) {
-            <div class="bel-search-result">
-              <div class="bel-contact-avatar">
-                @if (searchResult.avatar_url) {
-                  <img [src]="searchResult.avatar_url" [alt]="searchResult.pseudo">
-                } @else {
-                  <div class="bel-avatar-initials large">{{ getInitials(searchResult.pseudo) }}</div>
-                }
+            <div class="bpm-result-item">
+              <div class="bpm-avatar small">
+                @if (searchResult.avatar_url) { <img [src]="searchResult.avatar_url" [alt]="searchResult.pseudo"> }
+                @else { <div class="bpm-avatar-letter">{{ getInitials(searchResult.pseudo) }}</div> }
               </div>
-              <div class="bel-result-info">
-                <div class="bel-result-name">
-                  {{ searchResult.pseudo }}
-                  @if (searchResult.is_verified) { <span class="bel-verified">✓</span> }
-                </div>
-                <div class="bel-result-meta">
-                  {{ searchResult.community }} · {{ searchResult.nationality_name }}
-                </div>
+              <div class="bpm-info">
+                <div class="bpm-name">{{ searchResult.pseudo }}</div>
+                <div class="bpm-sub">{{ searchResult.community }} · {{ searchResult.nationality_name }}</div>
               </div>
               @if (searchResult.isAlreadyContact) {
-                <span class="bel-already-contact">✅ Déjà contact</span>
-              } @else if (!searchResult.isBlocked) {
-                <button
-                  class="bel-add-btn"
-                  (click)="addFoundContact()"
-                  [disabled]="isAddingContact">
-                  @if (isAddingContact) { <div class="bel-mini-spinner"></div> }
-                  @if (!isAddingContact) { + Ajouter }
+                <span class="bpm-badge-done">✓ Ajouté</span>
+              } @else {
+                <button class="bpm-add-btn" (click)="addContact(searchResult!)" [disabled]="isAddingContact">
+                  @if (isAddingContact) { <div class="bpm-mini-spin"></div> }
+                  @else { + }
                 </button>
               }
             </div>
