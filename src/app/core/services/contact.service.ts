@@ -27,8 +27,18 @@ export class ContactService {
     return this.contacts$.getValue();
   }
 
+  /**
+   * Recherche par numéro de téléphone
+   */
   searchByPhone(phone: string): Observable<{ success: boolean; user?: ContactSearchResult; error?: string; notOnApp?: boolean }> {
     return this.http.post<any>(`${this.apiUrl}/search`, { phone });
+  }
+
+  /**
+   * Recherche par pseudo (parmi les membres de la même communauté)
+   */
+  searchByPseudo(pseudo: string): Observable<{ success: boolean; users?: ContactSearchResult[]; error?: string }> {
+    return this.http.post<any>(`${this.apiUrl}/search-pseudo`, { pseudo });
   }
 
   addContact(contactUserId: string): Observable<{ success: boolean; message: string }> {

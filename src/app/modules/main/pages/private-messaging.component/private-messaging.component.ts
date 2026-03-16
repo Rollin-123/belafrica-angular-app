@@ -22,9 +22,15 @@ export class PrivateMessagingComponent implements OnInit, OnDestroy {
   isSearching = false;
   isAddingContact = false;
   showAddContactModal = false;
+
+  // Recherche
+  searchMode: 'phone' | 'pseudo' = 'pseudo';  
   searchPhone = '';
+  searchPseudo = '';
   searchResult: ContactSearchResult | null = null;
+  searchResults: ContactSearchResult[] = [];  
   searchError = '';
+
   activeTab: 'conversations' | 'contacts' = 'conversations';
 
   private subscription = new Subscription();
@@ -48,10 +54,7 @@ export class PrivateMessagingComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.subscription.add(
       this.contactService.getContacts().subscribe({
-        next: (contacts) => {
-          this.contacts = contacts;
-          this.isLoading = false;
-        },
+        next: (contacts) => { this.contacts = contacts; this.isLoading = false; },
         error: () => { this.isLoading = false; }
       })
     );
@@ -82,67 +85,100 @@ export class PrivateMessagingComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoading = false;
-        this.modalService.showError('Erreur', 'Impossible de demarrer la conversation.');
+        this.modalService.showError('Erreur', 'Impossible de démarrer la conversation.');
       }
     });
   }
 
   openAddContactModal() {
     this.showAddContactModal = true;
-    this.searchPhone = '';
-    this.searchResult = null;
-    this.searchError = '';
+    this.resetSearch();
   }
 
   closeAddContactModal() {
     this.showAddContactModal = false;
+    this.resetSearch();
+  }
+
+  private resetSearch(): void {
     this.searchPhone = '';
+    this.searchPseudo = '';
     this.searchResult = null;
+    this.searchResults = [];
     this.searchError = '';
+    this.searchMode = 'pseudo';
   }
 
   searchContact() {
-    if (!this.searchPhone.trim()) return;
-    this.isSearching = true;
     this.searchResult = null;
+    this.searchResults = [];
     this.searchError = '';
 
-    this.contactService.searchByPhone(this.searchPhone.trim()).subscribe({
-      next: (res) => {
-        this.isSearching = false;
-        if (res.success && res.user) {
-          this.searchResult = res.user;
-        } else {
-          this.searchError = res.error || 'Utilisateur non trouve.';
+    if (this.searchMode === 'phone') {
+      if (!this.searchPhone.trim()) return;
+      this.isSearching = true;
+      this.contactService.searchByPhone(this.searchPhone.trim()).subscribe({
+        next: (res) => {
+          this.isSearching = false;
+          if (res.success && res.user) {
+            this.searchResult = res.user;
+          } else {
+            this.searchError = res.error || 'Utilisateur non trouvé.';
+          }
+        },
+        error: (err) => {
+          this.isSearching = false;
+          this.searchError = err.error?.notOnApp
+            ? 'Ce numéro n\'est pas inscrit sur BelAfrica.'
+            : 'Erreur lors de la recherche.';
         }
-      },
-      error: (err) => {
-        this.isSearching = false;
-        if (err.error?.notOnApp) {
-          this.searchError = 'Ce numero n\'est pas inscrit sur BelAfrica.';
-        } else {
+      });
+    } else {
+      if (!this.searchPseudo.trim() || this.searchPseudo.length < 2) {
+        this.searchError = 'Entrez au moins 2 caractères.';
+        return;
+      }
+      this.isSearching = true;
+      this.contactService.searchByPseudo(this.searchPseudo.trim()).subscribe({
+        next: (res) => {
+          this.isSearching = false;
+          if (res.success && res.users && res.users.length > 0) {
+            this.searchResults = res.users;
+          } else {
+            this.searchError = 'Aucun membre trouvé avec ce pseudo.';
+          }
+        },
+        error: () => {
+          this.isSearching = false;
           this.searchError = 'Erreur lors de la recherche.';
         }
-      }
-    });
+      });
+    }
   }
 
-  addFoundContact() {
-    if (!this.searchResult) return;
+  addContactFromResult(user: ContactSearchResult) {
+    if (user.isAlreadyContact) {
+      this.modalService.showError('Info', 'Ce contact est déjà dans votre liste.');
+      return;
+    }
     this.isAddingContact = true;
-
-    this.contactService.addContact(this.searchResult.id).subscribe({
+    this.contactService.addContact(user.id).subscribe({
       next: (res) => {
         this.isAddingContact = false;
         this.closeAddContactModal();
         this.loadContacts();
-        this.modalService.showError('Contact ajoute', res.message);
+        this.modalService.showError('✅ Contact ajouté', res.message);
       },
       error: () => {
         this.isAddingContact = false;
         this.modalService.showError('Erreur', 'Impossible d\'ajouter ce contact.');
       }
     });
+  }
+
+  addFoundContact() {
+    if (!this.searchResult) return;
+    this.addContactFromResult(this.searchResult);
   }
 
   confirmRemoveContact(contact: Contact) {
@@ -169,7 +205,7 @@ export class PrivateMessagingComponent implements OnInit, OnDestroy {
     const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
     if (diffDays === 0) return 'Aujourd\'hui';
     if (diffDays === 1) return 'Hier';
-    if (diffDays < 7) return 'Il y a ' + diffDays + ' jours';
+    if (diffDays < 7) return `Il y a ${diffDays} jours`;
     return d.toLocaleDateString('fr-FR');
   }
 }

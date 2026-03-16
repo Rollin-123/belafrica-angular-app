@@ -1,11 +1,11 @@
 /* 
-    * BELAFRICA - Plateforme diaspora africaine
-    * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
-    * Code source confidentiel - Usage interdit sans autorisation
-    */
+ * BELAFRICA - Plateforme diaspora africaine
+ * Copyright © 2025 Rollin Loic Tianga. Tous droits réservés.
+ */
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService, User, UserUpdateData } from '../../../../../core/services/user.service';
+import { ModalService } from '../../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-profile',
@@ -17,32 +17,27 @@ export class ProfileComponent implements OnInit {
   user: User | null = null;
   isEditing = false;
   isLoading = false;
-    editData: UserUpdateData = {
-    pseudo: '',
-    bio: '',
-    gender: '',
-    profession: '',
-    interests: []
-  };
+  isSavingAvatar = false;
+  errorMessage = '';
+  successMessage = '';
+
+  editData: UserUpdateData = { pseudo: '', bio: '', gender: '', profession: '', interests: [] };
 
   genders = [
     { value: 'male', label: 'Homme' },
     { value: 'female', label: 'Femme' },
     { value: 'other', label: 'Autre' },
-    { value: 'prefer_not_to_say', label: 'Je préfère ne pas dire' }
+    { value: 'prefer_not_to_say', label: 'Préfère ne pas dire' }
   ];
 
   constructor(
-    public userService: UserService, 
+    public userService: UserService,
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private modalService: ModalService
   ) {}
 
   ngOnInit() {
-    this.loadUserProfile();
-  }
-
-  loadUserProfile(): void {
     this.user = this.userService.getCurrentUser();
   }
 
@@ -51,7 +46,7 @@ export class ProfileComponent implements OnInit {
   }
 
   startEditing(): void {
-    this.isEditing = true;    
+    this.isEditing = true;
     this.editData = {
       pseudo: this.user?.pseudo || '',
       bio: this.user?.bio || '',
@@ -59,90 +54,73 @@ export class ProfileComponent implements OnInit {
       profession: this.user?.profession || '',
       interests: this.user?.interests ? [...this.user.interests] : []
     };
-    
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 
   cancelEditing(): void {
     this.isEditing = false;
-    this.editData = {
-      pseudo: '',
-      bio: '',
-      gender: '',
-      profession: '',
-      interests: []
-    };
+    this.resetEditData();
   }
 
   async saveProfile(): Promise<void> {
-    if (!this.user) {
+    if (!this.user || !this.editData.pseudo?.trim()) {
+      this.errorMessage = 'Le pseudo est requis.';
       return;
     }
-
     this.isLoading = true;
-    try {
-      await this.userService.updateProfile(this.editData);
-      // Recharger les données
-      this.loadUserProfile();
-      this.isEditing = false;
-      
-      // Réinitialiser les données d'édition
-      this.editData = {
-        pseudo: '',
-        bio: '',
-        gender: '',
-        profession: '',
-        interests: []
-      };
-      
-    } catch (error) {
-      console.error('❌ Erreur sauvegarde profil:', error);
-      alert('Erreur lors de la sauvegarde du profil');
-    } finally {
-      this.isLoading = false;
-    }
+    this.errorMessage = '';
+
+    this.userService.updateProfile(this.editData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.user = response.user;
+        this.isEditing = false;
+        this.resetEditData();
+        this.successMessage = 'Profil mis à jour avec succès !';
+        setTimeout(() => this.successMessage = '', 3000);
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err?.error?.error || 'Erreur lors de la sauvegarde.';
+        this.cd.detectChanges();
+      }
+    });
   }
 
   async onAvatarSelected(event: any): Promise<void> {
     const file = event.target.files[0];
     if (!file) return;
 
-    this.isLoading = true;
-    
+    this.isSavingAvatar = true;
+    this.errorMessage = '';
     try {
-      await this.userService.uploadAvatar(file);
-      this.loadUserProfile();
+      const url = await this.userService.uploadAvatar(file);
+      this.user = this.userService.getCurrentUser();
+      this.successMessage = 'Photo de profil mise à jour !';
+      setTimeout(() => this.successMessage = '', 3000);
     } catch (error: any) {
-      console.error('❌ Erreur upload avatar:', error);
-      alert(error.message || 'Erreur lors de l\'upload de l\'avatar');
-    this.cd.detectChanges();
+      this.errorMessage = error.message || 'Erreur lors de l\'upload.';
     } finally {
-      this.isLoading = false;
+      this.isSavingAvatar = false;
       event.target.value = '';
+      this.cd.detectChanges();
     }
   }
 
   addInterest(event: any): void {
     const input = event.target as HTMLInputElement;
     const value = input.value.trim();
-    
     if (value && event.key === 'Enter') {
-      
-      // CORRECTION : Initialisation garantie du tableau
-      if (!this.editData.interests) {
-        this.editData.interests = [];
-      }
-      
-      if (!this.editData.interests.includes(value)) {
-        this.editData.interests.push(value);
-      }
-      
+      if (!this.editData.interests) this.editData.interests = [];
+      if (!this.editData.interests.includes(value)) this.editData.interests.push(value);
       input.value = '';
       event.preventDefault();
     }
   }
 
   removeInterest(interest: string): void {
-    
     if (this.editData.interests) {
       this.editData.interests = this.editData.interests.filter(i => i !== interest);
     }
@@ -150,18 +128,19 @@ export class ProfileComponent implements OnInit {
 
   getMemberSince(): string {
     if (!this.user?.created_at) return 'Récemment';
-    
-    const created = new Date(this.user.created_at);
-    return created.toLocaleDateString('fr-FR');
+    return new Date(this.user.created_at).toLocaleDateString('fr-FR');
   }
 
   getGenderLabel(genderValue: string | undefined): string {
     if (!genderValue) return 'Non spécifié';
-    const gender = this.genders.find(g => g.value === genderValue);
-    return gender ? gender.label : genderValue;
+    return this.genders.find(g => g.value === genderValue)?.label || genderValue;
   }
 
   getUserInitials(): string {
     return this.user?.pseudo?.charAt(0).toUpperCase() || 'U';
+  }
+
+  private resetEditData(): void {
+    this.editData = { pseudo: '', bio: '', gender: '', profession: '', interests: [] };
   }
 }

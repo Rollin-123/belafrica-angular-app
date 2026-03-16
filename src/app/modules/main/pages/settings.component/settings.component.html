@@ -4,118 +4,116 @@
     <p>Gérez vos préférences et paramètres de compte</p>
   </header>
 
-  
   @if (user) {
     <div class="bel-user-card">
       <div class="bel-user-avatar">
-        @if (!user.avatar_url) {
-          <div
-            class="bel-avatar-default">
+        @if (user.avatar_url) {
+          <img [src]="user.avatar_url" [alt]="user.pseudo" class="bel-avatar-img">
+        } @else {
+          <div class="bel-avatar-default">
             {{ userService.generateDefaultAvatar(user.pseudo) }}
           </div>
         }
       </div>
-      <main class="bel-settings-sections">
-        <section class="bel-settings-group">
-          <h3 class="bel-settings-group-title">Préférences du compte</h3>
-          <div class="bel-settings-list">
-            @for (section of settingsSections; track section) {
-              <div
-                class="bel-settings-item"
-                [class.disabled]="section.disabled"
-                (click)="navigateToSection(section)">
-                <div class="bel-settings-item-icon">
-                  {{ section.icon }}
-                </div>
-                <div class="bel-settings-item-content">
-                  <h4 class="bel-settings-item-title">{{ section.title }}</h4>
-                  <p class="bel-settings-item-desc">{{ section.description }}</p>
-                </div>
-                <div class="bel-settings-item-actions">
-                  @if (section.badge) {
-                    <span class="bel-settings-badge">
-                      {{ section.badge }}
-                    </span>
-                  }
-                  @if (!section.disabled) {
-                    <span class="bel-settings-arrow">›</span>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-        </section>
-        @if (user && !user.is_admin) {
-          <section class="bel-settings-group">
-            <h3 class="bel-settings-group-title">Administration</h3>
-            <div class="bel-settings-list">
-              <div
-                class="bel-settings-item"
-                (click)="navigateToAdminRequest()">
-                <div class="bel-settings-item-icon">
-                  👑
-                </div>
-                <div class="bel-settings-item-content">
-                  <h4 class="bel-settings-item-title">Devenir Administrateur</h4>
-                  <p class="bel-settings-item-desc">Publiez du contenu pour votre communauté</p>
-                </div>
-                <div class="bel-settings-item-actions">
-                  <span class="bel-settings-badge">Vérification requise</span>
-                  <span class="bel-settings-arrow">›</span>
-                </div>
-              </div>
-            </div>
-          </section>
-        }
-        @if (user && user.is_admin) {
-          <section class="bel-settings-group">
-            <h3 class="bel-settings-group-title">👑 Administration</h3>
-            <div class="bel-settings-list">
-              <div class="bel-settings-item bel-settings-item-success">
-                <div class="bel-settings-item-icon">
-                  ✅
-                </div>
-                <div class="bel-settings-item-content">
-                  <h4 class="bel-settings-item-title">Administrateur Actif</h4>
-                  <p class="bel-settings-item-desc">Vous pouvez publier du contenu</p>
-                </div>
-                <div class="bel-settings-item-actions">
-                  <span class="bel-settings-badge success">Actif</span>
-                </div>
-              </div>
-            </div>
-          </section>
-        }
-        <!-- Actions Critiques -->
-        <section class="bel-settings-group">
-          <h3 class="bel-settings-group-title">Actions</h3>
-          <div class="bel-settings-list">
-            @for (action of criticalActions; track action) {
-              <div
-                class="bel-settings-item bel-settings-item-critical"
-                [class.bel-danger]="action.color === 'danger'"
-                (click)="navigateToSection(action)">
-                <div class="bel-settings-item-icon">
-                  {{ action.icon }}
-                </div>
-                <div class="bel-settings-item-content">
-                  <h4 class="bel-settings-item-title">{{ action.title }}</h4>
-                  <p class="bel-settings-item-desc">{{ action.description }}</p>
-                </div>
-                <div class="bel-settings-item-actions">
-                  <span class="bel-settings-arrow">›</span>
-                </div>
-              </div>
-            }
-          </div>
-        </section>
-        <!-- Informations Version -->
-        <section class="bel-app-info">
-          <div class="bel-version-info">
-            <p class="bel-version">BELAFRICA v2.0.0</p>
-            <p class="bel-copyright">© 2025 BELAFRICA. Tous droits réservés By Rollin.</p>
-          </div>
-        </section>
-      </main>
+      <div class="bel-user-info">
+        <h2 class="bel-user-name">{{ user.pseudo }}</h2>
+        <p class="bel-user-community">{{ user.community }}</p>
+        <p class="bel-user-since">Membre {{ getMemberSince() }}</p>
+      </div>
     </div>
+
+    <main class="bel-settings-sections">
+      <!-- Préférences -->
+      <section class="bel-settings-group">
+        <h3 class="bel-settings-group-title">Préférences du compte</h3>
+        <div class="bel-settings-list">
+          @for (section of settingsSections; track section) {
+            <div
+              class="bel-settings-item"
+              [class.disabled]="section.disabled"
+              (click)="navigateToSection(section)">
+              <div class="bel-settings-item-icon">{{ section.icon }}</div>
+              <div class="bel-settings-item-content">
+                <h4 class="bel-settings-item-title">{{ section.title }}</h4>
+                <p class="bel-settings-item-desc">{{ section.description }}</p>
+              </div>
+              <div class="bel-settings-item-actions">
+                @if (section.badge) {
+                  <span class="bel-settings-badge">{{ section.badge }}</span>
+                }
+                @if (!section.disabled) {
+                  <span class="bel-settings-arrow">›</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Administration -->
+      @if (!user.is_admin) {
+        <section class="bel-settings-group">
+          <h3 class="bel-settings-group-title">Administration</h3>
+          <div class="bel-settings-list">
+            <div class="bel-settings-item" (click)="navigateToAdminRequest()">
+              <div class="bel-settings-item-icon">👑</div>
+              <div class="bel-settings-item-content">
+                <h4 class="bel-settings-item-title">Devenir Administrateur</h4>
+                <p class="bel-settings-item-desc">Publiez du contenu pour votre communauté</p>
+              </div>
+              <div class="bel-settings-item-actions">
+                <span class="bel-settings-badge">Vérification requise</span>
+                <span class="bel-settings-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      @if (user.is_admin) {
+        <section class="bel-settings-group">
+          <h3 class="bel-settings-group-title">👑 Administration</h3>
+          <div class="bel-settings-list">
+            <div class="bel-settings-item bel-settings-item-success">
+              <div class="bel-settings-item-icon">✅</div>
+              <div class="bel-settings-item-content">
+                <h4 class="bel-settings-item-title">Administrateur Actif</h4>
+                <p class="bel-settings-item-desc">Niveau : {{ user.admin_level || 'national' }}</p>
+              </div>
+              <span class="bel-settings-badge success">Actif</span>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- Actions Compte -->
+      <section class="bel-settings-group">
+        <h3 class="bel-settings-group-title">Actions du compte</h3>
+        <div class="bel-settings-list">
+
+          <!-- Déconnexion avec options -->
+          <div class="bel-settings-item bel-settings-item-critical bel-danger"
+               (click)="showLogoutOptions()">
+            <div class="bel-settings-item-icon">🚪</div>
+            <div class="bel-settings-item-content">
+              <h4 class="bel-settings-item-title">Déconnexion</h4>
+              <p class="bel-settings-item-desc">Déconnexion simple, changement de numéro ou réinitialisation</p>
+            </div>
+            <div class="bel-settings-item-actions">
+              <span class="bel-settings-arrow">›</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Version -->
+      <section class="bel-app-info">
+        <div class="bel-version-info">
+          <p class="bel-version">BELAFRICA v2.0.0</p>
+          <p class="bel-copyright">© 2025 BELAFRICA. Tous droits réservés By Rollin.</p>
+        </div>
+      </section>
+    </main>
   }
+</div>
