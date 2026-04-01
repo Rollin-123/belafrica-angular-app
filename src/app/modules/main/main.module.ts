@@ -26,6 +26,8 @@ import { ModalService } from '../../core/services/modal.service';
 import { MessageBubbleComponent } from './components/message-bubble/message-bubble.component';
 import { ChatComponent } from './pages/chat.component/chat.component';
 import { PrivateMessagingComponent } from './pages/private-messaging.component/private-messaging.component';
+import { NotificationSettingsComponent } from './pages/settings/notifications/notification-settings.component';
+import { MessagingSettingsComponent } from './pages/settings/messaging-settings/messaging-settings.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +44,9 @@ import { PrivateMessagingComponent } from './pages/private-messaging.component/p
     AppearanceComponent,
     LanguageRegionComponent,
     MessageBubbleComponent,
-    PrivateMessagingComponent  
+    PrivateMessagingComponent,
+    NotificationSettingsComponent,
+    MessagingSettingsComponent 
   ],
   imports: [
     CommonModule,

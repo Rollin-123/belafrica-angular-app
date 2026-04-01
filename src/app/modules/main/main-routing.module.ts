@@ -16,6 +16,8 @@ import { AdminRequestComponent } from './pages/admin-request.component/admin-req
 import { PrivacySecurityComponent } from './pages/settings/privacy-security/privacy-security.component';
 import { AppearanceComponent } from './pages/settings/appearance/appearance.component';
 import { LanguageRegionComponent } from './pages/settings/language-region/language-region.component';
+import { NotificationSettingsComponent } from './pages/settings/notifications/notification-settings.component';
+import { MessagingSettingsComponent } from './pages/settings/messaging-settings/messaging-settings.component';
 
 const routes: Routes = [
   {
@@ -36,6 +38,8 @@ const routes: Routes = [
           { path: 'privacy', component: PrivacySecurityComponent },
           { path: 'appearance', component: AppearanceComponent },
           { path: 'language', component: LanguageRegionComponent },
+          { path: 'notifications', component: NotificationSettingsComponent },
+          { path: 'messaging', component: MessagingSettingsComponent },
         ]
       }
     ]

@@ -1,42 +1,38 @@
-<div class="bel-appearence-container">
-      <!-- Header avec bouton retour -->
-  <header class="bel-appearence-header">
-    <div class="bel-appearence-header-content">
-      <button (click)="goBackToSettings()" class="bel-back-btn" title="Retour aux paramètres">
-        ← Retour
-      </button>
-      <h1>Apparence</h1>
+<div class="bel-settings-page">
+  <div class="bel-settings-header">
+    <button class="bel-btn-back" (click)="goBackToSettings()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Apparence</h1>
+  </div>
+  <div class="bel-settings-body">
+
+    <div class="bel-card bel-section">
+      <h2 class="bel-section-title">Thème</h2>
+      <div class="bel-theme-grid">
+        <div *ngFor="let theme of themes"
+          class="bel-theme-option"
+          [class.active]="selectedTheme === theme.value"
+          (click)="onThemeChange(theme.value)">
+          <span class="material-icons">{{ theme.icon }}</span>
+          <span>{{ theme.label }}</span>
+        </div>
+      </div>
     </div>
-    <p>Personnalisez l'apparence de l'application.</p>
-  </header>
 
-<!-- src/app/modules/main/pages/settings/appearance/appearance.component.html -->
-<div class="setting-page"> 
-  <div class="theme-options">
-    <label class="theme-option">
-      <input type="radio" name="theme" value="light" [checked]="selectedTheme === 'light'" (change)="onThemeChange('light')">
-      <div class="option-card">
-        <div class="preview light"></div>
-        <span>Clair</span>
+    <div class="bel-card bel-section">
+      <h2 class="bel-section-title">Taille de police</h2>
+      <div class="bel-font-grid">
+        <div *ngFor="let fs of fontSizes"
+          class="bel-font-option"
+          [class.active]="selectedFontSize === fs.value"
+          (click)="onFontSizeChange(fs.value)"
+          [style.fontSize]="fs.value === 'small' ? '0.85rem' : fs.value === 'large' ? '1.15rem' : '1rem'">
+          <span class="bel-font-preview">{{ fs.preview }}</span>
+          <span>{{ fs.label }}</span>
+        </div>
       </div>
-    </label>
+    </div>
 
-    <label class="theme-option">
-      <input type="radio" name="theme" value="dark" [checked]="selectedTheme === 'dark'" (change)="onThemeChange('dark')">
-      <div class="option-card">
-        <div class="preview dark"></div>
-        <span>Sombre</span>
-      </div>
-    </label>
-
-    <label class="theme-option">
-      <input type="radio" name="theme" value="system" [checked]="selectedTheme === 'system'" (change)="onThemeChange('system')">
-      <div class="option-card">
-        <div class="preview system"></div>
-        <span>Système</span>
-      </div>
-    </label>
   </div>
 </div>
-</div>
-

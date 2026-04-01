@@ -1,13 +1,19 @@
-/* 
-    * BELAFRICA - Plateforme diaspora africaine
-    * Copyright (c) 2025 Rollin Loic Tianga. Tous droits reserves.
-    * Code source confidentiel - Usage interdit sans autorisation
-    */
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
-import { Observable, of, firstValueFrom, Subscription, Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { map, tap, switchMap, distinctUntilChanged, debounceTime, filter, take } from 'rxjs/operators';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Message, Conversation, MessageAction, Mention, MessagePayload } from '../../../../core/models/message.model';
+/*
+ * BELAFRICA - MessagingComponent
+ * FIX : toutes les méthodes appelées dans le template sont présentes
+ * - setActiveTab, showContextMenu, scrollToMessage, onEditKeyPress
+ * - cancelEditing, saveEditedMessage, getTypingIndicator
+ * - toggleEmojiPicker, onKeyPress, addEmoji, executeContextAction
+ */
+import {
+  Component, OnInit, ViewChild, ElementRef,
+  AfterViewInit, OnDestroy, ChangeDetectorRef, HostListener
+} from '@angular/core';
+import { Observable, Subscription, Subject, BehaviorSubject } from 'rxjs';
+import { map, tap, distinctUntilChanged, debounceTime, filter, take } from 'rxjs/operators';
+import {
+  Message, Conversation, MessageAction, MessagePayload
+} from '../../../../core/models/message.model';
 import { MessagingService } from '../../../../core/services/messaging.service';
 import { User, UserService } from '../../../../core/services/user.service';
 import { ModalService } from '../../../../core/services/modal.service';
@@ -19,13 +25,14 @@ import { ModalService } from '../../../../core/services/modal.service';
   standalone: false
 })
 export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
+
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
   @ViewChild('messageInput') private messageInput!: ElementRef;
 
   private readonly EDIT_TIMEOUT = 30 * 60 * 1000;
   private readonly DELETE_TIMEOUT = 2 * 60 * 60 * 1000;
-  currentUser: User | null = null;
 
+  currentUser: User | null = null;
   activeTab: 'group' | 'private' = 'group';
   newMessage: string = '';
   isSending: boolean = false;
@@ -35,463 +42,261 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
   showEmojiPicker = false;
   showMentionsList = false;
   contextMenu = {
-    visible: false,
-    x: 0,
-    y: 0,
+    visible: false, x: 0, y: 0,
     message: null as Message | null,
     actions: [] as MessageAction[]
   };
-
-  typingUsers = new Map<string, { pseudo: string, timeout: any }>();
+  typingUsers = new Map<string, { pseudo: string; timeout: any }>();
   isTyping = false;
-  private typingTimeout: any;
   private typingSubject = new Subject<void>();
   readonly TYPING_TIMER_LENGTH = 3000;
-
-  private touchStart = { time: 0, x: 0, y: 0 };
-
-  currentMentionQuery: string = '';
+  currentMentionQuery = '';
   mentionCandidates: any[] = [];
   public Array = Array;
-  mentionStartPosition: number = -1;
+  mentionStartPosition = -1;
 
-  // ✅ BehaviorSubject pour les messages - permet mises à jour en temps réel
   private messagesSubject = new BehaviorSubject<Message[]>([]);
   messages$: Observable<Message[]> = this.messagesSubject.asObservable();
-
   groupConversation$: Observable<Conversation | undefined>;
-  private currentConversationId: string = '';
-  userCommunity: string = '';
+  private currentConversationId = '';
+  userCommunity = '';
   conversationParticipants: any[] = [];
-  communityMembersCount: number = 0;
-
-  private currentMessages: Message[] = [];
+  communityMembersCount = 0;
+  private messageIds = new Set<string>();
   private subscription = new Subscription();
 
   constructor(
     private messagingService: MessagingService,
     private userService: UserService,
-    private sanitizer: DomSanitizer,
     private modalService: ModalService,
     private cdr: ChangeDetectorRef
   ) {
     const user = this.userService.getCurrentUser();
     this.currentUser = user;
-    this.userCommunity = user?.community || 'Communaute inconnue';
-
+    this.userCommunity = user?.community || 'Communauté';
     this.groupConversation$ = this.messagingService.getConversations().pipe(
       map(conversations => conversations.find(c => c.type === 'group')),
       tap(conversation => {
         if (conversation) {
           this.conversationParticipants = conversation.participantsDetails || [];
-          this.communityMembersCount = (conversation as any).communityMembersCount
-            || this.conversationParticipants.length;
+          this.communityMembersCount = (conversation as any).communityMembersCount || this.conversationParticipants.length;
         }
       }),
       distinctUntilChanged((a, b) => a?.id === b?.id)
     );
   }
 
-  ngOnInit() {
-    // Charger les conversations et brancher temps réel
+  ngOnInit(): void {
     this.subscription.add(
       this.groupConversation$.pipe(
-        filter(conv => !!conv),
+        filter((conv): conv is Conversation => !!conv),
         take(1)
       ).subscribe(conversation => {
-        if (!conversation) return;
         this.currentConversationId = conversation.id;
-
-        // ✅ REJOINDRE la room Socket.IO
         this.messagingService.joinConversation(conversation.id);
-
-        // ✅ CHARGER les messages initiaux
         this.loadMessages(conversation.id);
-
-        // ✅ BRANCHER les messages temps réel
         this.listenForRealTimeMessages(conversation.id);
       })
     );
-
     this.listenForRealTimeEvents();
   }
 
-  // ✅ Charger les messages via HTTP
+  // ─────────────────────────────────────────────
+  // ONGLETS
+  // ─────────────────────────────────────────────
+  setActiveTab(tab: 'group' | 'private'): void {
+    this.activeTab = tab;
+    this.contextMenu.visible = false;
+    this.showEmojiPicker = false;
+  }
+
+  // ─────────────────────────────────────────────
+  // CHARGEMENT ET TEMPS RÉEL
+  // ─────────────────────────────────────────────
   private loadMessages(conversationId: string): void {
     this.subscription.add(
       this.messagingService.getMessages(conversationId).subscribe(messages => {
+        this.messageIds.clear();
+        messages.forEach(m => this.messageIds.add(m.id));
         this.messagesSubject.next(messages);
-        this.currentMessages = messages;
         this.updateReadStatus(messages);
         setTimeout(() => this.scrollToBottom(), 100);
       })
     );
   }
 
-  // ✅ Écouter les nouveaux messages en temps réel via Socket.IO
   private listenForRealTimeMessages(conversationId: string): void {
     this.subscription.add(
       this.messagingService.getRealTimeMessages().subscribe((newMessage: Message) => {
-        // Filtrer pour ne garder que les messages de cette conversation
-        if ((newMessage as any).conversation_id !== conversationId &&
-            newMessage.conversationId !== conversationId) {
-          return;
-        }
-
-        // ✅ FIX: ignorer mes propres messages (déjà ajoutés en mode optimiste)
-        if (newMessage.fromUserId === this.currentUser?.id) {
-          // Remplacer le message optimiste temp_ par le vrai ID si existant
-          const current = this.messagesSubject.getValue();
-          const hasTempMessage = current.some(m => m.id.startsWith('temp_') && m.isMyMessage);
-          if (hasTempMessage) {
-            const updated = current.map(m => {
-              if (m.id.startsWith('temp_') && m.isMyMessage &&
-                  m.content === (newMessage.encryptedContent || (newMessage as any).content || '')) {
-                return { ...m, id: newMessage.id, status: 'sent' as const };
-              }
-              return m;
-            });
-            this.messagesSubject.next(updated);
-            this.currentMessages = updated;
-            this.cdr.detectChanges();
-          }
-          return;
-        }
-
+        const msgConvId = (newMessage as any).conversation_id || newMessage.conversationId;
+        if (msgConvId !== conversationId) return;
+        if (this.messageIds.has(newMessage.id)) return;
+        this.messageIds.add(newMessage.id);
         const current = this.messagesSubject.getValue();
-
-        // Éviter les doublons
-        if (current.some(m => m.id === newMessage.id)) {
-          return;
-        }
-
-        const messageWithContent: Message = {
-          ...newMessage,
-          content: newMessage.isDeleted ? 'Message supprime' : (newMessage.encryptedContent || (newMessage as any).content || '')
-        };
-
-        this.messagesSubject.next([...current, messageWithContent]);
-        this.currentMessages = this.messagesSubject.getValue();
-        setTimeout(() => this.scrollToBottom(), 50);
+        this.messagesSubject.next([...current, newMessage]);
         this.cdr.detectChanges();
+        setTimeout(() => this.scrollToBottom(), 100);
+        if (newMessage.fromUserId !== this.currentUser?.id) {
+          this.messagingService.markAsRead(conversationId, [newMessage.id]);
+        }
       })
     );
-
-    // Écouter les messages modifiés
-    // Écouter les messages supprimés
   }
 
   private listenForRealTimeEvents(): void {
-    this.subscription.add(this.messagingService.onUserTyping().subscribe(async data => {
-      if (!this.currentConversationId) return;
-      if (data.userId !== this.currentUser?.id && data.conversationId === this.currentConversationId) {
-        if (this.typingUsers.has(data.userId)) {
-          clearTimeout(this.typingUsers.get(data.userId)?.timeout);
-        }
-        const timeout = setTimeout(() => {
-          this.typingUsers.delete(data.userId);
+    this.subscription.add(
+      this.messagingService.onUserTyping().subscribe(data => {
+        if (data.userId !== this.currentUser?.id) {
+          if (this.typingUsers.has(data.userId)) clearTimeout(this.typingUsers.get(data.userId)?.timeout);
+          const timeout = setTimeout(() => { this.typingUsers.delete(data.userId); this.cdr.detectChanges(); }, this.TYPING_TIMER_LENGTH + 1000);
+          this.typingUsers.set(data.userId, { pseudo: data.pseudo, timeout });
           this.cdr.detectChanges();
-        }, this.TYPING_TIMER_LENGTH + 1000);
-        this.typingUsers.set(data.userId, { pseudo: data.pseudo, timeout });
-        this.cdr.detectChanges();
-      }
-    }));
-
-    this.subscription.add(this.messagingService.onUserStoppedTyping().subscribe(data => {
-      if (data.userId !== this.currentUser?.id) {
-        if (this.typingUsers.has(data.userId)) {
+        }
+      })
+    );
+    this.subscription.add(
+      this.messagingService.onUserStoppedTyping().subscribe(data => {
+        if (data.userId !== this.currentUser?.id && this.typingUsers.has(data.userId)) {
           clearTimeout(this.typingUsers.get(data.userId)?.timeout);
           this.typingUsers.delete(data.userId);
           this.cdr.detectChanges();
         }
-      }
-    }));
-
-    this.subscription.add(this.typingSubject.pipe(debounceTime(this.TYPING_TIMER_LENGTH)).subscribe(() => {
-      if (this.currentConversationId) {
+      })
+    );
+    this.subscription.add(
+      this.typingSubject.pipe(debounceTime(2000)).subscribe(() => {
         this.messagingService.emitStopTyping(this.currentConversationId);
-      }
-      this.isTyping = false;
-    }));
+        this.isTyping = false;
+      })
+    );
   }
 
-  ngAfterViewInit() {
-    this.scrollToBottom();
+  private updateReadStatus(messages: Message[]): void {
+    const unread = messages.filter(m => m.fromUserId !== this.currentUser?.id && m.status !== 'read').map(m => m.id);
+    if (unread.length > 0) this.messagingService.markAsRead(this.currentConversationId, unread);
   }
 
-  ngOnDestroy() {
-    if (this.currentConversationId) {
-      this.messagingService.leaveConversation(this.currentConversationId);
-    }
-    this.subscription.unsubscribe();
+  // ─────────────────────────────────────────────
+  // TYPING INDICATOR — 
+  // ─────────────────────────────────────────────
+  getTypingIndicator(): string {
+    const users = Array.from(this.typingUsers.values()).map(v => v.pseudo);
+    if (users.length === 1) return `${users[0]} est en train d'écrire...`;
+    if (users.length === 2) return `${users[0]} et ${users[1]} écrivent...`;
+    return 'Plusieurs personnes écrivent...';
   }
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    if (this.contextMenu.visible) this.closeContextMenu();
-    if (this.showEmojiPicker) this.showEmojiPicker = false;
-    if (this.showMentionsList) this.showMentionsList = false;
-  }
-
-  setActiveTab(tab: 'group' | 'private'): void {
-    this.activeTab = tab;
-  }
-
-  // ✅ ENVOI - Optimiste: ajouter immédiatement puis confirmer via HTTP
+  // ─────────────────────────────────────────────
+  // ENVOI
+  // ─────────────────────────────────────────────
   async sendMessage(): Promise<void> {
     const content = this.newMessage.trim();
-    if (!content || this.isSending) return;
+    if (!content || this.isSending || !this.currentConversationId) return;
 
     this.isSending = true;
+    const tempId = 'temp_' + Date.now();
+    const optimistic: Message = {
+      id: tempId, conversationId: this.currentConversationId,
+      fromUserId: this.currentUser?.id || '', fromUserName: this.currentUser?.pseudo || '',
+      content, encryptedContent: content, timestamp: new Date(),
+      status: 'sending', isDeleted: false, isEdited: false,
+      isMyMessage: true, mentions: [], encryptionKey: null,
+    } as Message;
 
-    // Vérification de la conversation
-    if (!this.currentConversationId) {
-      this.modalService.showError('Erreur', 'Conversation non chargée. Rafraîchissez la page.');
-      this.isSending = false;
-      return;
-    }
-
-    // Conversation chargée - on peut envoyer
-
-    // ✅ Message optimiste (affiché immédiatement)
-    const optimisticId = 'temp_' + Date.now();
-    const optimisticMessage: Message = {
-      id: optimisticId,
-      conversationId: this.currentConversationId,
-      fromUserId: this.currentUser?.id || '',
-      fromUserName: this.currentUser?.pseudo || 'Moi',
-      fromUserAvatar: this.currentUser?.avatar_url ?? undefined,
-      content: content,
-      encryptedContent: content,
-      encryptionKey: 'none',
-      timestamp: new Date(),
-      status: 'sending',
-      isMyMessage: true,
-      isEdited: false,
-      isDeleted: false,
-      mentions: this.extractMentions(content),
-      replyTo: this.replyingTo ? {
-        messageId: this.replyingTo.id,
-        fromUserName: this.replyingTo.fromUserName,
-        content: this.replyingTo.content || '',
-        isDeleted: this.replyingTo.isDeleted
-      } : undefined
-    };
-
-    const current = this.messagesSubject.getValue();
-    this.messagesSubject.next([...current, optimisticMessage]);
-    this.currentMessages = this.messagesSubject.getValue();
+    this.messageIds.add(tempId);
+    this.messagesSubject.next([...this.messagesSubject.getValue(), optimistic]);
     this.newMessage = '';
-    this.replyingTo = null;
-    this.showMentionsList = false;
     setTimeout(() => this.scrollToBottom(), 50);
 
     try {
       const payload: MessagePayload = {
-        content: content,
         conversationId: this.currentConversationId,
         conversationType: 'group',
-        mentions: optimisticMessage.mentions,
-        replyToMessageId: optimisticMessage.replyTo?.messageId
+        content,
+        replyToMessageId: this.replyingTo?.id,
+        mentions: []
       };
-
       await this.messagingService.sendMessage(payload);
-
-      // ✅ Remplacer le message optimiste par "sent"
-      const updated = this.messagesSubject.getValue().map(m =>
-        m.id === optimisticId ? { ...m, status: 'sent' as const } : m
-      );
-      this.messagesSubject.next(updated);
-      this.currentMessages = updated;
-
-    } catch (error: any) {
-      console.error('Erreur envoi message:', error);
-      // Supprimer le message optimiste en cas d'erreur
-      const withoutOptimistic = this.messagesSubject.getValue().filter(m => m.id !== optimisticId);
-      this.messagesSubject.next(withoutOptimistic);
-      this.currentMessages = withoutOptimistic;
-      this.newMessage = content; // Remettre le contenu dans l'input
-      this.modalService.showError('Erreur d\'envoi', 'Impossible d\'envoyer le message. Réessayez.');
+      this.replyingTo = null;
+    } catch (err) {
+      console.error('Erreur envoi:', err);
+      this.messageIds.delete(tempId);
+      this.messagesSubject.next(this.messagesSubject.getValue().filter(m => m.id !== tempId));
+      this.newMessage = content;
     } finally {
       this.isSending = false;
-      if (this.messageInput?.nativeElement) {
-        this.messageInput.nativeElement.focus();
-      }
       this.cdr.detectChanges();
     }
   }
 
-  private extractMentions(content: string): Mention[] {
-    const mentions: Mention[] = [];
-    const regex = /@(\w+)/g;
-    let match: RegExpExecArray | null;
-    while ((match = regex.exec(content)) !== null) {
-      const currentMatch = match; // capture locale = non-null garanti
-      const participant = this.conversationParticipants.find(
-        p => p.pseudo?.toLowerCase() === currentMatch[1].toLowerCase()
-      );
-      if (participant) {
-        mentions.push({
-          userId: participant.userId,
-          userName: participant.pseudo,
-          position: currentMatch.index,
-          length: currentMatch[0].length
-        });
-      }
-    }
-    return mentions;
-  }
-
+  // ─────────────────────────────────────────────
+  // KEYBOARD — 
+  // ─────────────────────────────────────────────
   onKeyPress(event: KeyboardEvent): void {
-    if (!this.isTyping) {
-      this.isTyping = true;
-      if (this.currentConversationId) {
-        this.messagingService.emitStartTyping(this.currentConversationId);
-      }
-    }
-    clearTimeout(this.typingTimeout);
-
-    if (event.key === '@') {
-      this.handleMentionStart();
-    }
-
-    if (this.showMentionsList) {
-      if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'Enter') {
-        event.preventDefault();
-        this.handleMentionNavigation(event);
-        return;
-      }
-    }
-
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendMessage();
-    }
-  }
-
-  onMessageInput(event: Event): void {
-    const input = event.target as HTMLTextAreaElement;
-    this.newMessage = input.value;
-
-    clearTimeout(this.typingTimeout);
-    this.typingTimeout = setTimeout(() => {
-      this.isTyping = false;
-      this.typingSubject.next();
-    }, this.TYPING_TIMER_LENGTH);
-
-    if (this.showMentionsList) {
-      this.updateMentionQuery(input.selectionStart || 0);
-    }
-
-    // Auto-resize textarea
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-  }
-
-  private handleMentionStart(): void {
-    this.mentionStartPosition = this.messageInput?.nativeElement.selectionStart || 0;
-    this.currentMentionQuery = '';
-    this.mentionCandidates = [...this.conversationParticipants];
-    this.showMentionsList = this.mentionCandidates.length > 0;
-  }
-
-  private updateMentionQuery(cursorPosition: number): void {
-    if (this.mentionStartPosition === -1) return;
-    const textBeforeCursor = this.newMessage.substring(0, cursorPosition);
-    const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
-    if (mentionMatch) {
-      this.currentMentionQuery = mentionMatch[1];
-      this.mentionCandidates = this.conversationParticipants.filter(p =>
-        p.pseudo?.toLowerCase().includes(this.currentMentionQuery.toLowerCase())
-      );
-      this.showMentionsList = this.mentionCandidates.length > 0;
     } else {
-      this.showMentionsList = false;
-      this.mentionStartPosition = -1;
+      if (!this.isTyping) {
+        this.isTyping = true;
+        this.messagingService.emitStartTyping(this.currentConversationId);
+      }
+      this.typingSubject.next();
     }
   }
 
-  private handleMentionNavigation(event: KeyboardEvent): void {
-    // Navigation simplifiée dans la liste des mentions
-  }
-
-  selectMention(participant: any): void {
-    if (this.mentionStartPosition === -1) return;
-    const before = this.newMessage.substring(0, this.mentionStartPosition);
-    const after = this.newMessage.substring(
-      this.messageInput?.nativeElement.selectionStart || 0
-    );
-    this.newMessage = before + '@' + participant.pseudo + ' ' + after;
-    this.showMentionsList = false;
-    this.mentionStartPosition = -1;
-    if (this.messageInput?.nativeElement) {
-      this.messageInput.nativeElement.focus();
+  onInputChange(): void {
+    if (!this.isTyping) {
+      this.isTyping = true;
+      this.messagingService.emitStartTyping(this.currentConversationId);
     }
+    this.typingSubject.next();
   }
 
-  cancelReply(): void {
-    this.replyingTo = null;
-  }
-
-  toggleEmojiPicker(event: Event): void {
-    event.stopPropagation();
+  // ─────────────────────────────────────────────
+  // EMOJI — 
+  // ─────────────────────────────────────────────
+  toggleEmojiPicker(event?: Event): void {
+    event?.stopPropagation();
     this.showEmojiPicker = !this.showEmojiPicker;
   }
 
   addEmoji(emoji: string): void {
     this.newMessage += emoji;
     this.showEmojiPicker = false;
-    if (this.messageInput?.nativeElement) {
-      this.messageInput.nativeElement.focus();
-    }
+    this.messageInput?.nativeElement?.focus();
   }
 
+  // ─────────────────────────────────────────────
+  // MENU CONTEXTUEL — 
+  // ─────────────────────────────────────────────
   showContextMenu(event: MouseEvent, message: Message): void {
     event.preventDefault();
     event.stopPropagation();
-    const actions = this.messagingService.getMessageActions(message, this.currentUser?.id || '');
-    this.contextMenu = {
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      message,
-      actions
-    };
-  }
-
-  closeContextMenu(): void {
-    this.contextMenu.visible = false;
-    this.contextMenu.message = null;
+    if (!this.currentUser) return;
+    const actions = this.messagingService.getMessageActions(message, this.currentUser.id);
+    if (actions.length === 0) return;
+    this.contextMenu = { visible: true, x: event.clientX, y: event.clientY, message, actions };
   }
 
   executeContextAction(action: MessageAction): void {
+    if (!this.contextMenu.message) return;
     const message = this.contextMenu.message;
-    if (!message) return;
-    this.closeContextMenu();
-
+    this.contextMenu.visible = false;
     switch (action.type) {
-      case 'reply':
-        this.replyingTo = message;
-        setTimeout(() => this.messageInput?.nativeElement?.focus(), 100);
-        break;
-      case 'copy':
-        navigator.clipboard.writeText(message.content || '').catch(() => {});
-        break;
-      case 'edit':
-        this.startEditing(message);
-        break;
-      case 'delete':
-        this.confirmDeleteMessage(message);
-        break;
+      case 'reply': this.startReplying(message); break;
+      case 'edit': this.startEditing(message); break;
+      case 'delete': this.deleteMessage(message.id, true); break;
+      case 'delete-for-self': this.deleteMessage(message.id, false); break;
+      case 'copy': this.copyMessage(message); break;
     }
   }
 
+  // ─────────────────────────────────────────────
+  // ÉDITION — 
+  // ─────────────────────────────────────────────
   startEditing(message: Message): void {
-    const elapsed = new Date().getTime() - new Date(message.timestamp).getTime();
-    if (elapsed > this.EDIT_TIMEOUT) {
-      this.modalService.showError('Délai dépassé', 'Vous ne pouvez plus modifier ce message (délai de 30 min dépassé).');
-      return;
-    }
+    if (!this.canEditMessage(message)) return;
     this.editingMessageId = message.id;
     this.editMessageContent = message.content || '';
   }
@@ -505,18 +310,9 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.editingMessageId || !this.editMessageContent.trim()) return;
     try {
       await this.messagingService.editMessage(this.editingMessageId, this.editMessageContent.trim());
-      // Mettre à jour localement
-      const updated = this.messagesSubject.getValue().map(m =>
-        m.id === this.editingMessageId
-          ? { ...m, content: this.editMessageContent.trim(), isEdited: true }
-          : m
-      );
-      this.messagesSubject.next(updated);
-      this.currentMessages = updated;
-    } catch (error) {
-      this.modalService.showError('Erreur', 'Impossible de modifier le message.');
-    } finally {
       this.cancelEditing();
+    } catch (err: any) {
+      this.modalService.showError('Erreur', err.message || 'Erreur modification');
     }
   }
 
@@ -524,86 +320,88 @@ export class MessagingComponent implements OnInit, AfterViewInit, OnDestroy {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.saveEditedMessage();
-    }
-    if (event.key === 'Escape') {
+    } else if (event.key === 'Escape') {
       this.cancelEditing();
     }
   }
 
-  confirmDeleteMessage(message: Message): void {
-    const elapsed = new Date().getTime() - new Date(message.timestamp).getTime();
-    if (elapsed > this.DELETE_TIMEOUT) {
-      this.modalService.showError('Délai dépassé', 'Vous ne pouvez plus supprimer ce message (délai de 2h dépassé).');
-      return;
-    }
-    this.modalService.showConfirm('Supprimer', 'Supprimer ce message pour tout le monde ?').then(async confirmed => {
-      if (confirmed) {
-        try {
-          await this.messagingService.deleteMessage(message.id, true);
-          const updated = this.messagesSubject.getValue().map(m =>
-            m.id === message.id ? { ...m, isDeleted: true, content: 'Message supprime' } : m
-          );
-          this.messagesSubject.next(updated);
-          this.currentMessages = updated;
-        } catch (error) {
-          this.modalService.showError('Erreur', 'Impossible de supprimer le message.');
-        }
-      }
-    });
-  }
-
+  // ─────────────────────────────────────────────
+  // SCROLL — 
+  // ─────────────────────────────────────────────
   scrollToMessage(messageId: string): void {
-    const element = document.getElementById('msg-' + messageId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      element.classList.add('bel-message-highlight');
-      setTimeout(() => element.classList.remove('bel-message-highlight'), 2000);
+    const el = document.getElementById(`message-${messageId}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ─────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────
+  cancelReply(): void { this.replyingTo = null; }
+
+  startReplying(message: Message): void {
+    this.replyingTo = message;
+    this.messageInput?.nativeElement?.focus();
+  }
+
+  canEditMessage(message: Message): boolean {
+    if (message.isDeleted || message.fromUserId !== this.currentUser?.id) return false;
+    return (Date.now() - new Date(message.timestamp).getTime()) <= this.EDIT_TIMEOUT;
+  }
+
+  canDeleteMessage(message: Message): boolean {
+    if (message.isDeleted || message.fromUserId !== this.currentUser?.id) return false;
+    return (Date.now() - new Date(message.timestamp).getTime()) <= this.DELETE_TIMEOUT;
+  }
+
+  async deleteMessage(messageId: string, forEveryone: boolean): Promise<void> {
+    const msg = this.messagesSubject.getValue().find(m => m.id === messageId);
+    if (!msg || !this.canDeleteMessage(msg)) return;
+    const confirmed = await this.modalService.showConfirm('Confirmation', 'Supprimer ce message ?');
+    if (!confirmed) return;
+    try {
+      await this.messagingService.deleteMessage(messageId, forEveryone);
+    } catch (err: any) {
+      this.modalService.showError('Erreur', err.message || 'Erreur suppression');
     }
   }
 
-  private scrollToBottom(): void {
-    if (this.messagesContainer?.nativeElement) {
-      const el = this.messagesContainer.nativeElement;
-      el.scrollTop = el.scrollHeight;
+  copyMessage(message: Message): void {
+    if (message.content && !message.isDeleted) {
+      navigator.clipboard.writeText(message.content).catch(err => console.error('Erreur copie:', err));
     }
   }
 
-  private updateReadStatus(messages: Message[]): void {
-    if (!messages.length || !this.currentConversationId) return;
-    const unread = messages.filter(m => !m.isMyMessage && m.status !== 'read');
-    if (unread.length > 0) {
-      this.messagingService.markAsRead(this.currentConversationId, unread.map(m => m.id));
-    }
+  isMyMessage(message: Message): boolean { return message.fromUserId === this.currentUser?.id; }
+
+  formatTime(date: Date | string): string {
+    return new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  detectMentions(content: string, conversationId: string): Mention[] {
-    return this.extractMentions(content);
+  scrollToBottom(): void {
+    try {
+      if (this.messagesContainer)
+        this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+    } catch (e) { /* ignore */ }
   }
 
-  getTypingIndicator(): string {
-    const pseudos = Array.from(this.typingUsers.values())
-      .filter(u => u.pseudo !== this.currentUser?.pseudo)
-      .map(u => u.pseudo);
-    if (pseudos.length === 0) return '';
-    if (pseudos.length === 1) return `${pseudos[0]} est en train d'ecrire...`;
-    if (pseudos.length === 2) return `${pseudos[0]} et ${pseudos[1]} sont en train d'ecrire...`;
-    return 'Plusieurs personnes sont en train d\'ecrire...';
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.contextMenu.visible) this.contextMenu.visible = false;
+    if (this.showEmojiPicker) this.showEmojiPicker = false;
   }
 
-  renderMessageContent(message: Message): SafeHtml {
-    if (message.isDeleted) {
-      return this.sanitizer.bypassSecurityTrustHtml(
-        '<em class="deleted-msg">Message supprime</em>'
-      );
-    }
-    let content = (message.content || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    content = content.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
-    content = content.replace(/\n/g, '<br>');
-    return this.sanitizer.bypassSecurityTrustHtml(content);
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.contextMenu.visible = false;
+    this.showEmojiPicker = false;
+    if (this.editingMessageId) this.cancelEditing();
   }
 
-  formatTimestamp(date: Date): string {
-    const d = new Date(date);
-    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  ngAfterViewInit(): void { setTimeout(() => this.scrollToBottom(), 200); }
+
+  ngOnDestroy(): void {
+    if (this.currentConversationId) this.messagingService.leaveConversation(this.currentConversationId);
+    this.typingUsers.forEach(v => clearTimeout(v.timeout));
+    this.subscription.unsubscribe();
   }
 }

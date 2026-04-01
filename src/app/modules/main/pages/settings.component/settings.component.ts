@@ -43,9 +43,18 @@ export class SettingsComponent implements OnInit, OnDestroy {
       title: 'Notifications',
       description: 'Gérez vos préférences de notifications',
       icon: '🔔',
-      route: null,
-      badge: 'Bientôt',
-      disabled: true
+      route: '/app/settings/notifications',  
+      badge: null,
+      disabled: false   
+    },
+    {
+      id: 'messaging',
+      title: 'Messagerie',
+      description: 'Options de messagerie',
+      icon: '💬',
+      route: '/app/settings/messaging',  
+      badge: null,
+      disabled: false  
     },
     {
       id: 'appearance',

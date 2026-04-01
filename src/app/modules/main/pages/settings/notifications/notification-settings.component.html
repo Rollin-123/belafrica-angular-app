@@ -1,0 +1,84 @@
+<div class="bel-settings-page">
+  <div class="bel-settings-header">
+    <button class="bel-btn-back" (click)="goBackToSettings()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Notifications</h1>
+  </div>
+  <div class="bel-settings-body">
+
+    <div class="bel-card">
+      <div class="bel-settings-row">
+        <span class="material-icons">notifications</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Activer les notifications</span>
+          <span class="bel-row-desc">Recevoir des alertes</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [checked]="notificationsEnabled" (change)="toggle('notificationsEnabled')">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="bel-card" [class.disabled-section]="!notificationsEnabled">
+      <div class="bel-settings-row">
+        <span class="material-icons">volume_up</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Son</span>
+          <span class="bel-row-desc">Jouer un son lors des notifications</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [checked]="notificationSound" [disabled]="!notificationsEnabled" (change)="toggle('notificationSound')">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+      <div class="bel-settings-row">
+        <span class="material-icons">vibration</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Vibration</span>
+          <span class="bel-row-desc">Vibrer lors des notifications</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [checked]="notificationVibration" [disabled]="!notificationsEnabled" (change)="toggle('notificationVibration')">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="bel-card" [class.disabled-section]="!notificationsEnabled">
+      <div class="bel-settings-section-title-bar">Types de notifications</div>
+      <div class="bel-settings-row">
+        <span class="material-icons">chat</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Messages privés</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [(ngModel)]="notifyPrivateMessages" [disabled]="!notificationsEnabled">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+      <div class="bel-settings-row">
+        <span class="material-icons">group</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Messages de groupe</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [(ngModel)]="notifyGroupMessages" [disabled]="!notificationsEnabled">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+      <div class="bel-settings-row">
+        <span class="material-icons">article</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Nouveaux posts</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [(ngModel)]="notifyNewPosts" [disabled]="!notificationsEnabled">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+  </div>
+</div>

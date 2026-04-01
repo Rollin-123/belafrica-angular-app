@@ -1,0 +1,58 @@
+<div class="bel-settings-page">
+  <div class="bel-settings-header">
+    <button class="bel-btn-back" (click)="goBackToSettings()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Messagerie</h1>
+  </div>
+  <div class="bel-settings-body">
+
+    <div class="bel-card">
+      <div class="bel-settings-row">
+        <span class="material-icons">alternate_email</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Notifications de mentions</span>
+          <span class="bel-row-desc">Être notifié quand quelqu'un vous mentionne</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [(ngModel)]="mentionNotifications">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+      <div class="bel-settings-row">
+        <span class="material-icons">done_all</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Accusés de lecture</span>
+          <span class="bel-row-desc">Envoyer les confirmations de lecture</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [(ngModel)]="showReadReceipts" (change)="saveReadReceipts()">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+      <div class="bel-settings-row">
+        <span class="material-icons">keyboard_return</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Entrée pour envoyer</span>
+          <span class="bel-row-desc">Appuyer sur Entrée envoie le message</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [(ngModel)]="enterToSend">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+      <div class="bel-settings-row">
+        <span class="material-icons">photo_library</span>
+        <div class="bel-settings-row-info">
+          <span class="bel-row-title">Sauvegarde automatique des médias</span>
+          <span class="bel-row-desc">Enregistrer dans la galerie (bientôt)</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [(ngModel)]="autoSaveMedia" [disabled]="true">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+  </div>
+</div>

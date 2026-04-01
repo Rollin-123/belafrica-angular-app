@@ -1,16 +1,168 @@
-<div class="bel-privacy-container">
-    <!-- Header avec bouton retour -->
-  <header class="bel-privacy-header">
-    <div class="bel-privacy-header-content">
-      <button (click)="goBackToSettings()" class="bel-back-btn" title="Retour aux paramètres">
-        ← Retour
-      </button>
-      <h1>Confidentialité & Sécurité</h1>
+<!-- BELAFRICA - Confidentialité & Sécurité — FIX: ngModel sans expression ternaire -->
+<div class="bel-settings-page">
+  <div class="bel-settings-header">
+    <button class="bel-btn-back" (click)="goBackToSettings()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+    <h1>Confidentialité & Sécurité</h1>
+  </div>
+
+  <div class="bel-settings-body">
+
+    <!-- DERNIÈRE CONNEXION -->
+    <div class="bel-card bel-settings-section">
+      <div class="bel-settings-section-header" (click)="toggleSection('lastSeen')">
+        <span class="material-icons">access_time</span>
+        <div class="bel-settings-section-info">
+          <span class="bel-settings-section-title">Dernière connexion</span>
+          <span class="bel-settings-section-desc">
+            {{ settings.privacyLastSeen === 'everyone' ? 'Tout le monde' :
+               settings.privacyLastSeen === 'contacts' ? 'Mes contacts' : 'Personne' }}
+          </span>
+        </div>
+        <span class="material-icons bel-chevron" [class.rotated]="openSection === 'lastSeen'">chevron_right</span>
+      </div>
+      <div class="bel-settings-section-content" *ngIf="openSection === 'lastSeen'">
+        <label class="bel-radio-item">
+          <input type="radio" name="lastSeen" value="everyone"
+            [checked]="settings.privacyLastSeen === 'everyone'"
+            (change)="setLastSeenVisibility('everyone')">
+          <span>Tout le monde</span>
+        </label>
+        <label class="bel-radio-item">
+          <input type="radio" name="lastSeen" value="contacts"
+            [checked]="settings.privacyLastSeen === 'contacts'"
+            (change)="setLastSeenVisibility('contacts')">
+          <span>Mes contacts</span>
+        </label>
+        <label class="bel-radio-item">
+          <input type="radio" name="lastSeen" value="nobody"
+            [checked]="settings.privacyLastSeen === 'nobody'"
+            (change)="setLastSeenVisibility('nobody')">
+          <span>Personne</span>
+        </label>
+      </div>
     </div>
-  </header>
 
-  <div class="setting-page">
-  <p class="setting-description">Page en cours de construction.</p>
-</div>
+    <!-- CONFIRMATIONS DE LECTURE -->
+    <div class="bel-card bel-settings-section">
+      <div class="bel-settings-section-header">
+        <span class="material-icons">done_all</span>
+        <div class="bel-settings-section-info">
+          <span class="bel-settings-section-title">Confirmations de lecture</span>
+          <span class="bel-settings-section-desc">Envoyer les accusés de lecture</span>
+        </div>
+        <label class="bel-switch">
+          <input type="checkbox" [checked]="settings.privacyReadReceipts" (change)="toggleReadReceipts()">
+          <span class="bel-switch-slider"></span>
+        </label>
+      </div>
+    </div>
 
+    <!-- CONTACTS BLOQUÉS -->
+    <div class="bel-card bel-settings-section">
+      <div class="bel-settings-section-header" (click)="toggleSection('blocked')">
+        <span class="material-icons">block</span>
+        <div class="bel-settings-section-info">
+          <span class="bel-settings-section-title">Contacts bloqués</span>
+          <span class="bel-settings-section-desc">{{ blockedContacts.length }} contact(s)</span>
+        </div>
+        <span class="material-icons bel-chevron" [class.rotated]="openSection === 'blocked'">chevron_right</span>
+      </div>
+      <div class="bel-settings-section-content" *ngIf="openSection === 'blocked'">
+        <div *ngIf="isLoading" class="bel-loading-small">Chargement...</div>
+        <div *ngIf="!isLoading && blockedContacts.length === 0" class="bel-empty-small">Aucun contact bloqué.</div>
+        <div *ngFor="let contact of blockedContacts" class="bel-list-item">
+          <img [src]="contact.avatar || 'assets/default-avatar.png'" class="bel-avatar-sm" alt="">
+          <span class="bel-list-item-name">{{ contact.pseudo }}</span>
+          <button class="bel-btn-text bel-color-danger" (click)="unblockContact(contact.id)">Débloquer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESSIONS ACTIVES -->
+    <div class="bel-card bel-settings-section">
+      <div class="bel-settings-section-header" (click)="toggleSection('sessions')">
+        <span class="material-icons">devices</span>
+        <div class="bel-settings-section-info">
+          <span class="bel-settings-section-title">Sessions actives</span>
+          <span class="bel-settings-section-desc">Gérez vos connexions</span>
+        </div>
+        <span class="material-icons bel-chevron" [class.rotated]="openSection === 'sessions'">chevron_right</span>
+      </div>
+      <div class="bel-settings-section-content" *ngIf="openSection === 'sessions'">
+        <div *ngIf="isLoadingSessions" class="bel-loading-small">Chargement...</div>
+        <div *ngFor="let session of activeSessions" class="bel-list-item">
+          <span class="material-icons">{{ session.isCurrent ? 'smartphone' : 'computer' }}</span>
+          <div class="bel-list-item-info">
+            <span class="bel-list-item-name">{{ session.device || 'Appareil inconnu' }}</span>
+            <span class="bel-list-item-sub">{{ session.ip }} — {{ session.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <span *ngIf="session.isCurrent" class="bel-badge-current">Actuel</span>
+          <button *ngIf="!session.isCurrent" class="bel-btn-text bel-color-danger" (click)="revokeSession(session.id)">Révoquer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VERROUILLAGE PIN -->
+    <div class="bel-card bel-settings-section">
+      <div class="bel-settings-section-header">
+        <span class="material-icons">lock</span>
+        <div class="bel-settings-section-info">
+          <span class="bel-settings-section-title">Verrouillage par PIN</span>
+          <span class="bel-settings-section-desc">{{ isPinEnabled ? 'Activé' : 'Désactivé' }}</span>
+        </div>
+        <button class="bel-btn-outline" (click)="openPinModal()">
+          {{ isPinEnabled ? 'Modifier / Désactiver' : 'Activer' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- CHIFFREMENT -->
+    <div class="bel-card bel-settings-section">
+      <div class="bel-settings-section-header">
+        <span class="material-icons">enhanced_encryption</span>
+        <div class="bel-settings-section-info">
+          <span class="bel-settings-section-title">Chiffrement de bout en bout</span>
+          <span class="bel-settings-section-desc">Actif pour toutes les conversations privées</span>
+        </div>
+        <span class="bel-badge-active">Actif</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL PIN — FIX: ngModel sur variable simple, pas expression ternaire -->
+  <div class="bel-modal-overlay" *ngIf="showPinModal" (click)="closePinModal()">
+    <div class="bel-modal-box" (click)="$event.stopPropagation()">
+      <h3>
+        {{ pinStep === 'disable' ? 'Désactiver le PIN' :
+           pinStep === 'confirm' ? 'Confirmer le PIN' : 'Créer un PIN' }}
+      </h3>
+      <p class="bel-modal-desc">
+        {{ pinStep === 'disable' ? 'Saisissez votre PIN actuel pour le désactiver.' :
+           pinStep === 'confirm' ? 'Ressaisissez votre PIN pour confirmer.' :
+           'Choisissez un PIN de 4 à 6 chiffres.' }}
+      </p>
+
+      <!-- FIX NG5002: une variable par champ, pas d'expression ternaire dans [(ngModel)] -->
+      <input *ngIf="pinStep !== 'confirm'"
+        type="password" inputmode="numeric" maxlength="6"
+        class="bel-input bel-pin-input"
+        placeholder="Votre PIN"
+        [(ngModel)]="pinValue">
+
+      <input *ngIf="pinStep === 'confirm'"
+        type="password" inputmode="numeric" maxlength="6"
+        class="bel-input bel-pin-input"
+        placeholder="Confirmer le PIN"
+        [(ngModel)]="pinConfirm">
+
+      <div *ngIf="pinError" class="bel-error-msg">{{ pinError }}</div>
+      <div class="bel-modal-actions">
+        <button class="bel-btn-outline" (click)="closePinModal()">Annuler</button>
+        <button class="bel-btn-primary" (click)="confirmPin()">Confirmer</button>
+      </div>
+    </div>
+  </div>
 </div>
